@@ -1,8 +1,6 @@
 <?php
 namespace G4\Tasker;
 
-use Gee\Log\Writer;
-
 use G4\Tasker\Model\Mapper\Mysql\Task as TaskMapper;
 
 class Runner
@@ -13,6 +11,9 @@ class Runner
 
     public function getTaskId()
     {
+        if(null === $this->_runner) {
+            throw new \Exception('Task ID is not set');
+        }
         return $this->_taskId;
     }
 
@@ -37,7 +38,7 @@ class Runner
             $task = new $className;
 
             if( ! $task instanceof \G4\Tasker\TaskAbstract) {
-                throw new \Exception("Class '{$className}' must extend \G4\Tasker\TaskAbstract abstract class");
+                throw new \Exception("Class '{$className}' must extend \G4\Tasker\TaskAbstract class");
             }
 
             $result = $task
