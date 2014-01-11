@@ -22,8 +22,8 @@ class Forker
         $mapper->transactionBegin();
 
 //         mark task as working
-//         $task->setStatus(Consts::STATUS_WORKING);
-//         $task->save();
+        $task->setStatus(Consts::STATUS_WORKING);
+        $task->save();
 
         $taskOptions = array(
             'id'  => $task->getId(),
