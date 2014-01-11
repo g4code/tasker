@@ -13,15 +13,11 @@ class Manager
 
     private $_tasks;
 
-    private $_env;
+    private $_options;
 
     private $_runner;
 
-    /**
-     *
-     * @var int
-     */
-    private $_limit;
+    private $_limit = Consts::LIMIT_DEFAULT;
 
     public function __construct()
     {
@@ -31,12 +27,17 @@ class Manager
     public function run()
     {
         $this
-            ->_getTasks()
+            ->_getTasks($this->_limit)
             ->_runTasks();
     }
 
-    private function _getTasks($limit = 100)
+    private function _getTasks($limit)
     {
+        $limit = intval($limit);
+        if(!$limit) {
+            $limit = Consts::LIMIT_DEFAULT;
+        }
+
         $mapper = new TaskMapper();
 
         $identity = $mapper->getIdentity();
@@ -46,6 +47,7 @@ class Manager
             ->eq(Consts::STATUS_PENDING)
             ->field('created_ts')
             ->le( time() )
+            ->setOrderBy('priority', 'DESC')
             ->setLimit( $limit );
 
         $this->_tasks = $mapper->findAll($identity);
@@ -58,7 +60,7 @@ class Manager
 
             $forker = new Forker();
             $forker
-                ->setEnvironment($this->getEnvironment())
+                ->setOptions($this->getOptions())
                 ->setRunner($this->getRunner());
 
             foreach ($this->_tasks as $task) {
@@ -69,7 +71,6 @@ class Manager
         $this
             ->_benchmarkStop()
             ->_writeLog();
-
     }
 
     private function _benchmarkStart()
@@ -86,8 +87,8 @@ class Manager
 
     private function _writeLog()
     {
-        echo "Cron started: " . date(self::TIME_FORMAT, $this->_benchmarkStart) . "\n";
-        echo "Cron execution time: " . ($this->_benchmarkStop - $this->_benchmarkStart) . "\n";
+        echo "Started: " . date(self::TIME_FORMAT, $this->_benchmarkStart) . "\n";
+        echo "Execution time: " . ($this->_benchmarkStop - $this->_benchmarkStart) . "\n";
     }
 
     public function getRunner()
@@ -101,14 +102,31 @@ class Manager
         return $this;
     }
 
-    public function getEnvironment()
+    public function getOptions()
     {
-        return $this->_env;
+        return $this->_options;
     }
 
-    public function setEnvironment($value)
+    public function setOptions(array $value)
     {
-        $this->_env = $value;
+        $this->_options = $value;
+        return $this;
+    }
+
+    public function addOption($value)
+    {
+        $this->_options[] = $value;
+        return $this;
+    }
+
+    public function getLimit()
+    {
+        return $this->_limit;
+    }
+
+    public function setLimit($value)
+    {
+        $this->_limit = $value;
         return $this;
     }
 }
