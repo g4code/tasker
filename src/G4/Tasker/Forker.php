@@ -1,50 +1,15 @@
 <?php
 namespace G4\Tasker;
 
-use G4\Tasker\Model\Domain\Task;
-use G4\Tasker\Model\Mapper\Mysql\Task as TaskMapper;
-
 class Forker
 {
     private $_context = 'php';
 
     private $_runner;
 
-    private $_env;
+    private $_options;
 
-    public function run(Task $task)
-    {
-        $mapper = new TaskMapper;
-
-        $task->addMapper($mapper);
-
-        // begin transaction
-        $mapper->transactionBegin();
-
-//         mark task as working
-        $task->setStatus(Consts::STATUS_WORKING);
-        $task->save();
-
-        $taskOptions = array(
-            'id'  => $task->getId(),
-            'env' => $this->getEnvironment(),
-        );
-
-        try {
-            // fork process
-            $this->_fork($taskOptions);
-        } catch (\Exception $e) {
-            // rollback
-            $mapper->transactionRollback();
-            return false;
-        }
-
-        // commit
-        $mapper->transactionCommit();
-        return true;
-    }
-
-    private function _fork($options)
+    public function fork()
     {
         $pid = pcntl_fork();
 
@@ -53,16 +18,23 @@ class Forker
         } else if ($pid) {
             // parent process
         } else {
-            $cmd = sprintf('%s %s %s', $this->_context, $this->_runner, $this->_formatOptions($options));
+            $cmd = sprintf('%s %s %s', $this->_context, $this->_runner, $this->_formatOptions());
             echo shell_exec($cmd), PHP_EOL;
             exit(0);
         }
     }
 
-    private function _formatOptions($options)
+    private function _formatOptions()
     {
+        $options = $this->getOptions();
+
+        if(empty($options) || !is_array($options)) {
+            return '';
+        }
+
         foreach($options as $key => $value) {
-            $segments[] = "--{$key} {$value}";
+            $dashes = strlen($key) == 1 ? '-' : '--';
+            $segments[] = "{$dashes}{$key} {$value}";
         }
 
         return implode(' ', $segments);
@@ -82,17 +54,14 @@ class Forker
         return $this;
     }
 
-    public function getEnvironment()
+    public function getOptions()
     {
-        if(null === $this->_env) {
-            throw new \Exception('Environment is not set');
-        }
-        return $this->_env;
+        return $this->_options;
     }
 
-    public function setEnvironment($value)
+    public function setOptions(array $value)
     {
-        $this->_env = $value;
+        $this->_options = $value;
         return $this;
     }
 
