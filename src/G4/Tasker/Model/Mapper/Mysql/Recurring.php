@@ -2,8 +2,6 @@
 
 namespace G4\Tasker\Model\Mapper\Mysql;
 
-use Gee\Log\Writer;
-
 use G3\Model\Mapper\Mysql\MysqlAbstract;
 
 class Recurring extends MysqlAbstract
@@ -17,7 +15,7 @@ class Recurring extends MysqlAbstract
         $subSelect = $this->_db->select();
 
         $subSelect
-            ->from('crons_tasks', array('recu_id'))
+            ->from('tasks', array('recu_id'))
             ->distinct(true)
             ->where('status = ?', \G4\Tasker\Consts::STATUS_PENDING);
 

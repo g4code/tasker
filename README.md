@@ -1,7 +1,7 @@
 Tasker
 ==========
 
-> Tasker - Application asynchronous tasks manager and runner, cron-like PHP implementation
+> Tasker - Application asynchronous tasks manager, cron-like PHP implementation
 
 Requires
 --------
