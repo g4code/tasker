@@ -57,14 +57,36 @@ class Manager
     private function _runTasks()
     {
         if($this->_tasks->count() > 0) {
-
             $forker = new Forker();
-            $forker
-                ->setOptions($this->getOptions())
-                ->setRunner($this->getRunner());
+            $forker->setRunner($this->getRunner());
+
+            $mapper = new TaskMapper;
 
             foreach ($this->_tasks as $task) {
-                $forker->run($task);
+                $task->addMapper($mapper);
+
+                // begin transaction
+                $mapper->transactionBegin();
+
+                // mark task as working
+                $task->setStatus(Consts::STATUS_WORKING);
+                $task->save();
+
+                $this->addOption(array('id' => $task->getId()));
+
+                try {
+                    $forker
+                        ->setOptions($this->getOptions())
+                        ->fork();
+                } catch (\Exception $e) {
+                    // rollback
+                    $mapper->transactionRollback();
+                    // log message here
+                    continue;
+                }
+
+                // commit
+                $mapper->transactionCommit();
             }
         }
 
@@ -113,7 +135,7 @@ class Manager
         return $this;
     }
 
-    public function addOption($value)
+    public function addOption(array $value)
     {
         $this->_options[] = $value;
         return $this;
