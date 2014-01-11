@@ -1,0 +1,36 @@
+{
+    "name": "g4/tasker",
+    "homepage": "http://g4fw.com/tasker",
+    "description": "Application asynchronous tasks manager and runner, cron-like PHP implementation",
+    "license": "MIT",
+    "keywords": [
+        "g4code",
+        "g4fw",
+        "task",
+        "queue",
+        "cron",
+        "async"
+    ],
+    "authors": [
+        {
+            "name": "Dejan Samardzija",
+            "email": "samardzija.dejan@gmail.com"
+        },
+        {
+            "name": "Drasko Gomboc",
+            "email": "drasko.gomboc@gmail.com"
+        },
+        {
+            "name": "Ivan Krickovic",
+            "email": "ivan.krickovic@gmail.com"
+        }
+    ],
+    "require": {
+        "php": ">=5.4",
+        "mtdowling/cron-expression" : "1.0.*",
+    },
+    "minimum-stability": "dev",
+    "autoload": {
+        "psr-0": {"G4\\Tasker\\": "src/"}
+    }
+}
