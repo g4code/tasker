@@ -17,7 +17,7 @@ class Task extends DomainAbstract
         $this->_domainModel
             ->setId($this->getDataProperty($this->_domainModel->getIdKey()))
             ->setRecurringId($this->getDataProperty('recu_id'))
-            ->setName($this->getDataProperty('name'))
+            ->setTask($this->getDataProperty('task'))
             ->setData($this->getDataProperty('data'))
             ->setStatus($this->getDataProperty('status'))
             ->setPriority($this->getDataProperty('priority'))

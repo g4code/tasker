@@ -1,7 +1,7 @@
 Tasker
 ==========
 
-> Tasker - Application asynchronous tasks manager and runner, cron-like PHP implementation
+> Tasker - Application asynchronous tasks manager, cron-like PHP implementation
 
 Requires
 --------
@@ -46,8 +46,8 @@ CREATE TABLE tasks_recurrings (
 INSERT INTO tasks_recurrings
     (task, frequency, data, status)
 VALUES
-    ('\\Dumy\\Task\\Foo', '3-59/15 2,6-12 */15 1 2-5', '{\"foo\":123}', '1'),
-    ('\\Dumy\\Task\\Bar', '*/5 * * * * *',             '{\"bar\":234}', '1');
+    ('\\Dummy\\Task\\Foo', '3-59/15 2,6-12 */15 1 2-5', '{\"foo\":123}', '1'),
+    ('\\Dummy\\Task\\Bar', '*/5 * * * * *',             '{\"bar\":234}', '1');
 ```
 
 

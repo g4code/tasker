@@ -1,18 +1,24 @@
 <?php
 namespace G4\Tasker;
 
-use Gee\Log\Writer;
-
 use G4\Tasker\Model\Mapper\Mysql\Task as TaskMapper;
 
-class Runner
+class Runner extends TimerAbstract
 {
     private $_taskId;
 
     private $_taskData;
 
+    public function __construct()
+    {
+        $this->_timerStart();
+    }
+
     public function getTaskId()
     {
+        if(null === $this->_taskId) {
+            throw new \Exception('Task ID is not set');
+        }
         return $this->_taskId;
     }
 
@@ -28,7 +34,7 @@ class Runner
 
             $this->_fetchTaskData();
 
-            $className = $this->_taskData->getName();
+            $className = $this->_taskData->getTask();
 
             if(class_exists($className) === false) {
                 throw new \Exception("Class '{$className}' for task not found");
@@ -37,19 +43,28 @@ class Runner
             $task = new $className;
 
             if( ! $task instanceof \G4\Tasker\TaskAbstract) {
-                throw new \Exception("Class '{$className}' must extend \G4\Tasker\TaskAbstract abstract class");
+                throw new \Exception("Class '{$className}' must extend \G4\Tasker\TaskAbstract class");
             }
 
             $result = $task
                 ->setData($this->_taskData->getData())
                 ->execute();
 
+            $this->_timerStop();
+
+            $mapper = new TaskMapper;
+
+            $status = ($result === true) ? Consts::STATUS_DONE : Consts::STATUS_BROKEN;
+
+            $this->_taskData
+                ->addMapper($mapper)
+                ->setStatus($status)
+                ->setExecTime($this->_getTotalTime())
+                ->save();
+
         } catch (\Exception $e) {
             // log message here
-            return false;
         }
-
-        return true;
     }
 
     private function _fetchTaskData()

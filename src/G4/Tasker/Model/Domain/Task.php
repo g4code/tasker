@@ -9,7 +9,7 @@ class Task extends DomainAbstract
 
     protected $_recu_id;
 
-    protected $_name;
+    protected $_task;
 
     protected $_data;
 
@@ -26,7 +26,7 @@ class Task extends DomainAbstract
         return array(
             self::getIdKey() => $this->getId(),
             'recu_id'        => $this->getRecurringId(),
-            'name'           => $this->getName(),
+            'task'           => $this->getTask(),
             'data'           => $this->getData(),
             'status'         => $this->getStatus(),
             'priority'       => $this->getPriority(),
@@ -38,9 +38,9 @@ class Task extends DomainAbstract
     /**
      * @return string
      */
-    public function getName()
+    public function getTask()
     {
-        return $this->_name;
+        return $this->_task;
     }
 
     /**
@@ -94,9 +94,9 @@ class Task extends DomainAbstract
     /**
      * @return G4\Tasker\Model\Domain\Task
      */
-    public function setName($value)
+    public function setTask($value)
     {
-        $this->_name = $value;
+        $this->_task = $value;
         return $this;
     }
 

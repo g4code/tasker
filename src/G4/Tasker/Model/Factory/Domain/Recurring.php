@@ -19,7 +19,8 @@ class Recurring extends DomainAbstract
             ->setTask($this->getDataProperty('task'))
             ->setFrequency($this->getDataProperty('frequency'))
             ->setData($this->getDataProperty('data'))
-            ->setStatus($this->getDataProperty('status'));
+            ->setStatus($this->getDataProperty('status'))
+            ->setPriority($this->getDataProperty('priority'));
     }
 
     /**

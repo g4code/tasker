@@ -1,0 +1,117 @@
+#!/bin/bash
+#-----------------------------------------------------
+# G4 Tasker Init sample file - version 0.1.0
+#-----------------------------------------------------
+# Copy this file to /etc/init.d/taskerd
+#
+# chkconfig: 35 99 99
+#
+. /etc/rc.d/init.d/functions
+
+if [ ! -f /etc/tasker.conf ]; then
+    die "Missing config file /etc/tasker.conf"
+fi
+
+. /etc/tasker.conf
+
+PID_STRING="$DAEMON $OPTIONS"
+PIDFILE="/var/run/$NAME.pid"
+LOCK_FILE="/var/lock/subsys/$NAME"
+
+do_start()
+{
+    if [ ! -f "$LOCK_FILE" ] ; then
+        echo -n $"Starting $NAME: "
+        runuser -l "$USER" -c "$DAEMON $OPTIONS &>> $LOG_FILE &" && sleep 3
+    RETVAL=$?
+    PID=`pgrep -f "$PID_STRING"`
+    if [ ! -z $PID ]; then
+        echo $PID > $PIDFILE
+        touch $LOCK_FILE && echo_success && echo || echo_failure && return
+        echo
+    else
+        echo_failure
+        echo
+        return
+    fi
+    else
+        echo -n $"$NAME is already running"
+        echo
+        do_status
+        #echo "$NAME is locked."
+        RETVAL=1
+    fi
+}
+
+function checkpidfile()
+{
+   if [ -f "${PIDFILE}" ]; then
+      read kpid < ${PIDFILE}
+      if [ -d "/proc/${kpid}" ]; then
+    # The pid file exists and the process is running
+        RETVAL="0"
+    return
+      else
+    # The pid file exists but the process is not running
+        RETVAL="1"
+        return
+      fi
+   fi
+# pid file does not exist and program is not running
+   RETVAL="3"
+}
+
+do_stop()
+{
+    echo -n $"Stopping $NAME: "
+    PID=`cat ${PIDFILE} 2>/dev/null`
+    kill -9 $PID &>/dev/null  && echo_success || echo_failure
+    echo
+    if [ -f ${PIDFILE} ]; then
+        rm ${PIDFILE}
+    fi
+    RETVAL=$?
+    [ $RETVAL -eq 0 ] && rm -f $LOCK_FILE
+}
+
+do_status()
+{
+    echo -n $"Status of $NAME: "
+    checkpidfile
+    if [ ${RETVAL} -eq 0 ]; then
+        echo_success
+        echo
+        else
+        if [ ${RETVAL} -eq 1 ]; then
+            echo_failure
+            echo "The pid file exists but the process is not running"
+            echo
+        else
+            echo_failure
+            echo "The pid file does not exist and program is not running"
+            echo
+        fi
+    fi
+}
+
+case "$1" in
+    status)
+        do_status
+        ;;
+    start)
+        do_start
+        ;;
+    stop)
+        do_stop
+        ;;
+    restart)
+        do_stop
+        do_start
+        ;;
+    *)
+        echo "Usage: $0 {start|stop|restart|status}"
+        RETVAL=1
+esac
+
+exit $RETVAL
+
