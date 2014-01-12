@@ -3,13 +3,9 @@ namespace G4\Tasker;
 
 use G4\Tasker\Model\Mapper\Mysql\Task as TaskMapper;
 
-class Manager
+class Manager extends TimerAbstract
 {
     const TIME_FORMAT = 'Y-m-d H:i:s';
-
-    private $_benchmarkStart;
-
-    private $_benchmarkStop;
 
     private $_tasks;
 
@@ -21,7 +17,7 @@ class Manager
 
     public function __construct()
     {
-        $this->_benchmarkStart();
+        $this->_timerStart();
     }
 
     public function run()
@@ -72,7 +68,7 @@ class Manager
                 $task->setStatus(Consts::STATUS_WORKING);
                 $task->save();
 
-                $this->addOption(array('id' => $task->getId()));
+                $this->addOption('id', $task->getId());
 
                 try {
                     $forker
@@ -91,26 +87,14 @@ class Manager
         }
 
         $this
-            ->_benchmarkStop()
+            ->_timerStop()
             ->_writeLog();
-    }
-
-    private function _benchmarkStart()
-    {
-        $this->_benchmarkStart = microtime(true);
-        return $this;
-    }
-
-    private function _benchmarkStop()
-    {
-        $this->_benchmarkStop = microtime(true);
-        return $this;
     }
 
     private function _writeLog()
     {
-        echo "Started: " . date(self::TIME_FORMAT, $this->_benchmarkStart) . "\n";
-        echo "Execution time: " . ($this->_benchmarkStop - $this->_benchmarkStart) . "\n";
+        echo "Started: " . date(self::TIME_FORMAT, $this->_getTimerStart()) . "\n";
+        echo "Execution time: " . ($this->_getTotalTime()) . "\n";
     }
 
     public function getRunner()
@@ -135,9 +119,9 @@ class Manager
         return $this;
     }
 
-    public function addOption(array $value)
+    public function addOption($key, $value)
     {
-        $this->_options[] = $value;
+        $this->_options[$key] = $value;
         return $this;
     }
 
