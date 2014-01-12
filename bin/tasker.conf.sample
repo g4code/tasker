@@ -1,0 +1,24 @@
+#-----------------------------------------------------
+# G4 Tasker Config sample file - version 0.1.0
+#-----------------------------------------------------
+# Configuration for tasker.init.d script
+#
+# Copy this file to /etc/tasker.conf and update values for your application
+
+# Application environment we are running
+ENV="development"
+
+# deamon file name
+NAME="tasker-${ENV}"
+
+# user under which we are running this script
+USER="root"
+
+# full deamon path
+DAEMON="/path/to/your/application/tasker.sh"
+
+# options that we will pass
+OPTIONS="-e ${ENV}"
+
+# where to save log file
+LOG_FILE="/path/to/your/application/logs/$NAME.log"
