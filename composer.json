@@ -27,7 +27,7 @@
     ],
     "require": {
         "php": ">=5.4",
-        "mtdowling/cron-expression" : "1.0.*",
+        "mtdowling/cron-expression" : "1.0.*"
     },
     "minimum-stability": "dev",
     "autoload": {
