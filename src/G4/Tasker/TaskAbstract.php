@@ -12,7 +12,7 @@ abstract class TaskAbstract
 
     public function setData($value)
     {
-        $this->_data = $value;
+        $this->_data = json_decode($value, true);
         return $this;
     }
 
