@@ -12,6 +12,7 @@ Requires
 CREATE TABLE tasks (
     task_id     INT(10)      UNSIGNED          AUTO_INCREMENT,
     recu_id     INT(10)      UNSIGNED NOT NULL DEFAULT 0,
+    identifier  VARCHAR(255)          NOT NULL DEFAULT '',
     task        VARCHAR(255)          NOT NULL DEFAULT '',
     data        TEXT,
     status      TINYINT(3)   UNSIGNED NOT NULL DEFAULT 0,
