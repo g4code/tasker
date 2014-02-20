@@ -25,6 +25,10 @@ abstract class TaskAbstract
 
     protected function _addMeta($key, $required = false, $valid = null, $default = null)
     {
+        if(!is_string($key) || empty($key)) {
+            throw new \Exception('Meta key must be non empty string');
+        }
+
         if(isset($this->_meta[$key])) {
             throw new \Exception('Meta key already declared');
         }

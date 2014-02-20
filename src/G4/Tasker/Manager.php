@@ -13,40 +13,40 @@ class Manager extends TimerAbstract
 
     private $_runner;
 
-    private $_limit = Consts::LIMIT_DEFAULT;
+    private $_limit;
+
+    /**
+     *
+     * @var G4\Tasker\Model\Mapper\Mysql\Task
+     */
+    private $_taskMapper;
 
     public function __construct()
     {
         $this->_timerStart();
+
+        $this->_taskMapper = new TaskMapper();
+
+        $this->_limit = Consts::LIMIT_DEFAULT;
     }
 
     public function run()
     {
         $this
-            ->_getTasks($this->_limit)
+            ->_reserveTasks()
+            ->_getReservedTasks()
             ->_runTasks();
     }
 
-    private function _getTasks($limit)
+    private function _reserveTasks()
     {
-        $limit = intval($limit);
-        if(!$limit) {
-            $limit = Consts::LIMIT_DEFAULT;
-        }
+        $this->_taskMapper->reserveTasks($this->_limit);
+        return $this;
+    }
 
-        $mapper = new TaskMapper();
-
-        $identity = $mapper->getIdentity();
-
-        $identity
-            ->field('status')
-            ->eq(Consts::STATUS_PENDING)
-            ->field('created_ts')
-            ->le( time() )
-            ->setOrderBy('priority', 'DESC')
-            ->setLimit( $limit );
-
-        $this->_tasks = $mapper->findAll($identity);
+    private function _getReservedTasks()
+    {
+        $this->_tasks = $this->_taskMapper->getReservedTasks($this->_limit);
         return $this;
     }
 
