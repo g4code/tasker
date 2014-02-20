@@ -15,63 +15,38 @@ class Manager extends TimerAbstract
 
     private $_limit;
 
-    private $_identifier;
+    /**
+     *
+     * @var G4\Tasker\Model\Mapper\Mysql\Task
+     */
+    private $_taskMapper;
 
     public function __construct()
     {
         $this->_timerStart();
 
-        $this->_limit = Consts::LIMIT_DEFAULT;
-    }
+        $this->_taskMapper = new TaskMapper();
 
-    public function getIdentifier()
-    {
-        if (!isset($this->_identifier)) {
-            $this->_generateIdentifier();
-        }
-        return $this->_identifier;
+        $this->_limit = Consts::LIMIT_DEFAULT;
     }
 
     public function run()
     {
         $this
             ->_reserveTasks()
-            ->_getTasks()
+            ->_getReservedTasks()
             ->_runTasks();
-    }
-
-    private function _getTasks()
-    {
-        $mapper = new TaskMapper();
-
-        $identity = $mapper->getIdentity()
-            ->field('identifier')
-            ->eq($this->getIdentifier())
-            ->field('status')
-            ->eq(Consts::STATUS_PENDING);
-
-        $this->_tasks = $mapper->findAll($identity);
-
-        return $this;
     }
 
     private function _reserveTasks()
     {
-        $mapper = new TaskMapper;
+        $this->_taskMapper->reserveTasks($this->_limit);
+        return $this;
+    }
 
-        $identity = $mapper->getIdentity()
-            ->field('identifier')
-            ->eq('')
-            ->field('status')
-            ->eq(Consts::STATUS_PENDING)
-            ->field('created_ts')
-            ->le(time())
-            ->setOrderBy('priority', 'DESC')
-            ->setLimit($this->_limit);
-
-        $mapper
-            ->updateAll($identity, array('identifier' => $this->getIdentifier()));
-
+    private function _getReservedTasks()
+    {
+        $this->_tasks = $this->_taskMapper->getReservedTasks($this->_limit);
         return $this;
     }
 
@@ -158,12 +133,6 @@ class Manager extends TimerAbstract
     public function setLimit($value)
     {
         $this->_limit = $value;
-        return $this;
-    }
-
-    private function _generateIdentifier()
-    {
-        $this->_identifier = gethostname()."|".time();
         return $this;
     }
 }
