@@ -102,8 +102,8 @@ abstract class TaskAbstract
             ->setStatus(Consts::STATUS_PENDING)
             ->setPriority($priority)
             ->setCreatedTs(time())
-            ->setExecTime(0)
-            ->setMapper($taskMapper)
-            ->save();
+            ->setExecTime(0);
+        
+        $taskMapper->insert($domain);
     }
 }

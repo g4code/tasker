@@ -57,11 +57,11 @@ class Runner extends TimerAbstract
             $status = ($result === true) ? Consts::STATUS_DONE : Consts::STATUS_BROKEN;
 
             $this->_taskData
-                ->addMapper($mapper)
                 ->setStatus($status)
-                ->setExecTime($this->_getTotalTime())
-                ->save();
-
+                ->setExecTime($this->_getTotalTime());
+            
+            $mapper->update($this->_taskData);
+            
         } catch (\Exception $e) {
             // log message here
         }

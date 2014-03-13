@@ -59,14 +59,14 @@ class Manager extends TimerAbstract
             $mapper = new TaskMapper;
 
             foreach ($this->_tasks as $task) {
-                $task->addMapper($mapper);
 
                 // begin transaction
                 $mapper->transactionBegin();
 
                 // mark task as working
                 $task->setStatus(Consts::STATUS_WORKING);
-                $task->save();
+                
+                $mapper->update($task);
 
                 $this->addOption('id', $task->getId());
 
