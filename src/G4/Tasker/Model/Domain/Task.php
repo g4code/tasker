@@ -1,7 +1,7 @@
 <?php
 namespace G4\Tasker\Model\Domain;
 
-use G3\Model\Domain\DomainAbstract;
+use G4\DataMapper\Domain\DomainAbstract;
 
 class Task extends DomainAbstract
 {

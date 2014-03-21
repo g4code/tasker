@@ -1,7 +1,7 @@
 <?php
 namespace G4\Tasker\Model\Factory\Domain;
 
-use G3\Model\Factory\Domain\DomainAbstract;
+use G4\DataMapper\Factory\Domain\DomainAbstract;
 
 class Recurring extends DomainAbstract
 {
@@ -25,7 +25,7 @@ class Recurring extends DomainAbstract
 
     /**
      * (non-PHPdoc)
-     * @see \G3\Model\Factory\Domain\DomainAbstract::createObject()
+     * @see \G4\DataMapper\Factory\Domain\DomainAbstract::createObject()
      * @return \G4\Tasker\Model\Domain\Recurring
      */
     public function createObject($data = null)
