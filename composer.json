@@ -32,6 +32,6 @@
     },
     "minimum-stability": "dev",
     "autoload": {
-        "psr-0": {"G4\\Tasker\\": "src/"}
+        "psr-4": {"G4\\Tasker\\": "src/"}
     }
 }
