@@ -3,7 +3,7 @@
 namespace G4\Tasker\Model\Mapper\Mysql;
 
 use G4\Tasker\Consts;
-use G3\Model\Mapper\Mysql\MysqlAbstract;
+use G4\DataMapper\Mapper\Mysql\MysqlAbstract;
 
 class Task extends MysqlAbstract
 {

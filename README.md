@@ -12,6 +12,7 @@ Requires
 CREATE TABLE tasks (
     task_id     INT(10)      UNSIGNED          AUTO_INCREMENT,
     recu_id     INT(10)      UNSIGNED NOT NULL DEFAULT 0,
+    identifier  VARCHAR(255)          NOT NULL DEFAULT '',
     task        VARCHAR(255)          NOT NULL DEFAULT '',
     data        TEXT,
     status      TINYINT(3)   UNSIGNED NOT NULL DEFAULT 0,
@@ -46,8 +47,8 @@ CREATE TABLE tasks_recurrings (
 INSERT INTO tasks_recurrings
     (task, frequency, data, status)
 VALUES
-    ('\\Dummy\\Task\\Foo', '3-59/15 2,6-12 */15 1 2-5', '{\"foo\":123}', '1'),
-    ('\\Dummy\\Task\\Bar', '*/5 * * * * *',             '{\"bar\":234}', '1');
+    ('Dummy\\Task\\Foo', '3-59/15 2,6-12 */15 1 2-5', '{\"foo\":123}', '1'),
+    ('Dummy\\Task\\Bar', '*/5 * * * *',             '{\"bar\":234}', '1');
 ```
 
 

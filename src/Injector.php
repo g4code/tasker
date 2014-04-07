@@ -32,9 +32,9 @@ class Injector
                 ->setStatus(Consts::STATUS_PENDING)
                 ->setPriority($item->getPriority())
                 ->setCreatedTs($ts)
-                ->setExecTime(0)
-                ->setMapper($taskMapper)
-                ->save();
+                ->setExecTime(0);
+            
+            $taskMapper->insert($domain);
         }
     }
 }
