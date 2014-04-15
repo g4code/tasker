@@ -47,7 +47,7 @@ class Runner extends TimerAbstract
             }
 
             $result = $task
-                ->setData($this->_taskData->getData())
+                ->setEncodedData($this->_taskData->getData())
                 ->execute();
 
             $this->_timerStop();
