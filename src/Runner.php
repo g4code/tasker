@@ -30,11 +30,18 @@ class Runner extends TimerAbstract
 
     public function execute()
     {
+        $mapper = new TaskMapper;
+
         try {
 
             $this->_fetchTaskData();
 
             $className = $this->_taskData->getTask();
+
+            $this->_taskData
+                ->setStartedTime(time());
+
+            $mapper->update($this->_taskData);
 
             if(class_exists($className) === false) {
                 throw new \Exception("Class '{$className}' for task not found");
@@ -59,8 +66,6 @@ class Runner extends TimerAbstract
 
             // log message here
         }
-
-        $mapper = new TaskMapper;
 
         $this->_taskData
             ->setStatus($status)

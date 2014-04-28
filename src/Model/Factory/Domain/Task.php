@@ -22,6 +22,7 @@ class Task extends DomainAbstract
             ->setStatus($this->getDataProperty('status'))
             ->setPriority($this->getDataProperty('priority'))
             ->setCreatedTs($this->getDataProperty('created_ts'))
+            ->setStartedTime($this->getDataProperty('started_time'))
             ->setExecTime($this->getDataProperty('exec_time'));
     }
 
