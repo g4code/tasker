@@ -19,6 +19,8 @@ class Task extends DomainAbstract
 
     protected $_created_ts;
 
+    protected $_started_time;
+
     protected $_exec_time;
 
     public function getRawData()
@@ -31,6 +33,7 @@ class Task extends DomainAbstract
             'status'         => $this->getStatus(),
             'priority'       => $this->getPriority(),
             'created_ts'     => $this->getCreatedTs(),
+            'started_time'   => $this->getStartedTime(),
             'exec_time'      => $this->getExecTime(),
         );
     }
@@ -81,6 +84,14 @@ class Task extends DomainAbstract
     public function getCreatedTs()
     {
         return $this->_created_ts;
+    }
+
+    /**
+     * @return int
+     */
+    public function getStartedTime()
+    {
+        return $this->_started_time;
     }
 
     /**
@@ -142,6 +153,15 @@ class Task extends DomainAbstract
     public function setCreatedTs($value)
     {
         $this->_created_ts = $value;
+        return $this;
+    }
+
+    /**
+     * @return G4\Tasker\Model\Domain\Task
+     */
+    public function setStartedTime($value)
+    {
+        $this->_started_time = $value;
         return $this;
     }
 
