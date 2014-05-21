@@ -32,9 +32,17 @@ class Manager extends TimerAbstract
 
     public function run()
     {
+        $this->_taskMapper->transactionBegin();
+        try {
+            $this
+                ->_reserveTasks()
+                ->_getReservedTasks();
+        } catch (\Exception $e) {
+            $this->_taskMapper->transactionRollback();
+            return $this;
+        }
+        $this->_taskMapper->transactionCommit();
         $this
-            ->_reserveTasks()
-            ->_getReservedTasks()
             ->_runTasks();
     }
 
@@ -56,17 +64,15 @@ class Manager extends TimerAbstract
             $forker = new Forker();
             $forker->setRunner($this->getRunner());
 
-            $mapper = new TaskMapper;
-
             foreach ($this->_tasks as $task) {
 
                 // begin transaction
-                $mapper->transactionBegin();
+                $this->_taskMapper->transactionBegin();
 
                 // mark task as working
                 $task->setStatus(Consts::STATUS_WORKING);
-                
-                $mapper->update($task);
+
+                $this->_taskMapper->update($task);
 
                 $this->addOption('id', $task->getId());
 
@@ -76,13 +82,13 @@ class Manager extends TimerAbstract
                         ->fork();
                 } catch (\Exception $e) {
                     // rollback
-                    $mapper->transactionRollback();
+                    $this->_taskMapper->transactionRollback();
                     // log message here
                     continue;
                 }
 
                 // commit
-                $mapper->transactionCommit();
+                $this->_taskMapper->transactionCommit();
             }
         }
 
