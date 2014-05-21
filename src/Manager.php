@@ -26,12 +26,11 @@ class Manager extends TimerAbstract
         $this->_timerStart();
 
         $this->_taskMapper = new TaskMapper();
-
-        $this->_limit = Consts::LIMIT_DEFAULT;
     }
 
     public function run()
     {
+        $this->setLimit(isset($this->_options['fetch_limit']) ? $this->_options['fetch_limit'] : Consts::LIMIT_DEFAULT);
         $this->_taskMapper->transactionBegin();
         try {
             $this
