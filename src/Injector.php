@@ -29,6 +29,7 @@ class Injector
                 ->setRecurringId($item->getId())
                 ->setTask($item->getTask())
                 ->setData($item->getData())
+                ->setIdentifier('')
                 ->setStatus(Consts::STATUS_PENDING)
                 ->setPriority($item->getPriority())
                 ->setCreatedTs($ts)
