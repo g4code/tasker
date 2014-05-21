@@ -66,6 +66,8 @@ class Manager extends TimerAbstract
 
             foreach ($this->_tasks as $task) {
 
+                usleep(isset($this->_options['delay']) ? $this->_options['delay'] : 0);
+
                 // begin transaction
                 $this->_taskMapper->transactionBegin();
 
