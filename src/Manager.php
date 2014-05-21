@@ -7,13 +7,17 @@ class Manager extends TimerAbstract
 {
     const TIME_FORMAT = 'Y-m-d H:i:s';
 
-    private $_tasks;
+    private $_delay;
+
+    private $_limit;
+
+    private $_maxNoOfPhpProcesses;
 
     private $_options;
 
     private $_runner;
 
-    private $_limit;
+    private $_tasks;
 
     /**
      *
@@ -26,13 +30,35 @@ class Manager extends TimerAbstract
         $this->_timerStart();
 
         $this->_taskMapper = new TaskMapper();
+
+        $this->_limit = Consts::LIMIT_DEFAULT;
+    }
+
+    public function addOption($key, $value)
+    {
+        $this->_options[$key] = $value;
+        return $this;
+    }
+
+    public function getLimit()
+    {
+        return $this->_limit;
+    }
+
+    public function getOptions()
+    {
+        return $this->_options;
+    }
+
+    public function getRunner()
+    {
+        return $this->_runner;
     }
 
     public function run()
     {
         $this
-            ->_checkPhpProcessesCount()
-            ->setLimit(isset($this->_options['fetch_limit']) ? $this->_options['fetch_limit'] : Consts::LIMIT_DEFAULT);
+            ->_checkPhpProcessesCount();
         $this->_taskMapper->transactionBegin();
         try {
             $this
@@ -47,26 +73,55 @@ class Manager extends TimerAbstract
             ->_runTasks();
     }
 
-    private function _checkPhpProcessesCount()
+    public function setDelay($value)
     {
-        if (!isset($this->_options['php_processes_max'])) return $this;
-
-        exec('ps -ef | grep -v grep | grep php | wc -l', $count);
-        if ($count[0] >= $this->_options['php_processes_max']) {
-            throw new \Exception('Max number of active php processes reached.');
-        }
+        $this->_delay = $value;
         return $this;
     }
 
-    private function _reserveTasks()
+    public function setLimit($value)
     {
-        $this->_taskMapper->reserveTasks($this->_limit);
+        $this->_limit = $value;
+        return $this;
+    }
+
+    public function setMaxNoOfPhpProcesses($value)
+    {
+        $this->_maxNoOfPhpProcesses = $value;
+        return $this;
+    }
+
+    public function setOptions(array $value)
+    {
+        $this->_options = $value;
+        return $this;
+    }
+
+    public function setRunner($value)
+    {
+        $this->_runner = $value;
+        return $this;
+    }
+
+    private function _checkPhpProcessesCount()
+    {
+        if ($this->_maxNoOfPhpProcesses == null) return $this;
+        exec('ps -ef | grep -v grep | grep php | wc -l', $count);
+        if ($count[0] >= $this->_maxNoOfPhpProcesses) {
+            throw new \Exception('Max number of active php processes reached.');
+        }
         return $this;
     }
 
     private function _getReservedTasks()
     {
         $this->_tasks = $this->_taskMapper->getReservedTasks($this->_limit);
+        return $this;
+    }
+
+    private function _reserveTasks()
+    {
+        $this->_taskMapper->reserveTasks($this->_limit);
         return $this;
     }
 
@@ -78,7 +133,7 @@ class Manager extends TimerAbstract
 
             foreach ($this->_tasks as $task) {
 
-                usleep(isset($this->_options['delay']) ? $this->_options['delay'] : 0);
+                usleep($this->_delay != null ? $this->_delay : 0);
 
                 // begin transaction
                 $this->_taskMapper->transactionBegin();
@@ -115,44 +170,5 @@ class Manager extends TimerAbstract
     {
         echo "Started: " . date(self::TIME_FORMAT, $this->_getTimerStart()) . "\n";
         echo "Execution time: " . ($this->_getTotalTime()) . "\n";
-    }
-
-    public function getRunner()
-    {
-        return $this->_runner;
-    }
-
-    public function setRunner($value)
-    {
-        $this->_runner = $value;
-        return $this;
-    }
-
-    public function getOptions()
-    {
-        return $this->_options;
-    }
-
-    public function setOptions(array $value)
-    {
-        $this->_options = $value;
-        return $this;
-    }
-
-    public function addOption($key, $value)
-    {
-        $this->_options[$key] = $value;
-        return $this;
-    }
-
-    public function getLimit()
-    {
-        return $this->_limit;
-    }
-
-    public function setLimit($value)
-    {
-        $this->_limit = $value;
-        return $this;
     }
 }
