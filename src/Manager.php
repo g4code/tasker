@@ -30,7 +30,9 @@ class Manager extends TimerAbstract
 
     public function run()
     {
-        $this->setLimit(isset($this->_options['fetch_limit']) ? $this->_options['fetch_limit'] : Consts::LIMIT_DEFAULT);
+        $this
+            ->_checkPhpProcessesCount()
+            ->setLimit(isset($this->_options['fetch_limit']) ? $this->_options['fetch_limit'] : Consts::LIMIT_DEFAULT);
         $this->_taskMapper->transactionBegin();
         try {
             $this
@@ -43,6 +45,17 @@ class Manager extends TimerAbstract
         $this->_taskMapper->transactionCommit();
         $this
             ->_runTasks();
+    }
+
+    private function _checkPhpProcessesCount()
+    {
+        if (!isset($this->_options['php_processes_max'])) return $this;
+
+        exec('ps -ef | grep -v grep | grep php | wc -l', $count);
+        if ($count[0] >= $this->_options['php_processes_max']) {
+            throw new \Exception('Max number of active php processes reached.');
+        }
+        return $this;
     }
 
     private function _reserveTasks()
