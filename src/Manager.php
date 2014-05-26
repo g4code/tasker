@@ -128,36 +128,27 @@ class Manager extends TimerAbstract
     private function _runTasks()
     {
         if($this->_tasks->count() > 0) {
+
+            \G4\DataMapper\Db\Db::getAdapter()->closeConnection();
+
             $forker = new Forker();
             $forker->setRunner($this->getRunner());
 
             foreach ($this->_tasks as $task) {
 
-                usleep($this->_delay != null ? $this->_delay : 0);
-
-                // begin transaction
-                $this->_taskMapper->transactionBegin();
-
-                // mark task as working
-                $task->setStatus(Consts::STATUS_WORKING);
-
-                $this->_taskMapper->update($task);
-
-                $this->addOption('id', $task->getId());
-
                 try {
+
+                    usleep($this->_delay != null ? $this->_delay : 0);
+
+                    $this->addOption('id', $task->getId());
+
                     $forker
                         ->setOptions($this->getOptions())
                         ->fork();
                 } catch (\Exception $e) {
-                    // rollback
-                    $this->_taskMapper->transactionRollback();
                     // log message here
                     continue;
                 }
-
-                // commit
-                $this->_taskMapper->transactionCommit();
             }
         }
 
