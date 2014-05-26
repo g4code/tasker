@@ -35,9 +35,6 @@ class Runner extends TimerAbstract
     public function execute()
     {
         try {
-
-            $this->_taskMapper->transactionBegin();
-
             $this
                 ->_fetchTaskData()
                 ->_updateToWorking()
@@ -46,12 +43,8 @@ class Runner extends TimerAbstract
                 ->_updateToDone();
 
         } catch (\Exception $e) {
-
-            $this->_taskMapper->transactionRollback();
             // log message here
         }
-
-        $this->_taskMapper->transactionCommit();
     }
 
     /**
