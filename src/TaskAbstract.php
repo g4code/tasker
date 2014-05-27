@@ -6,15 +6,30 @@ use G4\Tasker\Model\Domain\Task as TaskDomain;
 
 abstract class TaskAbstract
 {
+    private $_createdTs;
+
     private $_data;
 
     private $_meta;
 
     private $_priority;
 
+    public function addDelay($value)
+    {
+        $this->_createdTs = $this->getCreatedTs() + $value;
+        return $this;
+    }
+
     public function getData()
     {
         return $this->_data;
+    }
+
+    public function getCreatedTs()
+    {
+        return empty($this->_createdTs)
+            ? time()
+            : $this->_createdTs;
     }
 
     public function getEncodedData()
