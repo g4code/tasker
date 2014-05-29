@@ -34,6 +34,30 @@ class Task extends MysqlAbstract
         return $this->updateAll($identity, array('identifier' => $this->getIdentifier()));
     }
 
+    public function resetTaskStatusPendingWithIdentifier($olderThanSeconds)
+    {
+        $identity = $this->getIdentity()
+            ->field('identifier')
+            ->neq('')
+            ->field('status')
+            ->eq(Consts::STATUS_PENDING)
+            ->field('created_ts')
+            ->le(time() - $olderThanSeconds);
+        $this->updateAll($identity, array('identifier' => ''));
+        return $this;
+    }
+
+    public function resetTaskStatusWorking($olderThanSeconds)
+    {
+        $identity = $this->getIdentity()
+            ->field('status')
+            ->eq(Consts::STATUS_WORKING)
+            ->field('created_ts')
+            ->le(time() - $olderThanSeconds);
+        $this->updateAll($identity, array('identifier' => '', 'status' => Consts::STATUS_PENDING));
+        return $this;
+    }
+
     public function getReservedTasks($limit)
     {
         $limit = intval($limit);

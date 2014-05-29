@@ -7,6 +7,8 @@ class Manager extends TimerAbstract
 {
     const TIME_FORMAT = 'Y-m-d H:i:s';
 
+    const RESET_TASKS_AFTER_SECONDS = 60;
+
     private $_delay;
 
     private $_limit;
@@ -58,7 +60,8 @@ class Manager extends TimerAbstract
     public function run()
     {
         $this
-            ->_checkPhpProcessesCount();
+            ->_checkPhpProcessesCount()
+            ->_resetTasks();
         $this->_taskMapper->transactionBegin();
         try {
             $this
@@ -122,6 +125,15 @@ class Manager extends TimerAbstract
     private function _reserveTasks()
     {
         $this->_taskMapper->reserveTasks($this->_limit);
+        return $this;
+    }
+
+    private function _resetTasks()
+    {
+        $cleaner = new Cleaner();
+        $cleaner
+            ->setTimeDelay(self::RESET_TASKS_AFTER_SECONDS)
+            ->run();
         return $this;
     }
 
