@@ -7,6 +7,12 @@ class Cleaner
 {
     /**
      *
+     * @var integer
+     */
+    private $_maxRetryAttempts;
+
+    /**
+     *
      * @var G4\Tasker\Model\Mapper\Mysql\Task
      */
     private $_taskMapper;
@@ -25,8 +31,16 @@ class Cleaner
     public function run()
     {
         $this->_taskMapper
-            ->resetTaskStatusPendingWithIdentifier($this->_timeDelay)
-            ->resetTaskStatusWorking($this->_timeDelay);
+            ->setTimeDelay($this->_timeDelay)
+            ->setRetryFailedStatus($this->_maxRetryAttempts)
+            ->resetTaskStatusPendingWithIdentifier()
+            ->resetTaskStatusWorking();
+    }
+
+    public function setMaxRetryAttempts($value)
+    {
+        $this->_maxRetryAttempts = $value;
+        return $this;
     }
 
     public function setTimeDelay($value)

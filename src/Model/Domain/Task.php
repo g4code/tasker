@@ -25,6 +25,8 @@ class Task extends DomainAbstract
 
     protected $_exec_time;
 
+    protected $_started_count;
+
     public function getRawData()
     {
         return array(
@@ -38,6 +40,7 @@ class Task extends DomainAbstract
             'created_ts'     => $this->getCreatedTs(),
             'started_time'   => $this->getStartedTime(),
             'exec_time'      => $this->getExecTime(),
+            'started_count'  => $this->getStartedCount(),
         );
     }
 
@@ -111,6 +114,14 @@ class Task extends DomainAbstract
     public function getExecTime()
     {
         return $this->_exec_time;
+    }
+
+    /**
+     * @return int
+     */
+    public function getStartedCount()
+    {
+        return $this->_started_count;
     }
 
     /**
@@ -194,6 +205,13 @@ class Task extends DomainAbstract
         return $this;
     }
 
-
+    /**
+     * @return G4\Tasker\Model\Domain\Task
+     */
+    public function setStartedCount($value)
+    {
+        $this->_started_count = $value;
+        return $this;
+    }
 
 }

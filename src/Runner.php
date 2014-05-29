@@ -113,7 +113,8 @@ class Runner extends TimerAbstract
     {
         $this->_taskData
             ->setStatus(Consts::STATUS_WORKING)
-            ->setStartedTime(time());
+            ->setStartedTime(time())
+            ->setStartedCount($this->_taskData->getStartedCount() + 1);
         $this->_taskMapper->update($this->_taskData);
         return $this;
     }

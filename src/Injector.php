@@ -34,7 +34,8 @@ class Injector
                 ->setPriority($item->getPriority())
                 ->setCreatedTs($ts)
                 ->setStartedTime(0)
-                ->setExecTime(0);
+                ->setExecTime(0)
+                ->setStartedCount(0);
 
             $taskMapper->insert($domain);
         }

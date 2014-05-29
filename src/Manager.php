@@ -5,6 +5,8 @@ use G4\Tasker\Model\Mapper\Mysql\Task as TaskMapper;
 
 class Manager extends TimerAbstract
 {
+    const MAX_RETRY_ATTEMPTS = 3;
+
     const TIME_FORMAT = 'Y-m-d H:i:s';
 
     const RESET_TASKS_AFTER_SECONDS = 60;
@@ -133,6 +135,7 @@ class Manager extends TimerAbstract
         $cleaner = new Cleaner();
         $cleaner
             ->setTimeDelay(self::RESET_TASKS_AFTER_SECONDS)
+            ->setMaxRetryAttempts(self::MAX_RETRY_ATTEMPTS)
             ->run();
         return $this;
     }
