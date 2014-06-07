@@ -13,6 +13,8 @@ class Task extends MysqlAbstract
 
     private $_identifier;
 
+    private $_timeDelay;
+
     public function reserveTasks($limit)
     {
         $limit = intval($limit);
@@ -32,6 +34,43 @@ class Task extends MysqlAbstract
             ->setLimit($limit);
 
         return $this->updateAll($identity, array('identifier' => $this->getIdentifier()));
+    }
+
+    public function resetTaskStatusPendingWithIdentifier()
+    {
+        $identity = $this->getIdentity()
+            ->field('identifier')
+            ->neq('')
+            ->field('status')
+            ->eq(Consts::STATUS_PENDING)
+            ->field('created_ts')
+            ->le(time() - $this->_timeDelay);
+        $this->updateAll($identity, array('identifier' => ''));
+        return $this;
+    }
+
+    public function resetTaskStatusWorking()
+    {
+        $identity = $this->getIdentity()
+            ->field('status')
+            ->eq(Consts::STATUS_WORKING)
+            ->field('started_time')
+            ->le(time() - $this->_timeDelay);
+        $this->updateAll($identity, array('identifier' => '', 'status' => Consts::STATUS_PENDING, 'started_time' => 0));
+        return $this;
+    }
+
+    public function setRetryFailedStatus($maxRetryAttempts)
+    {
+        $identity = $this->getIdentity()
+            ->field('started_count')
+            ->ge($maxRetryAttempts)
+            ->field('status')
+            ->eq(Consts::STATUS_WORKING)
+            ->field('started_time')
+            ->le(time() - $this->_timeDelay);
+        $this->updateAll($identity, array('status' => Consts::STATUS_RETRY_FAILED));
+        return $this;
     }
 
     public function getReservedTasks($limit)
@@ -59,6 +98,12 @@ class Task extends MysqlAbstract
             $this->_generateIdentifier();
         }
         return $this->_identifier;
+    }
+
+    public function setTimeDelay($value)
+    {
+        $this->_timeDelay = $value;
+        return $this;
     }
 
     private function _generateIdentifier()

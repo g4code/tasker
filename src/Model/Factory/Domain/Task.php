@@ -19,11 +19,13 @@ class Task extends DomainAbstract
             ->setRecurringId($this->getDataProperty('recu_id'))
             ->setTask($this->getDataProperty('task'))
             ->setData($this->getDataProperty('data'))
+            ->setIdentifier($this->getDataProperty('identifier'))
             ->setStatus($this->getDataProperty('status'))
             ->setPriority($this->getDataProperty('priority'))
             ->setCreatedTs($this->getDataProperty('created_ts'))
             ->setStartedTime($this->getDataProperty('started_time'))
-            ->setExecTime($this->getDataProperty('exec_time'));
+            ->setExecTime($this->getDataProperty('exec_time'))
+            ->setStartedCount($this->getDataProperty('started_count'));
     }
 
     /**

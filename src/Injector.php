@@ -29,11 +29,13 @@ class Injector
                 ->setRecurringId($item->getId())
                 ->setTask($item->getTask())
                 ->setData($item->getData())
+                ->setIdentifier('')
                 ->setStatus(Consts::STATUS_PENDING)
                 ->setPriority($item->getPriority())
                 ->setCreatedTs($ts)
                 ->setStartedTime(0)
-                ->setExecTime(0);
+                ->setExecTime(0)
+                ->setStartedCount(0);
 
             $taskMapper->insert($domain);
         }
