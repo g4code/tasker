@@ -4,6 +4,7 @@ namespace G4\Tasker;
 use G4\Tasker\Model\Mapper\Mysql\Recurring as RecurringMapper;
 use G4\Tasker\Model\Mapper\Mysql\Task as TaskMapper;
 use G4\Tasker\Model\Domain\Task as TaskDomain;
+use G4\Cron\CronExpression;
 
 class Injector
 {
@@ -21,7 +22,7 @@ class Injector
 
         foreach ($this->_data as $item) {
 
-            $expression = \Cron\CronExpression::factory($item->getFrequency());
+            $expression = CronExpression::factory($item->getFrequency());
             $ts = strtotime($expression->getNextRunDate()->format('Y-m-d H:i:s'));
 
             $domain = new TaskDomain();
