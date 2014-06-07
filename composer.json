@@ -1,7 +1,7 @@
 {
     "name": "g4/tasker",
     "homepage": "http://g4fw.com/tasker",
-    "description": "Application asynchronous tasks manager and runner, cron-like PHP implementation",
+    "description": "Application asynchronous tasks manager and runner, cron-like PHP implementation with ability to run tasks with resolution in seconds",
     "license": "MIT",
     "keywords": [
         "g4code",
@@ -26,9 +26,9 @@
         }
     ],
     "require": {
-        "php"                       : ">=5.3",
-        "g4/data-mapper"            : "*",
-        "mtdowling/cron-expression" : "1.0.*"
+        "php"            : ">=5.3",
+        "g4/data-mapper" : "0.*",
+        "g4/cron"        : "0.*"
     },
     "minimum-stability": "dev",
     "autoload": {
