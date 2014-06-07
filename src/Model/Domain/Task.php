@@ -9,6 +9,8 @@ class Task extends DomainAbstract
 
     protected $_recu_id;
 
+    protected $_identifier;
+
     protected $_task;
 
     protected $_data;
@@ -19,19 +21,26 @@ class Task extends DomainAbstract
 
     protected $_created_ts;
 
+    protected $_started_time;
+
     protected $_exec_time;
+
+    protected $_started_count;
 
     public function getRawData()
     {
         return array(
             self::getIdKey() => $this->getId(),
             'recu_id'        => $this->getRecurringId(),
+            'identifier'     => $this->getIdentifier(),
             'task'           => $this->getTask(),
             'data'           => $this->getData(),
             'status'         => $this->getStatus(),
             'priority'       => $this->getPriority(),
             'created_ts'     => $this->getCreatedTs(),
+            'started_time'   => $this->getStartedTime(),
             'exec_time'      => $this->getExecTime(),
+            'started_count'  => $this->getStartedCount(),
         );
     }
 
@@ -41,6 +50,14 @@ class Task extends DomainAbstract
     public function getTask()
     {
         return $this->_task;
+    }
+
+    /**
+     * @return string
+     */
+    public function getIdentifier()
+    {
+        return $this->_identifier;
     }
 
     /**
@@ -86,9 +103,25 @@ class Task extends DomainAbstract
     /**
      * @return int
      */
+    public function getStartedTime()
+    {
+        return $this->_started_time;
+    }
+
+    /**
+     * @return int
+     */
     public function getExecTime()
     {
         return $this->_exec_time;
+    }
+
+    /**
+     * @return int
+     */
+    public function getStartedCount()
+    {
+        return $this->_started_count;
     }
 
     /**
@@ -97,6 +130,15 @@ class Task extends DomainAbstract
     public function setTask($value)
     {
         $this->_task = $value;
+        return $this;
+    }
+
+    /**
+     * @return G4\Tasker\Model\Domain\Task
+     */
+    public function setIdentifier($value)
+    {
+        $this->_identifier = $value;
         return $this;
     }
 
@@ -148,12 +190,28 @@ class Task extends DomainAbstract
     /**
      * @return G4\Tasker\Model\Domain\Task
      */
+    public function setStartedTime($value)
+    {
+        $this->_started_time = $value;
+        return $this;
+    }
+
+    /**
+     * @return G4\Tasker\Model\Domain\Task
+     */
     public function setExecTime($value)
     {
         $this->_exec_time = $value;
         return $this;
     }
 
-
+    /**
+     * @return G4\Tasker\Model\Domain\Task
+     */
+    public function setStartedCount($value)
+    {
+        $this->_started_count = $value;
+        return $this;
+    }
 
 }

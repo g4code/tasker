@@ -6,18 +6,67 @@ use G4\Tasker\Model\Domain\Task as TaskDomain;
 
 abstract class TaskAbstract
 {
-    private $_meta;
+    private $_createdTs;
 
     private $_data;
+
+    private $_meta;
+
+    private $_priority;
+
+    public function addDelay($value)
+    {
+        $this->_createdTs = $this->getCreatedTs() + $value;
+        return $this;
+    }
 
     public function getData()
     {
         return $this->_data;
     }
 
-    public function setData($value)
+    public function getCreatedTs()
+    {
+        return empty($this->_createdTs)
+            ? time()
+            : $this->_createdTs;
+    }
+
+    public function getEncodedData()
+    {
+        return $this->_data !== null
+            ? json_encode($this->_data)
+            : '';
+    }
+
+    public function getName()
+    {
+        return str_replace("\\", '\\\\', get_class($this));
+    }
+
+    public function getPriority()
+    {
+        return $this->_priority !== null
+                    ? $this->_priority
+                    : Consts::PRIORITY_MEDIUM;
+    }
+
+    public function setData(array $value)
+    {
+        $this->_verifyData($value);
+        $this->_data = $value;
+        return $this;
+    }
+
+    public function setEncodedData($value)
     {
         $this->_data = json_decode($value, true);
+        return $this;
+    }
+
+    public function setPriority($value)
+    {
+        $this->_priority = $value;
         return $this;
     }
 
@@ -42,20 +91,12 @@ abstract class TaskAbstract
         return $this;
     }
 
-    public function addToQueue(array $data = null, $priority = Consts::PRIORITY_MEDIUM)
-    {
-        $this->_verifyData($data);
-
-        $priority = intval($priority);
-        if(!$priority) {
-            $priority = Consts::PRIORITY_MEDIUM;
-        }
-
-        $this->_save(get_called_class(), $data, $priority);
-    }
-
     protected function _verifyData($data)
     {
+        if(empty($data)) {
+            throw new \Exception('If data is set, it must be non empty array');
+        }
+
         // if meta is not set, or is set to empty array, return true since we don't have anything to verify
         if(null === $this->_meta || (is_array($this->_meta) && empty($this->_meta))) {
             return true;
@@ -71,39 +112,5 @@ abstract class TaskAbstract
         }
 
         return true;
-    }
-
-    private function _save($task, array $data = null, $priority = Consts::PRIORITY_MEDIUM)
-    {
-        if(!is_string($task)) {
-            throw new \Exception('Task name must be string');
-        }
-
-        if(null !== $data && (!is_array($data) || empty($data)) ) {
-            throw new \Exception('If data is set, it must be non empty array');
-        }
-
-        $priority = intval($priority);
-        if(!$priority) {
-            $priority = Consts::PRIORITY_MEDIUM;
-        }
-
-        $parsedData = null !== $data
-            ? json_encode($data)
-            : '';
-
-        $taskMapper = new TaskMapper();
-
-        $domain = new TaskDomain();
-        $domain
-            ->setRecurringId(0)
-            ->setTask($task)
-            ->setData($parsedData)
-            ->setStatus(Consts::STATUS_PENDING)
-            ->setPriority($priority)
-            ->setCreatedTs(time())
-            ->setExecTime(0);
-        
-        $taskMapper->insert($domain);
     }
 }

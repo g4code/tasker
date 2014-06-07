@@ -5,13 +5,17 @@ use G4\Tasker\Model\Mapper\Mysql\Task as TaskMapper;
 
 class Runner extends TimerAbstract
 {
+    private $_taskMapper;
+
     private $_taskId;
 
     private $_taskData;
 
+
     public function __construct()
     {
         $this->_timerStart();
+        $this->_taskMapper = new TaskMapper;
     }
 
     public function getTaskId()
@@ -30,55 +34,90 @@ class Runner extends TimerAbstract
 
     public function execute()
     {
-        try {
-
-            $this->_fetchTaskData();
-
-            $className = $this->_taskData->getTask();
-
-            if(class_exists($className) === false) {
-                throw new \Exception("Class '{$className}' for task not found");
-            }
-
-            $task = new $className;
-
-            if( ! $task instanceof \G4\Tasker\TaskAbstract) {
-                throw new \Exception("Class '{$className}' must extend \G4\Tasker\TaskAbstract class");
-            }
-
-            $result = $task
-                ->setData($this->_taskData->getData())
-                ->execute();
-
-            $this->_timerStop();
-
-            $status = Consts::STATUS_DONE;
-
-        } catch (\Exception $e) {
-            $status = Consts::STATUS_BROKEN;
-
-            // log message here
-        }
-
         $mapper = new TaskMapper;
 
-        $this->_taskData
-            ->setStatus($status)
-            ->setExecTime($this->_getTotalTime());
+        try {
+            $this
+                ->_fetchTaskData()
+                ->_updateToWorking()
+                ->_executeTask()
+                ->_timerStop()
+                ->_updateToDone();
 
-        $mapper->update($this->_taskData);
+        } catch (\Exception $e) {
+            // log message here
+        }
     }
 
+    /**
+     * @return \G4\Tasker\Runner
+     */
+    private function _executeTask()
+    {
+        $this->_getTaskInstance()
+            ->setEncodedData($this->_taskData->getData())
+            ->execute();
+        return $this;
+    }
+
+    /**
+     * @return \G4\Tasker\Runner
+     */
     private function _fetchTaskData()
     {
-        $mapper = new TaskMapper();
-
-        $identity = $mapper->getIdentity();
+        $identity = $this->_taskMapper->getIdentity();
 
         $identity
             ->field('task_id')
             ->eq($this->getTaskId());
 
-        $this->_taskData = $mapper->findOne($identity);
+        $this->_taskData = $this->_taskMapper->findOne($identity);
+        return $this;
+    }
+
+    /**
+     * @throws \Exception
+     * @return \G4\Tasker\TaskAbstract
+     */
+    private function _getTaskInstance()
+    {
+        $className = $this->_taskData->getTask();
+
+        if (class_exists($className) === false) {
+            throw new \Exception("Class '{$className}' for task not found");
+        }
+
+        $task = new $className;
+
+        if (!$task instanceof \G4\Tasker\TaskAbstract) {
+            throw new \Exception("Class '{$className}' must extend \G4\Tasker\TaskAbstract class");
+        }
+
+        return $task;
+    }
+
+    /**
+     * @return \G4\Tasker\Runner
+     */
+    private function _updateToDone()
+    {
+        $this->_taskData
+            ->setStatus(Consts::STATUS_DONE)
+            ->setExecTime($this->_getTotalTime());
+        $this->_taskMapper->update($this->_taskData);
+        return $this;
+    }
+
+    /**
+     * @return \G4\Tasker\Runner
+     */
+    private function _updateToWorking()
+    {
+        $this->_taskData
+            ->setStatus(Consts::STATUS_WORKING)
+            ->setStartedTime(time())
+            ->setStartedCount($this->_taskData->getStartedCount() + 1);
+        $this->_taskMapper->update($this->_taskData);
+        return $this;
     }
 }
