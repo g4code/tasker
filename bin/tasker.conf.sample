@@ -22,3 +22,9 @@ OPTIONS="-e ${ENV}"
 
 # where to save log file
 LOG_FILE="/path/to/your/application/logs/$NAME.log"
+
+# how often to run tasker php script in seconds
+TASKER_SLEEP=3
+
+# how much tasks to process in one run
+TASKER_LIMIT=20

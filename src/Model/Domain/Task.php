@@ -19,9 +19,9 @@ class Task extends DomainAbstract
 
     protected $_priority;
 
-    protected $_created_ts;
+    protected $_ts_created;
 
-    protected $_started_time;
+    protected $_ts_started;
 
     protected $_exec_time;
 
@@ -37,8 +37,8 @@ class Task extends DomainAbstract
             'data'           => $this->getData(),
             'status'         => $this->getStatus(),
             'priority'       => $this->getPriority(),
-            'created_ts'     => $this->getCreatedTs(),
-            'started_time'   => $this->getStartedTime(),
+            'ts_created'     => $this->getTsCreated(),
+            'ts_started'     => $this->getTsStarted(),
             'exec_time'      => $this->getExecTime(),
             'started_count'  => $this->getStartedCount(),
         );
@@ -95,17 +95,17 @@ class Task extends DomainAbstract
     /**
      * @return int
      */
-    public function getCreatedTs()
+    public function getTsCreated()
     {
-        return $this->_created_ts;
+        return $this->_ts_created;
     }
 
     /**
      * @return int
      */
-    public function getStartedTime()
+    public function getTsStarted()
     {
-        return $this->_started_time;
+        return $this->_ts_started;
     }
 
     /**
@@ -181,18 +181,18 @@ class Task extends DomainAbstract
     /**
      * @return G4\Tasker\Model\Domain\Task
      */
-    public function setCreatedTs($value)
+    public function setTsCreated($value)
     {
-        $this->_created_ts = $value;
+        $this->_ts_created = $value;
         return $this;
     }
 
     /**
      * @return G4\Tasker\Model\Domain\Task
      */
-    public function setStartedTime($value)
+    public function setTsStarted($value)
     {
-        $this->_started_time = $value;
+        $this->_ts_started = $value;
         return $this;
     }
 
