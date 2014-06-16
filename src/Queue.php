@@ -22,7 +22,7 @@ class Queue
             ->setData($task->getEncodedData())
             ->setStatus(Consts::STATUS_PENDING)
             ->setPriority($task->getPriority())
-            ->setCreatedTs($task->getCreatedTs())
+            ->setTsCreated($task->getTsCreated())
             ->setExecTime(0);
 
         $this->_tasks[] = $domain;

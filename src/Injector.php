@@ -33,8 +33,8 @@ class Injector
                 ->setIdentifier('')
                 ->setStatus(Consts::STATUS_PENDING)
                 ->setPriority($item->getPriority())
-                ->setCreatedTs($ts)
-                ->setStartedTime(0)
+                ->setTsCreated($ts)
+                ->setTsStarted(0)
                 ->setExecTime(0)
                 ->setStartedCount(0);
 

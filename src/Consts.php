@@ -22,7 +22,7 @@ class Consts
     const STATUS_NAME_RETRY_FAILED = 'STATUS_RETRY_FAILED';
     const STATUS_NAME_DONE         = 'STATUS_DONE';
 
-    const ORDER_BY_CREATED_ON = 'created_ts';
+    const ORDER_BY_CREATED_ON = 'ts_created';
     const ORDER_BY_PRIORITY   = 'priority';
 
     const ORDER_BY_NAME_DEFAULT    = self::ORDER_BY_NAME_CREATED_ON;

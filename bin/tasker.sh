@@ -9,6 +9,6 @@ do
 done
 
 while [ 1 -eq 1 ]; do
-    php $(dirname $0)/tasker.php  --env $ENV
-    sleep 6
+    php $(dirname $0)/tasker.php  --env $ENV --limit $TASKER_LIMIT
+    sleep $TASKER_SLEEP
 done &

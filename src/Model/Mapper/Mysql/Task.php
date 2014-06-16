@@ -28,7 +28,7 @@ class Task extends MysqlAbstract
             ->eq('')
             ->field('status')
             ->eq(Consts::STATUS_PENDING)
-            ->field('created_ts')
+            ->field('ts_created')
             ->le(time())
             ->setOrderBy('priority', 'DESC')
             ->setLimit($limit);
@@ -43,7 +43,7 @@ class Task extends MysqlAbstract
             ->neq('')
             ->field('status')
             ->eq(Consts::STATUS_PENDING)
-            ->field('created_ts')
+            ->field('ts_created')
             ->le(time() - $this->_timeDelay);
         $this->updateAll($identity, array('identifier' => ''));
         return $this;
@@ -54,9 +54,9 @@ class Task extends MysqlAbstract
         $identity = $this->getIdentity()
             ->field('status')
             ->eq(Consts::STATUS_WORKING)
-            ->field('started_time')
+            ->field('ts_started')
             ->le(time() - $this->_timeDelay);
-        $this->updateAll($identity, array('identifier' => '', 'status' => Consts::STATUS_PENDING, 'started_time' => 0));
+        $this->updateAll($identity, array('identifier' => '', 'status' => Consts::STATUS_PENDING, 'ts_started' => 0));
         return $this;
     }
 
@@ -67,7 +67,7 @@ class Task extends MysqlAbstract
             ->ge($maxRetryAttempts)
             ->field('status')
             ->eq(Consts::STATUS_WORKING)
-            ->field('started_time')
+            ->field('ts_started')
             ->le(time() - $this->_timeDelay);
         $this->updateAll($identity, array('status' => Consts::STATUS_RETRY_FAILED));
         return $this;

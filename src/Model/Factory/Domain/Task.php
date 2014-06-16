@@ -22,8 +22,8 @@ class Task extends DomainAbstract
             ->setIdentifier($this->getDataProperty('identifier'))
             ->setStatus($this->getDataProperty('status'))
             ->setPriority($this->getDataProperty('priority'))
-            ->setCreatedTs($this->getDataProperty('created_ts'))
-            ->setStartedTime($this->getDataProperty('started_time'))
+            ->setTsCreated($this->getDataProperty('ts_created'))
+            ->setTsStarted($this->getDataProperty('ts_started'))
             ->setExecTime($this->getDataProperty('exec_time'))
             ->setStartedCount($this->getDataProperty('started_count'));
     }

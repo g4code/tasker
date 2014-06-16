@@ -16,7 +16,7 @@ abstract class TaskAbstract
 
     public function addDelay($value)
     {
-        $this->_createdTs = $this->getCreatedTs() + $value;
+        $this->_createdTs = $this->getTsCreated() + $value;
         return $this;
     }
 
@@ -25,7 +25,7 @@ abstract class TaskAbstract
         return $this->_data;
     }
 
-    public function getCreatedTs()
+    public function getTsCreated()
     {
         return empty($this->_createdTs)
             ? time()
