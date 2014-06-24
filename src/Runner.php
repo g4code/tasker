@@ -2,6 +2,7 @@
 namespace G4\Tasker;
 
 use G4\Tasker\Model\Mapper\Mysql\Task as TaskMapper;
+use G4\Log\Writer;
 
 class Runner extends TimerAbstract
 {
@@ -45,7 +46,7 @@ class Runner extends TimerAbstract
                 ->_updateToDone();
 
         } catch (\Exception $e) {
-            // log message here
+            Writer::writeLogPre($e, 'tasker_runner_exception');
         }
     }
 

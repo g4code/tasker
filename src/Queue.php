@@ -32,7 +32,9 @@ class Queue
     public function save()
     {
         $mapper = $this->_getMapperInstance();
-        $mapper->insertBulk($this->_tasks);
+        if (count($this->_tasks) > 0) {
+            $mapper->insertBulk($this->_tasks);
+        }
         return  $this;
     }
 
