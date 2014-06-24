@@ -28,7 +28,8 @@
     "require": {
         "php"            : ">=5.3",
         "g4/data-mapper" : "0.*",
-        "g4/cron"        : "0.*"
+        "g4/cron"        : "0.*",
+        "g4/log"         : "0.*"
     },
     "minimum-stability": "dev",
     "autoload": {
