@@ -5,11 +5,11 @@ use G4\Tasker\Model\Domain\Task as TaskDomain;
 
 class Queue
 {
-    private $_tasks;
+    private $tasks;
 
     public function __construct()
     {
-        $this->_tasks = array();
+        $this->tasks = array();
     }
 
     public function add(\G4\Tasker\TaskAbstract $task)
@@ -25,15 +25,15 @@ class Queue
             ->setTsCreated($task->getTsCreated())
             ->setExecTime(0);
 
-        $this->_tasks[] = $domain;
+        $this->tasks[] = $domain;
         return  $this;
     }
 
     public function save()
     {
         $mapper = $this->_getMapperInstance();
-        if (count($this->_tasks) > 0) {
-            $mapper->insertBulk($this->_tasks);
+        if (count($this->tasks) > 0) {
+            $mapper->insertBulk($this->tasks);
         }
         return  $this;
     }

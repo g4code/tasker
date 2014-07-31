@@ -9,43 +9,43 @@ class Cleaner
      *
      * @var integer
      */
-    private $_maxRetryAttempts;
+    private $maxRetryAttempts;
 
     /**
      *
      * @var G4\Tasker\Model\Mapper\Mysql\Task
      */
-    private $_taskMapper;
+    private $taskMapper;
 
     /**
      *
      * @var integer
      */
-    private $_timeDelay;
+    private $timeDelay;
 
     public function __construct()
     {
-        $this->_taskMapper = new TaskMapper();
+        $this->taskMapper = new TaskMapper();
     }
 
     public function run()
     {
-        $this->_taskMapper
-            ->setTimeDelay($this->_timeDelay)
-            ->setRetryFailedStatus($this->_maxRetryAttempts)
+        $this->taskMapper
+            ->setTimeDelay($this->timeDelay)
+            ->setRetryFailedStatus($this->maxRetryAttempts)
             ->resetTaskStatusPendingWithIdentifier()
             ->resetTaskStatusWorking();
     }
 
     public function setMaxRetryAttempts($value)
     {
-        $this->_maxRetryAttempts = $value;
+        $this->maxRetryAttempts = $value;
         return $this;
     }
 
     public function setTimeDelay($value)
     {
-        $this->_timeDelay = $value;
+        $this->timeDelay = $value;
         return $this;
     }
 }

@@ -4,17 +4,17 @@ namespace G4\Tasker;
 
 class Consts
 {
-    const STATUS_PENDING      = 0;
-    const STATUS_WORKING      = 1;
-    const STATUS_BROKEN       = 3;
-    const STATUS_RETRY_FAILED = 4;
-    const STATUS_DONE         = 2;
+    const STATUS_PENDING           = 0;
+    const STATUS_WORKING           = 1;
+    const STATUS_BROKEN            = 3;
+    const STATUS_RETRY_FAILED      = 4;
+    const STATUS_DONE              = 2;
 
-    const PRIORITY_LOW    = 11;
-    const PRIORITY_MEDIUM = 41;
-    const PRIORITY_HIGH   = 81;
+    const PRIORITY_LOW             = 11;
+    const PRIORITY_MEDIUM          = 41;
+    const PRIORITY_HIGH            = 81;
 
-    const LIMIT_DEFAULT = 100;
+    const LIMIT_DEFAULT            = 100;
 
     const STATUS_NAME_PENDING      = 'STATUS_PENDING';
     const STATUS_NAME_WORKING      = 'STATUS_WORKING';
@@ -22,8 +22,8 @@ class Consts
     const STATUS_NAME_RETRY_FAILED = 'STATUS_RETRY_FAILED';
     const STATUS_NAME_DONE         = 'STATUS_DONE';
 
-    const ORDER_BY_CREATED_ON = 'ts_created';
-    const ORDER_BY_PRIORITY   = 'priority';
+    const ORDER_BY_CREATED_ON      = 'ts_created';
+    const ORDER_BY_PRIORITY        = 'priority';
 
     const ORDER_BY_NAME_DEFAULT    = self::ORDER_BY_NAME_CREATED_ON;
     const ORDER_BY_NAME_CREATED_ON = 'CREATED_ON';

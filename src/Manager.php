@@ -31,7 +31,7 @@ class Manager extends TimerAbstract
 
     public function __construct()
     {
-        $this->_timerStart();
+        $this->timerStart();
 
         $this->_taskMapper = new TaskMapper();
 
@@ -64,7 +64,9 @@ class Manager extends TimerAbstract
         $this
             ->_checkPhpProcessesCount()
             ->_resetTasks();
+
         $this->_taskMapper->transactionBegin();
+
         try {
             $this
                 ->_reserveTasks()
@@ -73,9 +75,10 @@ class Manager extends TimerAbstract
             $this->_taskMapper->transactionRollback();
             return $this;
         }
+
         $this->_taskMapper->transactionCommit();
-        $this
-            ->_runTasks();
+
+        $this->_runTasks();
     }
 
     public function setDelay($value)
@@ -110,11 +113,16 @@ class Manager extends TimerAbstract
 
     private function _checkPhpProcessesCount()
     {
-        if ($this->_maxNoOfPhpProcesses == null) return $this;
+        if ($this->_maxNoOfPhpProcesses == null) {
+            return $this;
+        }
+
         exec('ps -ef | grep -v grep | grep php | wc -l', $count);
+
         if ($count[0] >= $this->_maxNoOfPhpProcesses) {
             throw new \Exception('Max number of active php processes reached.');
         }
+
         return $this;
     }
 
@@ -168,13 +176,13 @@ class Manager extends TimerAbstract
         }
 
         $this
-            ->_timerStop()
+            ->timerStop()
             ->_writeLog();
     }
 
     private function _writeLog()
     {
-        echo "Started: " . date(self::TIME_FORMAT, $this->_getTimerStart()) . "\n";
-        echo "Execution time: " . ($this->_getTotalTime()) . "\n";
+        echo "Started: " . date(self::TIME_FORMAT, $this->getTimerStart()) . "\n";
+        echo "Execution time: " . ($this->getTotalTime()) . "\n";
     }
 }

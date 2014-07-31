@@ -1,41 +1,38 @@
 <?php
 namespace G4\Tasker;
 
-use G4\Tasker\Model\Mapper\Mysql\Task as TaskMapper;
-use G4\Tasker\Model\Domain\Task as TaskDomain;
-
 abstract class TaskAbstract
 {
-    private $_createdTs;
+    private $createdTs;
 
-    private $_data;
+    private $data;
 
-    private $_meta;
+    private $meta;
 
-    private $_priority;
+    private $priority;
 
     public function addDelay($value)
     {
-        $this->_createdTs = $this->getTsCreated() + $value;
+        $this->createdTs = $this->getTsCreated() + $value;
         return $this;
     }
 
     public function getData()
     {
-        return $this->_data;
+        return $this->data;
     }
 
     public function getTsCreated()
     {
-        return empty($this->_createdTs)
+        return empty($this->createdTs)
             ? time()
-            : $this->_createdTs;
+            : $this->createdTs;
     }
 
     public function getEncodedData()
     {
-        return $this->_data !== null
-            ? json_encode($this->_data)
+        return $this->data !== null
+            ? json_encode($this->data)
             : '';
     }
 
@@ -46,43 +43,43 @@ abstract class TaskAbstract
 
     public function getPriority()
     {
-        return $this->_priority !== null
-                    ? $this->_priority
-                    : Consts::PRIORITY_MEDIUM;
+        return $this->priority !== null
+            ? $this->priority
+            : Consts::PRIORITY_MEDIUM;
     }
 
     public function setData(array $value)
     {
-        $this->_verifyData($value);
-        $this->_data = $value;
+        $this->verifyData($value);
+        $this->data = $value;
         return $this;
     }
 
     public function setEncodedData($value)
     {
-        $this->_data = json_decode($value, true);
+        $this->data = json_decode($value, true);
         return $this;
     }
 
     public function setPriority($value)
     {
-        $this->_priority = $value;
+        $this->priority = $value;
         return $this;
     }
 
     abstract public function execute();
 
-    protected function _addMeta($key, $required = false, $valid = null, $default = null)
+    protected function addMeta($key, $required = false, $valid = null, $default = null)
     {
         if(!is_string($key) || empty($key)) {
             throw new \Exception('Meta key must be non empty string');
         }
 
-        if(isset($this->_meta[$key])) {
+        if(isset($this->meta[$key])) {
             throw new \Exception('Meta key already declared');
         }
 
-        $this->_meta[$key] = array(
+        $this->meta[$key] = array(
             'required' => (bool) $required,
             'valid'    => $valid,
             'default'  => $default,
@@ -91,18 +88,18 @@ abstract class TaskAbstract
         return $this;
     }
 
-    protected function _verifyData($data)
+    protected function verifyData($data)
     {
         if(empty($data)) {
             throw new \Exception('If data is set, it must be non empty array');
         }
 
         // if meta is not set, or is set to empty array, return true since we don't have anything to verify
-        if(null === $this->_meta || (is_array($this->_meta) && empty($this->_meta))) {
+        if(null === $this->meta || (is_array($this->meta) && empty($this->meta))) {
             return true;
         }
 
-        foreach ($this->_meta as $key => $value) {
+        foreach ($this->meta as $key => $value) {
             if($value['required']) {
                 if(!isset($data[$key]) || empty($data[$key])) {
                     $class = get_called_class();
