@@ -12,15 +12,15 @@ class Injector
     {
         $recuringMapper = new RecurringMapper();
 
-        $this->_data = $recuringMapper->getNextTasks();
+        $data = $recuringMapper->getNextTasks();
 
-        if(empty($this->_data)) {
+        if(empty($data)) {
             return false;
         }
 
         $taskMapper = new TaskMapper();
 
-        foreach ($this->_data as $item) {
+        foreach ($data as $item) {
 
             $expression = CronExpression::factory($item->getFrequency());
             $ts = strtotime($expression->getNextRunDate()->format('Y-m-d H:i:s'));

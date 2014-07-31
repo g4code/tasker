@@ -1,35 +1,67 @@
 <?php
 namespace G4\Tasker;
 
+declare(ticks = 1);
+
 use G4\Tasker\Model\Mapper\Mysql\Task as TaskMapper;
 use G4\Log\Writer;
 
 class Runner extends TimerAbstract
 {
-    private $_taskMapper;
+    private $taskMapper;
 
-    private $_taskId;
+    private $taskId;
 
-    private $_taskData;
+    private $taskData;
 
+    private $alarmTime = 10;
+
+    private $maxExecTime = 30;
+
+    private $posixPid;
 
     public function __construct()
     {
-        $this->_timerStart();
-        $this->_taskMapper = new TaskMapper;
+        $this->timerStart();
+        $this->taskMapper = new TaskMapper;
+
+        $this->posixPid = posix_getpid();
+
+        pcntl_signal(SIGALRM, [$this, "signalsHandler"], true);
+        pcntl_alarm($this->alarmTime);
+    }
+
+    private function signalsHandler($signal)
+    {
+        // set alarm again for next run
+        pcntl_alarm($this->alarmTime);
+
+        /**
+         * check if task is done by checking status in database...
+         * for some reason we have zombie processes that finish what they are intended to do but don't kill process in memory
+         */
+        if($this->checkIsTaskFinished()) {
+            // do something here
+        }
+
+        // sanity check, if time reached kill process
+        if($this->getRunningTime() > $this->maxExecTime) {
+            Writer::writeLogPre($this->taskData, 'tasker_kill');
+            posix_kill($this->posixPid, SIGUSR1);
+        }
     }
 
     public function getTaskId()
     {
-        if(null === $this->_taskId) {
+        if(null === $this->taskId) {
             throw new \Exception('Task ID is not set');
         }
-        return $this->_taskId;
+        return $this->taskId;
     }
 
     public function setTaskId($value)
     {
-        $this->_taskId = $value;
+        $this->taskId = $value;
         return $this;
     }
 
@@ -39,11 +71,11 @@ class Runner extends TimerAbstract
 
         try {
             $this
-                ->_fetchTaskData()
-                ->_updateToWorking()
-                ->_executeTask()
-                ->_timerStop()
-                ->_updateToDone();
+                ->fetchTaskData()
+                ->updateToWorking()
+                ->executeTask()
+                ->timerStop()
+                ->updateToDone();
 
         } catch (\Exception $e) {
             Writer::writeLogPre($e, 'tasker_runner_exception');
@@ -53,10 +85,10 @@ class Runner extends TimerAbstract
     /**
      * @return \G4\Tasker\Runner
      */
-    private function _executeTask()
+    private function executeTask()
     {
-        $this->_getTaskInstance()
-            ->setEncodedData($this->_taskData->getData())
+        $this->getTaskInstance()
+            ->setEncodedData($this->taskData->getData())
             ->execute();
         return $this;
     }
@@ -64,15 +96,15 @@ class Runner extends TimerAbstract
     /**
      * @return \G4\Tasker\Runner
      */
-    private function _fetchTaskData()
+    private function fetchTaskData()
     {
-        $identity = $this->_taskMapper->getIdentity();
+        $identity = $this->taskMapper->getIdentity();
 
         $identity
             ->field('task_id')
             ->eq($this->getTaskId());
 
-        $this->_taskData = $this->_taskMapper->findOne($identity);
+        $this->taskData = $this->taskMapper->findOne($identity);
         return $this;
     }
 
@@ -80,9 +112,9 @@ class Runner extends TimerAbstract
      * @throws \Exception
      * @return \G4\Tasker\TaskAbstract
      */
-    private function _getTaskInstance()
+    private function getTaskInstance()
     {
-        $className = $this->_taskData->getTask();
+        $className = $this->taskData->getTask();
 
         if (class_exists($className) === false) {
             throw new \Exception("Class '{$className}' for task not found");
@@ -100,25 +132,42 @@ class Runner extends TimerAbstract
     /**
      * @return \G4\Tasker\Runner
      */
-    private function _updateToDone()
+    private function updateToDone()
     {
-        $this->_taskData
+        $this->taskData
             ->setStatus(Consts::STATUS_DONE)
-            ->setExecTime($this->_getTotalTime());
-        $this->_taskMapper->update($this->_taskData);
+            ->setExecTime($this->getTotalTime());
+        $this->taskMapper->update($this->taskData);
         return $this;
     }
 
     /**
      * @return \G4\Tasker\Runner
      */
-    private function _updateToWorking()
+    private function updateToWorking()
     {
-        $this->_taskData
+        $this->taskData
             ->setStatus(Consts::STATUS_WORKING)
             ->setTsStarted(time())
-            ->setStartedCount($this->_taskData->getStartedCount() + 1);
-        $this->_taskMapper->update($this->_taskData);
+            ->setStartedCount($this->taskData->getStartedCount() + 1);
+        $this->taskMapper->update($this->taskData);
         return $this;
+    }
+
+    /**
+     * @todo: Dejan: remove duplicated code, uses the same logic as fetchTaskData()
+     * @return boolean
+     */
+    private function checkIsTaskFinished()
+    {
+        $identity = $this->taskMapper->getIdentity();
+
+        $identity
+            ->field('task_id')
+            ->eq($this->getTaskId());
+
+        $taskData = $this->taskMapper->findOne($identity);
+
+        return $taskData->getStatus() == Consts::STATUS_DONE;
     }
 }

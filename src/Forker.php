@@ -3,11 +3,11 @@ namespace G4\Tasker;
 
 class Forker
 {
-    private $_context = 'php';
+    private $context = 'php';
 
-    private $_runner;
+    private $runner;
 
-    private $_options;
+    private $options;
 
     public function fork()
     {
@@ -18,13 +18,13 @@ class Forker
         } else if ($pid) {
             // parent process
         } else {
-            $cmd = sprintf('%s %s %s', $this->_context, $this->_runner, $this->_formatOptions());
+            $cmd = sprintf('%s %s %s', $this->context, $this->runner, $this->formatOptions());
             echo shell_exec($cmd), PHP_EOL;
             exit(0);
         }
     }
 
-    private function _formatOptions()
+    private function formatOptions()
     {
         $options = $this->getOptions();
 
@@ -42,26 +42,26 @@ class Forker
 
     public function getRunner()
     {
-        if(null === $this->_runner) {
+        if(null === $this->runner) {
             throw new \Exception('Runner is not set');
         }
-        return $this->_runner;
+        return $this->runner;
     }
 
     public function setRunner($value)
     {
-        $this->_runner = $value;
+        $this->runner = $value;
         return $this;
     }
 
     public function getOptions()
     {
-        return $this->_options;
+        return $this->options;
     }
 
     public function setOptions(array $value)
     {
-        $this->_options = $value;
+        $this->options = $value;
         return $this;
     }
 

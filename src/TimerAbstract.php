@@ -3,35 +3,39 @@ namespace G4\Tasker;
 
 class TimerAbstract
 {
-    private $_timerStart;
+    private $timerStart;
 
-    private $_timerStop;
+    private $timerStop;
 
-    protected function _timerStart()
+    protected function timerStart()
     {
-        $this->_timerStart = microtime(true);
+        $this->timerStart = microtime(true);
         return $this;
     }
 
-    protected function _timerStop()
+    protected function timerStop()
     {
-        $this->_timerStop = microtime(true);
+        $this->timerStop = microtime(true);
         return $this;
     }
 
-    protected function _getTimerStart()
+    protected function getTimerStart()
     {
-        return $this->_timerStart;
+        return $this->timerStart;
     }
 
-    protected function _getTimerStop()
+    protected function getTimerStop()
     {
-        return $this->_timerStop;
+        return $this->timerStop;
     }
 
-    protected function _getTotalTime()
+    protected function getTotalTime()
     {
-        return $this->_timerStop - $this->_timerStart;
+        return $this->timerStop - $this->timerStart;
     }
 
+    protected function getRunningTime()
+    {
+        return microtime(true) - $this->timerStart;
+    }
 }
