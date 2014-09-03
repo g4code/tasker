@@ -32,7 +32,7 @@ abstract class TaskAbstract
     public function getEncodedData()
     {
         return $this->data !== null
-            ? json_encode($this->data)
+            ? json_encode($this->data, JSON_UNESCAPED_UNICODE)
             : '';
     }
 
