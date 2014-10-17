@@ -14,6 +14,18 @@ class Consts
     const PRIORITY_MEDIUM          = 41;
     const PRIORITY_HIGH            = 81;
 
+    const PRIORITY_00              = 0;
+    const PRIORITY_10              = 10;
+    const PRIORITY_20              = 20;
+    const PRIORITY_30              = 30;
+    const PRIORITY_40              = 40;
+    const PRIORITY_50              = 50;
+    const PRIORITY_60              = 60;
+    const PRIORITY_70              = 70;
+    const PRIORITY_80              = 80;
+    const PRIORITY_90              = 90;
+    const PRIORITY_99              = 99;
+
     const LIMIT_DEFAULT            = 100;
 
     const STATUS_NAME_PENDING      = 'STATUS_PENDING';

@@ -17,6 +17,8 @@ class Manager extends TimerAbstract
 
     private $_maxNoOfPhpProcesses;
 
+    private $_numberOfGroupedTasks;
+
     private $_options;
 
     private $_runner;
@@ -99,6 +101,12 @@ class Manager extends TimerAbstract
         return $this;
     }
 
+    public function setNumberOfGroupedTasks($value)
+    {
+        $this->_numberOfGroupedTasks = $value;
+        return $this;
+    }
+
     public function setOptions(array $value)
     {
         $this->_options = $value;
@@ -148,31 +156,49 @@ class Manager extends TimerAbstract
         return $this;
     }
 
+    private function _forkProcesses()
+    {
+        $forker = new Forker();
+        $forker->setRunner($this->getRunner());
+
+        foreach ($this->_tasks as $task) {
+
+            try {
+
+                usleep($this->_delay != null ? $this->_delay : 0);
+
+                if ($task instanceof \G4\Tasker\Model\Domain\Task) {
+                    $this->addOption('id', $task->getId());
+                } else {
+                    $key = 'task_id';
+                    $taskIds = array_map(function($item) use ($key) {
+                        return $item[$key];
+                    }, $task);
+                    $this->addOption('ids', json_encode($taskIds));
+                }
+
+                $forker
+                    ->setOptions($this->getOptions())
+                    ->fork();
+
+            } catch (\Exception $e) {
+                // log message here
+                continue;
+            }
+        }
+    }
+
     private function _runTasks()
     {
         if($this->_tasks->count() > 0) {
 
             \G4\DataMapper\Db\Db::getAdapter()->closeConnection();
 
-            $forker = new Forker();
-            $forker->setRunner($this->getRunner());
-
-            foreach ($this->_tasks as $task) {
-
-                try {
-
-                    usleep($this->_delay != null ? $this->_delay : 0);
-
-                    $this->addOption('id', $task->getId());
-
-                    $forker
-                        ->setOptions($this->getOptions())
-                        ->fork();
-                } catch (\Exception $e) {
-                    // log message here
-                    continue;
-                }
+            if (!is_null($this->_numberOfGroupedTasks) && $this->_numberOfGroupedTasks > 1) {
+                $this->_tasks = array_chunk($this->_tasks->getRawData(), $this->_numberOfGroupedTasks);
             }
+
+            $this->_forkProcesses();
         }
 
         $this
