@@ -26,6 +26,9 @@ class Consts
     const PRIORITY_90              = 90;
     const PRIORITY_99              = 99;
 
+    const RECURRING_TASK_STATUS_INACTIVE = 0;
+    const RECURRING_TASK_STATUS_ACTIVE = 1;
+
     const LIMIT_DEFAULT            = 100;
 
     const STATUS_NAME_PENDING      = 'STATUS_PENDING';
