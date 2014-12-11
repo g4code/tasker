@@ -15,26 +15,6 @@ class Task extends MysqlAbstract
 
     private $_timeDelay;
 
-    public function reserveTasks($limit)
-    {
-        $limit = intval($limit);
-
-        if(!$limit) {
-            throw new \Exception('Limit is not valid');
-        }
-
-        $identity = $this->getIdentity()
-            ->field('identifier')
-            ->eq('')
-            ->field('status')
-            ->eq(Consts::STATUS_PENDING)
-            ->field('ts_created')
-            ->le(time())
-            ->setOrderBy('priority', 'DESC')
-            ->setLimit($limit);
-
-        return $this->updateAll($identity, array('identifier' => $this->getIdentifier()));
-    }
 
     public function resetTaskStatusPendingWithIdentifier()
     {
@@ -108,7 +88,7 @@ class Task extends MysqlAbstract
 
     private function _generateIdentifier()
     {
-        $this->_identifier = gethostname()."|".time();
+        $this->_identifier = gethostname();
         return $this;
     }
 }

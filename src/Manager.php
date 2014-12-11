@@ -5,167 +5,148 @@ use G4\Tasker\Model\Mapper\Mysql\Task as TaskMapper;
 
 class Manager extends TimerAbstract
 {
-    const MAX_RETRY_ATTEMPTS = 3;
+    const MAX_RETRY_ATTEMPTS        = 3;
+    const TIME_FORMAT               = 'Y-m-d H:i:s';
+    const RESETtasks_AFTER_SECONDS = 60;
 
-    const TIME_FORMAT = 'Y-m-d H:i:s';
+    private $delay;
 
-    const RESET_TASKS_AFTER_SECONDS = 60;
+    private $limit;
 
-    private $_delay;
+    private $maxNoOfPhpProcesses;
 
-    private $_limit;
+    private $numberOfGroupedTasks;
 
-    private $_maxNoOfPhpProcesses;
+    /**
+     * @var array
+     */
+    private $options;
 
-    private $_numberOfGroupedTasks;
+    private $runner;
 
-    private $_options;
-
-    private $_runner;
-
-    private $_tasks;
+    private $tasks;
 
     /**
      *
-     * @var G4\Tasker\Model\Mapper\Mysql\Task
+     * @var \G4\Tasker\Model\Mapper\Mysql\Task
      */
-    private $_taskMapper;
+    private $taskMapper;
 
     public function __construct()
     {
         $this->timerStart();
 
-        $this->_taskMapper = new TaskMapper();
+        $this->taskMapper = new TaskMapper();
 
-        $this->_limit = Consts::LIMIT_DEFAULT;
+        $this->limit = Consts::LIMIT_DEFAULT;
     }
 
     public function addOption($key, $value)
     {
-        $this->_options[$key] = $value;
+        $this->options[$key] = $value;
         return $this;
     }
 
     public function getLimit()
     {
-        return $this->_limit;
+        return $this->limit;
     }
 
     public function getOptions()
     {
-        return $this->_options;
+        return $this->options;
     }
 
     public function getRunner()
     {
-        return $this->_runner;
+        return $this->runner;
     }
 
     public function run()
     {
-        $this
-            ->_checkPhpProcessesCount()
-            ->_resetTasks();
+        $this->checkPhpProcessesCount();
 
-        $this->_taskMapper->transactionBegin();
+        $this->taskMapper->transactionBegin();
 
         try {
-            $this
-                ->_reserveTasks()
-                ->_getReservedTasks();
+            $this->getReservedTasks();
         } catch (\Exception $e) {
-            $this->_taskMapper->transactionRollback();
+            $this->taskMapper->transactionRollback();
             return $this;
         }
 
-        $this->_taskMapper->transactionCommit();
+        $this->taskMapper->transactionCommit();
 
-        $this->_runTasks();
+        $this->runTasks();
     }
 
     public function setDelay($value)
     {
-        $this->_delay = $value;
+        $this->delay = $value;
         return $this;
     }
 
     public function setLimit($value)
     {
-        $this->_limit = $value;
+        $this->limit = $value;
         return $this;
     }
 
     public function setMaxNoOfPhpProcesses($value)
     {
-        $this->_maxNoOfPhpProcesses = $value;
+        $this->maxNoOfPhpProcesses = $value;
         return $this;
     }
 
     public function setNumberOfGroupedTasks($value)
     {
-        $this->_numberOfGroupedTasks = $value;
+        $this->numberOfGroupedTasks = $value;
         return $this;
     }
 
     public function setOptions(array $value)
     {
-        $this->_options = $value;
+        $this->options = $value;
         return $this;
     }
 
     public function setRunner($value)
     {
-        $this->_runner = $value;
+        $this->runner = $value;
         return $this;
     }
 
-    private function _checkPhpProcessesCount()
+    private function checkPhpProcessesCount()
     {
-        if ($this->_maxNoOfPhpProcesses == null) {
+        if ($this->maxNoOfPhpProcesses == null) {
             return $this;
         }
 
         exec('ps -ef | grep -v grep | grep php | wc -l', $count);
 
-        if ($count[0] >= $this->_maxNoOfPhpProcesses) {
+        if ($count[0] >= $this->maxNoOfPhpProcesses) {
             throw new \Exception('Max number of active php processes reached.');
         }
 
         return $this;
     }
 
-    private function _getReservedTasks()
+    private function getReservedTasks()
     {
-        $this->_tasks = $this->_taskMapper->getReservedTasks($this->_limit);
+        $this->tasks = $this->taskMapper->getReservedTasks($this->limit);
         return $this;
     }
 
-    private function _reserveTasks()
-    {
-        $this->_taskMapper->reserveTasks($this->_limit);
-        return $this;
-    }
-
-    private function _resetTasks()
-    {
-        $cleaner = new Cleaner();
-        $cleaner
-            ->setTimeDelay(self::RESET_TASKS_AFTER_SECONDS)
-            ->setMaxRetryAttempts(self::MAX_RETRY_ATTEMPTS)
-            ->run();
-        return $this;
-    }
-
-    private function _forkProcesses()
+    private function forkProcesses()
     {
         $forker = new Forker();
         $forker->setRunner($this->getRunner());
 
-        foreach ($this->_tasks as $task) {
+        foreach ($this->tasks as $task) {
 
             try {
 
-                usleep($this->_delay != null ? $this->_delay : 0);
+                usleep($this->delay != null ? $this->_delay : 0);
 
                 if ($task instanceof \G4\Tasker\Model\Domain\Task) {
                     $this->addOption('id', $task->getId());
@@ -188,25 +169,25 @@ class Manager extends TimerAbstract
         }
     }
 
-    private function _runTasks()
+    private function runTasks()
     {
-        if($this->_tasks->count() > 0) {
+        if($this->tasks->count() > 0) {
 
             \G4\DataMapper\Db\Db::getAdapter()->closeConnection();
 
-            if (!is_null($this->_numberOfGroupedTasks) && $this->_numberOfGroupedTasks > 1) {
-                $this->_tasks = array_chunk($this->_tasks->getRawData(), $this->_numberOfGroupedTasks);
+            if (!is_null($this->numberOfGroupedTasks) && $this->numberOfGroupedTasks > 1) {
+                $this->tasks = array_chunk($this->tasks->getRawData(), $this->numberOfGroupedTasks);
             }
 
-            $this->_forkProcesses();
+            $this->forkProcesses();
         }
 
         $this
             ->timerStop()
-            ->_writeLog();
+            ->writeLog();
     }
 
-    private function _writeLog()
+    private function writeLog()
     {
         echo "Started: " . date(self::TIME_FORMAT, $this->getTimerStart()) . "\n";
         echo "Execution time: " . ($this->getTotalTime()) . "\n";

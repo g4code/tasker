@@ -5,6 +5,9 @@ use G4\Tasker\Model\Domain\Task as TaskDomain;
 
 class Queue
 {
+
+    private $identifier;
+
     private $tasks;
 
     public function __construct()
@@ -23,22 +26,33 @@ class Queue
             ->setStatus(Consts::STATUS_PENDING)
             ->setPriority($task->getPriority())
             ->setTsCreated($task->getTsCreated())
+            ->setIdentifier($this->identifier->getOne())
             ->setExecTime(0);
 
         $this->tasks[] = $domain;
         return  $this;
     }
 
+    /**
+     * @param string|array $hostname
+     * @return \G4\Tasker\Queue
+     */
+    public function setHostname($hostname)
+    {
+        $this->identifier = new Identifier($hostname);
+        return $this;
+    }
+
     public function save()
     {
-        $mapper = $this->_getMapperInstance();
+        $mapper = $this->getMapperInstance();
         if (count($this->tasks) > 0) {
             $mapper->insertBulk($this->tasks);
         }
         return  $this;
     }
 
-    private function _getMapperInstance()
+    private function getMapperInstance()
     {
         return new \G4\Tasker\Model\Mapper\Mysql\Task();
     }
