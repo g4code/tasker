@@ -23,7 +23,8 @@ class Recurring extends MysqlAbstract
 
         $select
             ->from($this->_tableName)
-            ->where('recu_id NOT IN (?)', $subSelect);
+            ->where('recu_id NOT IN (?)', $subSelect)
+            ->where('status = ?', \G4\Tasker\Consts::RECURRING_TASK_STATUS_ACTIVE);
 
         $this->_rawData = $this->_db->fetchAll($select);
 
