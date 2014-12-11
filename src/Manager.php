@@ -64,20 +64,10 @@ class Manager extends TimerAbstract
 
     public function run()
     {
-        $this->checkPhpProcessesCount();
-
-        $this->taskMapper->transactionBegin();
-
-        try {
-            $this->getReservedTasks();
-        } catch (\Exception $e) {
-            $this->taskMapper->transactionRollback();
-            return $this;
-        }
-
-        $this->taskMapper->transactionCommit();
-
-        $this->runTasks();
+        $this
+            ->checkPhpProcessesCount()
+            ->getReservedTasks()
+            ->runTasks();
     }
 
     public function setDelay($value)
