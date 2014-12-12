@@ -6,13 +6,20 @@ use G4\Tasker\Model\Domain\Task as TaskDomain;
 class Queue
 {
 
+    /**
+     * @var Identifier
+     */
     private $identifier;
 
+    /**
+     * @var array
+     */
     private $tasks;
+
 
     public function __construct()
     {
-        $this->tasks = array();
+        $this->tasks = [];
     }
 
     public function add(\G4\Tasker\TaskAbstract $task)

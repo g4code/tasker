@@ -8,37 +8,89 @@ use G4\Cron\CronExpression;
 
 class Injector
 {
+
+    /**
+     * @var \G4\DataMapper\Collection\Content
+     */
+    private $data;
+
+    /**
+     * @var Identifier
+     */
+    private $identifier;
+
+    /**
+     * @var RecurringMapper
+     */
+    private $recurringMapper;
+
+    /**
+     * @var TaskMapper
+     */
+    private $taskMapper;
+
+
+    public function __construct()
+    {
+        $this->recurringMapper = new RecurringMapper();
+        $this->taskMapper      = new TaskMapper();
+    }
+
     public function run()
     {
-        $recuringMapper = new RecurringMapper();
+        $this->fetchRecurringTasks();
 
-        $data = $recuringMapper->getNextTasks();
-
-        if(empty($data)) {
-            return false;
+        if($this->hasData()) {
+            $this->saveTasks();
         }
+    }
 
-        $taskMapper = new TaskMapper();
+    /**
+     * @param string|array $hostname
+     * @return \G4\Tasker\Injector
+     */
+    public function setHostname($hostname)
+    {
+        $this->identifier = new Identifier($hostname);
+        return $this;
+    }
 
-        foreach ($data as $item) {
+    private function fetchRecurringTasks()
+    {
+        $this->recurringMapper = new RecurringMapper();
+        $this->data = $this->recurringMapper->getNextTasks();
+    }
 
-            $expression = CronExpression::factory($item->getFrequency());
-            $ts = strtotime($expression->getNextRunDate()->format('Y-m-d H:i:s'));
+    private function hasData()
+    {
+        return !empty($this->data);
+    }
 
-            $domain = new TaskDomain();
-            $domain
-                ->setRecurringId($item->getId())
-                ->setTask($item->getTask())
-                ->setData($item->getData())
-                ->setIdentifier('')
-                ->setStatus(Consts::STATUS_PENDING)
-                ->setPriority($item->getPriority())
-                ->setTsCreated($ts)
-                ->setTsStarted(0)
-                ->setExecTime(0)
-                ->setStartedCount(0);
+    private function saveOneTask($item)
+    {
+        $expression = CronExpression::factory($item->getFrequency());
+        $ts = strtotime($expression->getNextRunDate()->format('Y-m-d H:i:s'));
 
-            $taskMapper->insert($domain);
+        $domain = new TaskDomain();
+        $domain
+            ->setRecurringId($item->getId())
+            ->setTask($item->getTask())
+            ->setData($item->getData())
+            ->setIdentifier($this->identifier->getOne())
+            ->setStatus(Consts::STATUS_PENDING)
+            ->setPriority($item->getPriority())
+            ->setTsCreated($ts)
+            ->setTsStarted(0)
+            ->setExecTime(0)
+            ->setStartedCount(0);
+
+        $this->taskMapper->insert($domain);
+    }
+
+    private function saveTasks()
+    {
+        foreach ($this->data as $item) {
+            $this->saveOneTask($item);
         }
     }
 }
