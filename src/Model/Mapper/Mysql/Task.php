@@ -28,6 +28,8 @@ class Task extends MysqlAbstract
             ->eq($this->getIdentifier())
             ->field('status')
             ->eq(Consts::STATUS_PENDING)
+            ->field('ts_created')
+            ->le(time())
             ->setLimit($limit);
 
         return $this->findAll($identity);
