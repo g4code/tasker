@@ -38,7 +38,7 @@ abstract class TaskAbstract
 
     public function getName()
     {
-        return str_replace("\\", '\\\\', get_class($this));
+        return get_class($this);
     }
 
     public function getPriority()
