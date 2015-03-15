@@ -27,9 +27,9 @@
     ],
     "require": {
         "php"            : ">=5.3",
-        "g4/data-mapper" : "0.*",
-        "g4/cron"        : "0.*",
-        "g4/log"         : "0.*"
+        "g4/data-mapper" : "*",
+        "g4/cron"        : "*",
+        "g4/log"         : "*"
     },
     "minimum-stability": "dev",
     "autoload": {
