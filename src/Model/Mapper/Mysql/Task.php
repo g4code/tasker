@@ -30,6 +30,8 @@ class Task extends MysqlAbstract
             ->eq(Consts::STATUS_PENDING)
             ->field('ts_created')
             ->le(time())
+            ->field('started_count')
+            ->eq(0)
             ->setLimit($limit);
 
         return $this->findAll($identity);
