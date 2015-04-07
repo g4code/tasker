@@ -31,7 +31,7 @@ class Runner extends TimerAbstract
         pcntl_alarm($this->alarmTime);
     }
 
-    private function signalsHandler($signal)
+    public function signalsHandler($signal)
     {
         // set alarm again for next run
         pcntl_alarm($this->alarmTime);
