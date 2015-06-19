@@ -24,6 +24,7 @@ class Consts
     const PRIORITY_70              = 70;
     const PRIORITY_80              = 80;
     const PRIORITY_90              = 90;
+    const PRIORITY_93              = 93;
     const PRIORITY_99              = 99;
 
     const RECURRING_TASK_STATUS_INACTIVE = 0;
