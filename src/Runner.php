@@ -82,6 +82,13 @@ class Runner extends TimerAbstract
         }
     }
 
+    public function setMultiWorking()
+    {
+        $this
+            ->fetchTaskData()
+            ->updateToMultiWorking();
+    }
+
     /**
      * @return \G4\Tasker\Runner
      */
@@ -150,6 +157,14 @@ class Runner extends TimerAbstract
             ->setStatus(Consts::STATUS_WORKING)
             ->setTsStarted(time())
             ->setStartedCount($this->taskData->getStartedCount() + 1);
+        $this->taskMapper->update($this->taskData);
+        return $this;
+    }
+
+    private function updateToMultiWorking()
+    {
+        $this->taskData
+            ->setStatus(Consts::STATUS_MULTI_WORKING);
         $this->taskMapper->update($this->taskData);
         return $this;
     }

@@ -11,6 +11,13 @@ class MultiRunner
             $runner = new Runner();
             $runner
                 ->setTaskId($taskId)
+                ->setMultiWorking();
+        }
+
+        foreach ($this->taskIds as $taskId) {
+            $runner = new Runner();
+            $runner
+                ->setTaskId($taskId)
                 ->execute();
         }
     }

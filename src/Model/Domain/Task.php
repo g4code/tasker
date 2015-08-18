@@ -125,7 +125,7 @@ class Task extends DomainAbstract
     }
 
     /**
-     * @return G4\Tasker\Model\Domain\Task
+     * @return \G4\Tasker\Model\Domain\Task
      */
     public function setTask($value)
     {
@@ -134,7 +134,7 @@ class Task extends DomainAbstract
     }
 
     /**
-     * @return G4\Tasker\Model\Domain\Task
+     * @return \G4\Tasker\Model\Domain\Task
      */
     public function setIdentifier($value)
     {
@@ -143,7 +143,7 @@ class Task extends DomainAbstract
     }
 
     /**
-     * @return G4\Tasker\Model\Domain\Task
+     * @return \G4\Tasker\Model\Domain\Task
      */
     public function setRecurringId($value)
     {
@@ -152,7 +152,7 @@ class Task extends DomainAbstract
     }
 
     /**
-     * @return G4\Tasker\Model\Domain\Task
+     * @return \G4\Tasker\Model\Domain\Task
      */
     public function setData($value)
     {
@@ -161,7 +161,7 @@ class Task extends DomainAbstract
     }
 
     /**
-     * @return G4\Tasker\Model\Domain\Task
+     * @return \G4\Tasker\Model\Domain\Task
      */
     public function setStatus($value)
     {
@@ -170,7 +170,7 @@ class Task extends DomainAbstract
     }
 
     /**
-     * @return G4\Tasker\Model\Domain\Task
+     * @return \G4\Tasker\Model\Domain\Task
      */
     public function setPriority($value)
     {
@@ -179,7 +179,7 @@ class Task extends DomainAbstract
     }
 
     /**
-     * @return G4\Tasker\Model\Domain\Task
+     * @return \G4\Tasker\Model\Domain\Task
      */
     public function setTsCreated($value)
     {
@@ -188,7 +188,7 @@ class Task extends DomainAbstract
     }
 
     /**
-     * @return G4\Tasker\Model\Domain\Task
+     * @return \G4\Tasker\Model\Domain\Task
      */
     public function setTsStarted($value)
     {
@@ -197,7 +197,7 @@ class Task extends DomainAbstract
     }
 
     /**
-     * @return G4\Tasker\Model\Domain\Task
+     * @return \G4\Tasker\Model\Domain\Task
      */
     public function setExecTime($value)
     {
@@ -206,7 +206,7 @@ class Task extends DomainAbstract
     }
 
     /**
-     * @return G4\Tasker\Model\Domain\Task
+     * @return \G4\Tasker\Model\Domain\Task
      */
     public function setStartedCount($value)
     {
