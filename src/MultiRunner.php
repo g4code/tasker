@@ -10,12 +10,16 @@ class MultiRunner
         $tasks = [];
 
         foreach ($this->taskIds as $taskId) {
-            $runner = new Runner();
-            $runner
-                ->setTaskId($taskId)
-                ->setMultiWorking();
+            try {
+                $runner = new Runner();
+                $runner
+                    ->setTaskId($taskId)
+                    ->setMultiWorking();
 
-            $tasks[] = $runner;
+                $tasks[] = $runner;
+            }catch(\Exception $e) {
+                print $e->getMessage() . "\n";  // todo petar: re-throw exception and catch it on upper level
+            }
         }
 
         foreach ($tasks as $task) {

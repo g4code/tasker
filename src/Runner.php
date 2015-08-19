@@ -112,6 +112,11 @@ class Runner extends TimerAbstract
             ->eq($this->getTaskId());
 
         $this->taskData = $this->taskMapper->findOne($identity);
+
+        if (!$this->taskData instanceof \G4\Tasker\Model\Domain\Task) {
+            throw new \Exception(sprintf("Task id='%d' does not exists.", $this->taskId));
+        }
+
         return $this;
     }
 
