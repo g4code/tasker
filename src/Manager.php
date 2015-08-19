@@ -66,6 +66,7 @@ class Manager extends TimerAbstract
     {
         $this
             ->checkPhpProcessesCount()
+            ->updateOldMultiRunnerTasks()
             ->getReservedTasks()
             ->runTasks();
     }
@@ -116,6 +117,19 @@ class Manager extends TimerAbstract
 
         if ($count[0] >= $this->maxNoOfPhpProcesses) {
             throw new \Exception('Max number of active php processes reached.');
+        }
+
+        return $this;
+    }
+
+    private function updateOldMultiRunnerTasks()
+    {
+        /** @var \G4\Tasker\Model\Domain\Task[] $oldMultiRunnerTasks */
+        $oldMultiRunnerTasks = $this->taskMapper->getOldMultiWorkingTasks();
+
+        foreach ($oldMultiRunnerTasks as $task) {
+            $task->setStatus(Consts::STATUS_PENDING);
+            $this->taskMapper->insertOnDuplicateKeyUpdate($task);
         }
 
         return $this;

@@ -164,7 +164,8 @@ class Runner extends TimerAbstract
     private function updateToMultiWorking()
     {
         $this->taskData
-            ->setStatus(Consts::STATUS_MULTI_WORKING);
+            ->setStatus(Consts::STATUS_MULTI_WORKING)
+            ->setTsStarted(time());
         $this->taskMapper->update($this->taskData);
         return $this;
     }

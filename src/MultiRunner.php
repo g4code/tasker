@@ -7,18 +7,19 @@ class MultiRunner
 
     public function execute()
     {
-        foreach ($this->taskIds as $taskId) {
-            $runner = new Runner();
-            $runner
-                ->setTaskId($taskId)
-                ->setMultiWorking();
-        }
+        $tasks = [];
 
         foreach ($this->taskIds as $taskId) {
             $runner = new Runner();
             $runner
                 ->setTaskId($taskId)
-                ->execute();
+                ->setMultiWorking();
+
+            $tasks[] = $runner;
+        }
+
+        foreach ($tasks as $task) {
+            $task->execute();
         }
     }
 
