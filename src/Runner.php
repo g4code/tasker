@@ -52,6 +52,8 @@ class Runner extends TimerAbstract
 
         } catch (\Exception $e) {
             Writer::writeLogPre($e, 'tasker_runner_exception');
+            $this->handleException($e);
+            throw $e;
         }
     }
 
@@ -164,5 +166,13 @@ class Runner extends TimerAbstract
         $taskData = $this->taskMapper->findOne($identity);
 
         return $taskData->getStatus() == Consts::STATUS_DONE;
+    }
+
+    public function handleException(\Exception $e)
+    {
+        $this->timerStop();
+        $eh = new \G4\Tasker\ExceptionHandler($this->getTaskId(), $this->taskData, $e, $this->getTotalTime());
+        $eh->writeLog();
+        return $this;
     }
 }
