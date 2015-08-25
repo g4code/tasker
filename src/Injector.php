@@ -38,6 +38,10 @@ class Injector
 
     public function run()
     {
+        if (!$this->isPrimaryHost()) {
+            return;
+        }
+
         $this->fetchRecurringTasks();
 
         if($this->hasData()) {
@@ -53,6 +57,11 @@ class Injector
     {
         $this->identifier = new Identifier($hostname);
         return $this;
+    }
+
+    public function isPrimaryHost()
+    {
+        return gethostname() == $this->identifier->getPrimary();
     }
 
     private function fetchRecurringTasks()

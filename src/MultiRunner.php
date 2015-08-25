@@ -7,11 +7,23 @@ class MultiRunner
 
     public function execute()
     {
+        $tasks = [];
+
         foreach ($this->taskIds as $taskId) {
-            $runner = new Runner();
-            $runner
-                ->setTaskId($taskId)
-                ->execute();
+            try {
+                $runner = new Runner();
+                $runner
+                    ->setTaskId($taskId)
+                    ->setMultiWorking();
+
+                $tasks[] = $runner;
+            }catch(\Exception $e) {
+                print $e->getMessage() . "\n";  // todo petar: re-throw exception and catch it on upper level
+            }
+        }
+
+        foreach ($tasks as $task) {
+            $task->execute();
         }
     }
 

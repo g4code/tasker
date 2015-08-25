@@ -8,47 +8,22 @@ use G4\Log\Writer;
 
 class Runner extends TimerAbstract
 {
+    /**
+     * @var TaskMapper
+     */
     private $taskMapper;
 
-    private $taskId;
-
+    /**
+     * @var \G4\Tasker\Model\Domain\Task
+     */
     private $taskData;
 
-    private $alarmTime = 10;
-
-    private $maxExecTime = 30;
-
-    private $posixPid;
+    private $taskId;
 
     public function __construct()
     {
         $this->timerStart();
-        $this->taskMapper = new TaskMapper;
-
-        $this->posixPid = posix_getpid();
-
-        pcntl_signal(SIGALRM, [$this, "signalsHandler"], true);
-        pcntl_alarm($this->alarmTime);
-    }
-
-    public function signalsHandler($signal)
-    {
-        // set alarm again for next run
-        pcntl_alarm($this->alarmTime);
-
-        /**
-         * check if task is done by checking status in database...
-         * for some reason we have zombie processes that finish what they are intended to do but don't kill process in memory
-         */
-        if($this->checkIsTaskFinished()) {
-            // do something here
-        }
-
-        // sanity check, if time reached kill process
-        if($this->getRunningTime() > $this->maxExecTime) {
-            Writer::writeLogPre($this->taskData, 'tasker_kill');
-            posix_kill($this->posixPid, SIGUSR1);
-        }
+        $this->taskMapper = new TaskMapper();
     }
 
     public function getTaskId()
@@ -67,8 +42,6 @@ class Runner extends TimerAbstract
 
     public function execute()
     {
-        $mapper = new TaskMapper;
-
         try {
             $this
                 ->fetchTaskData()
@@ -80,6 +53,13 @@ class Runner extends TimerAbstract
         } catch (\Exception $e) {
             Writer::writeLogPre($e, 'tasker_runner_exception');
         }
+    }
+
+    public function setMultiWorking()
+    {
+        $this
+            ->fetchTaskData()
+            ->updateToMultiWorking();
     }
 
     /**
@@ -95,6 +75,7 @@ class Runner extends TimerAbstract
 
     /**
      * @return \G4\Tasker\Runner
+     * @throws \Exception
      */
     private function fetchTaskData()
     {
@@ -105,6 +86,11 @@ class Runner extends TimerAbstract
             ->eq($this->getTaskId());
 
         $this->taskData = $this->taskMapper->findOne($identity);
+
+        if (!$this->taskData instanceof \G4\Tasker\Model\Domain\Task) {
+            throw new \Exception(sprintf("Task id='%d' does not exists.", $this->taskId));
+        }
+
         return $this;
     }
 
@@ -150,6 +136,15 @@ class Runner extends TimerAbstract
             ->setStatus(Consts::STATUS_WORKING)
             ->setTsStarted(time())
             ->setStartedCount($this->taskData->getStartedCount() + 1);
+        $this->taskMapper->update($this->taskData);
+        return $this;
+    }
+
+    private function updateToMultiWorking()
+    {
+        $this->taskData
+            ->setStatus(Consts::STATUS_MULTI_WORKING)
+            ->setTsStarted(time());
         $this->taskMapper->update($this->taskData);
         return $this;
     }

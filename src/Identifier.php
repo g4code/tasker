@@ -23,4 +23,9 @@ class Identifier
     {
         return $this->hostnamePool[array_rand($this->hostnamePool)];
     }
+
+    public function getPrimary()
+    {
+        return $this->hostnamePool[0];
+    }
 }
