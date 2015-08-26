@@ -24,6 +24,8 @@ class Runner extends TimerAbstract
     {
         $this->timerStart();
         $this->taskMapper = new TaskMapper();
+        register_shutdown_function([$this, 'handleShutdownError']);
+        set_error_handler([$this, 'handleError']);
     }
 
     public function getTaskId()
@@ -151,6 +153,15 @@ class Runner extends TimerAbstract
         return $this;
     }
 
+    private function updateToBroken()
+    {
+        $this->taskData
+            ->setStatus(Consts::STATUS_BROKEN)
+            ->setExecTime($this->getTotalTime());
+        $this->taskMapper->update($this->taskData);
+        return $this;
+    }
+
     /**
      * @todo: Dejan: remove duplicated code, uses the same logic as fetchTaskData()
      * @return boolean
@@ -170,9 +181,32 @@ class Runner extends TimerAbstract
 
     public function handleException(\Exception $e)
     {
-        $this->timerStop();
+        $this
+            ->timerStop()
+            ->updateToBroken();
+
         $eh = new \G4\Tasker\ExceptionHandler($this->getTaskId(), $this->taskData, $e, $this->getTotalTime());
         $eh->writeLog();
         return $this;
+    }
+
+    public function handleShutdownError()
+    {
+        $error = error_get_last();
+
+        if (!in_array($error['type'], [ E_ERROR, E_PARSE, E_CORE_ERROR, E_COMPILE_ERROR])) {
+            return $this;
+        }
+
+        $exception = new \ErrorException($error['message'], $error['type'], 1, $error['file'], $error['line']);
+        $this->handleException($exception);
+        return false;
+    }
+
+    public function handleError($errno, $errstr, $errfile, $errline)
+    {
+        $exception = new \ErrorException($errstr, $errno, 0, $errfile, $errline);
+        $this->handleException($exception);
+        return false;
     }
 }
