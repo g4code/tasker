@@ -23,13 +23,15 @@ class ExceptionHandler
 
     private $totalTime;
 
-    public function __construct($taskId, \G4\Tasker\Model\Domain\Task $taskData, \Exception $exception, $totalTime, \G4\Tasker\Model\Mapper\Mysql\TaskErrorLog $exeptionMapper)
+    private $exceptionMapper;
+
+    public function __construct($taskId, \G4\Tasker\Model\Domain\Task $taskData, \Exception $exception, $totalTime, \G4\Tasker\Model\Mapper\Mysql\TaskErrorLog $exceptionMapper)
     {
         $this->taskId    = $taskId;
         $this->taskData  = $taskData;
         $this->exception = $exception;
         $this->totalTime = $totalTime;
-        $this->exeptionMapper = $exeptionMapper;
+        $this->exceptionMapper = $exceptionMapper;
     }
 
     public function writeLog()
@@ -61,7 +63,7 @@ class ExceptionHandler
 
     private function insert()
     {
-        $this->exeptionMapper->insert($this->taskErrorLog);
+        $this->exceptionMapper->insert($this->taskErrorLog);
         return $this;
     }
 }

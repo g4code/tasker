@@ -20,11 +20,14 @@ class Runner extends TimerAbstract
 
     private $taskId;
 
-    public function __construct(\G4\Tasker\Model\Mapper\Mysql\Task $taskMapper, \G4\Tasker\Model\Mapper\Mysql\TaskErrorLog $exeptionMapper)
+    private $exceptionMapper;
+
+
+    public function __construct(\G4\Tasker\Model\Mapper\Mysql\Task $taskMapper, \G4\Tasker\Model\Mapper\Mysql\TaskErrorLog $exceptionMapper)
     {
         $this->timerStart();
         $this->taskMapper = $taskMapper;
-        $this->exeptionMapper = $exeptionMapper;
+        $this->exceptionMapper = $exceptionMapper;
 
         register_shutdown_function([$this, 'handleShutdownError']);
         set_error_handler([$this, 'handleError']);
@@ -187,7 +190,7 @@ class Runner extends TimerAbstract
             ->timerStop()
             ->updateToBroken();
 
-        $eh = new \G4\Tasker\ExceptionHandler($this->getTaskId(), $this->taskData, $e, $this->getTotalTime(), $this->exeptionMapper);
+        $eh = new \G4\Tasker\ExceptionHandler($this->getTaskId(), $this->taskData, $e, $this->getTotalTime(), $this->exceptionMapper);
         $eh->writeLog();
         return $this;
     }
