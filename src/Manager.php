@@ -1,8 +1,6 @@
 <?php
 namespace G4\Tasker;
 
-use G4\Tasker\Model\Mapper\Mysql\Task as TaskMapper;
-
 class Manager extends TimerAbstract
 {
     const MAX_RETRY_ATTEMPTS        = 3;
@@ -32,11 +30,11 @@ class Manager extends TimerAbstract
      */
     private $taskMapper;
 
-    public function __construct()
+    public function __construct(\G4\Tasker\Model\Mapper\Mysql\Task $mapper)
     {
         $this->timerStart();
 
-        $this->taskMapper = new TaskMapper();
+        $this->taskMapper = $mapper;
 
         $this->limit = Consts::LIMIT_DEFAULT;
     }

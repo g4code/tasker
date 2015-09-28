@@ -30,10 +30,10 @@ class Injector
     private $taskMapper;
 
 
-    public function __construct()
+    public function __construct(\G4\Tasker\Model\Mapper\Mysql\Task $taskMapper, \G4\Tasker\Model\Mapper\Mysql\Recurring $recurringMapper)
     {
-        $this->recurringMapper = new RecurringMapper();
-        $this->taskMapper      = new TaskMapper();
+        $this->taskMapper      = $taskMapper;
+        $this->recurringMapper = $recurringMapper;
     }
 
     public function run()
