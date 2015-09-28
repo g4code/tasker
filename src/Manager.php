@@ -175,7 +175,7 @@ class Manager extends TimerAbstract
     {
         if($this->tasks->count() > 0) {
 
-            \G4\DataMapper\Db\Db::getAdapter()->closeConnection();
+            $this->taskMapper->closeConnection();
 
             if (!is_null($this->numberOfGroupedTasks) && $this->numberOfGroupedTasks > 1) {
                 $this->tasks = array_chunk($this->tasks->getRawData(), $this->numberOfGroupedTasks);

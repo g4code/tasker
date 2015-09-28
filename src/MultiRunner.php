@@ -5,13 +5,19 @@ class MultiRunner
 {
     private $taskIds;
 
+    public function __construct(\G4\Tasker\Model\Mapper\Mysql\Task $taskMapper, \G4\Tasker\Model\Mapper\Mysql\TaskErrorLog $exeptionMapper)
+    {
+        $this->taskMapper = $taskMapper;
+        $this->exeptionMapper = $exeptionMapper;
+    }
+
     public function execute()
     {
         $tasks = [];
 
         foreach ($this->taskIds as $taskId) {
             try {
-                $runner = new Runner();
+                $runner = new Runner($this->taskMapper, $this->exeptionMappe);
                 $runner
                     ->setTaskId($taskId)
                     ->setMultiWorking();

@@ -66,7 +66,6 @@ class Injector
 
     private function fetchRecurringTasks()
     {
-        $this->recurringMapper = new RecurringMapper();
         $this->data = $this->recurringMapper->getNextTasks();
     }
 
