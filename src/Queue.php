@@ -6,6 +6,8 @@ use G4\Tasker\Model\Domain\Task as TaskDomain;
 class Queue
 {
 
+    private $dbAdapter;
+
     /**
      * @var Identifier
      */
@@ -17,8 +19,9 @@ class Queue
     private $tasks;
 
 
-    public function __construct()
+    public function __construct(\G4\DataMapper\Adapter\Mysql\Db $dbAdapter)
     {
+        $this->dbAdapter = $dbAdapter;
         $this->tasks = [];
     }
 
@@ -61,6 +64,6 @@ class Queue
 
     private function getMapperInstance()
     {
-        return new \G4\Tasker\Model\Mapper\Mysql\Task();
+        return new \G4\Tasker\Model\Mapper\Mysql\Task($this->dbAdapter);
     }
 }

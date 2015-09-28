@@ -10,6 +10,7 @@ composer.lock
 .buildpath
 .project
 .export
+.idea
 *~
 dummy.php
 composer.phar
