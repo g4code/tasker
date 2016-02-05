@@ -44,6 +44,27 @@ CREATE TABLE tasks_recurrings (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 ```
 
+```sql
+CREATE TABLE tasks_error_log (
+    tel_id       INT(10)      UNSIGNED          AUTO_INCREMENT,
+    task_id      INT(10)      UNSIGNED NOT NULL DEFAULT 0,
+    identifier   VARCHAR(255)          NOT NULL DEFAULT '',
+    task         VARCHAR(255)          NOT NULL DEFAULT '',
+    data         TEXT,
+    ts_started   INT(10)      UNSIGNED NOT NULL DEFAULT 0,
+    date_started DATETIME                      DEFAULT NULL,
+    exec_time    FLOAT(10,6)  UNSIGNED NOT NULL DEFAULT 0.00,
+    log          TEXT,
+    PRIMARY KEY (tel_id),
+    KEY (task_id),
+    KEY (identifier),
+    KEY (task),
+    KEY (ts_started),
+    KEY (date_started),
+    KEY (exec_time)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+```
+
 * Sample data
 
 ```sql
