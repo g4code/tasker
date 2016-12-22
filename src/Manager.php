@@ -157,7 +157,7 @@ class Manager extends TimerAbstract
                     $taskIds = array_map(function($item) use ($key) {
                         return $item[$key];
                     }, $task);
-                    $this->addOption('ids', json_encode($taskIds));
+                    $this->addOption('ids', implode(',', $taskIds));
                 }
 
                 $forker
