@@ -58,7 +58,6 @@ class Runner extends TimerAbstract
                 ->updateToDone();
 
         } catch (\Exception $e) {
-            Writer::writeLogPre($e, 'tasker_runner_exception');
             $this->handleException($e);
             throw $e;
         }

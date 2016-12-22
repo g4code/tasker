@@ -41,7 +41,7 @@ class ZombieKiller
 
     private function fetchZombieProcesses()
     {
-        exec('ps -eo pid,etime,command,args | grep -v grep | grep ' . self::PROCESS_NAME, $response);
+        exec('ps -eo pid,etime,args | grep -v grep | grep ' . self::PROCESS_NAME, $response);
 
         // form array of pid and execution time
         preg_match_all('~(\d+)\s+([^\s]+)\s[^\d]+~', join("\n", $response), $response);
