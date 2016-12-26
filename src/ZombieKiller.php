@@ -44,7 +44,7 @@ class ZombieKiller
         exec('ps -eo pid,etime,args | grep -v grep | grep ' . self::PROCESS_NAME, $response);
 
         // form array of pid and execution time
-        preg_match_all('~(\d+)\s+([^\s]+)\s[^\d]+~', join("\n", $response), $response);
+        preg_match_all('~(\d+)\s+([^\s]+)\s[^\d]+.*~', join("\n", $response), $response);
 
         foreach ($response[2] as $key => $time) {
 
