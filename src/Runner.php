@@ -185,6 +185,13 @@ class Runner extends TimerAbstract
 
     public function handleException(\Exception $e)
     {
+        // because register_shutdown_function is registered multiple times inside MultiRunner, it is also called
+        // multiple times in case of FATAL error. So this condition will ensure that only currently executing/failed
+        // task will be updated to STATUS_BROKEN
+        if ($this->taskData->getStatus() != Consts::STATUS_WORKING) {
+            return $this;
+        }
+    
         $this
             ->timerStop()
             ->updateToBroken();
