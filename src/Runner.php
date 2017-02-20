@@ -8,10 +8,6 @@ use G4\Log\Writer;
 
 class Runner extends TimerAbstract
 {
-    /**
-     * @var TaskMapper
-     */
-    private $taskMapper;
 
     /**
      * @var \G4\Tasker\Model\Domain\Task
@@ -22,11 +18,16 @@ class Runner extends TimerAbstract
 
     private $exceptionMapper;
 
+    /**
+     * @var \G4\Tasker\Model\Repository\TaskRepositoryInterface
+     */
+    private $taskRepository;
 
-    public function __construct(\G4\Tasker\Model\Mapper\Mysql\Task $taskMapper, \G4\Tasker\Model\Mapper\Mysql\TaskErrorLog $exceptionMapper)
+
+    public function __construct(\G4\Tasker\Model\Repository\TaskRepositoryInterface $taskRepository, \G4\Tasker\Model\Mapper\Mysql\TaskErrorLog $exceptionMapper)
     {
+        $this->taskRepository = $taskRepository;
         $this->timerStart();
-        $this->taskMapper = $taskMapper;
         $this->exceptionMapper = $exceptionMapper;
 
         register_shutdown_function([$this, 'handleShutdownError']);
@@ -43,7 +44,7 @@ class Runner extends TimerAbstract
 
     public function setTaskId($value)
     {
-        $this->taskId = $value;
+        $this->taskId = (int) $value;
         return $this;
     }
 
@@ -87,17 +88,7 @@ class Runner extends TimerAbstract
      */
     private function fetchTaskData()
     {
-        $identity = $this->taskMapper->getIdentity();
-
-        $identity
-            ->field('task_id')
-            ->eq($this->getTaskId());
-
-        $this->taskData = $this->taskMapper->findOne($identity);
-
-        if (!$this->taskData instanceof \G4\Tasker\Model\Domain\Task) {
-            throw new \Exception(sprintf("Task id='%d' does not exists.", $this->taskId));
-        }
+        $this->taskData = $this->taskRepository->find($this->getTaskId());
 
         return $this;
     }
@@ -144,7 +135,7 @@ class Runner extends TimerAbstract
             ->setStatus(Consts::STATUS_WORKING)
             ->setTsStarted(time())
             ->setStartedCount($this->taskData->getStartedCount() + 1);
-        $this->taskMapper->update($this->taskData);
+        $this->taskRepository->update($this->taskData);
         return $this;
     }
 
@@ -159,10 +150,9 @@ class Runner extends TimerAbstract
 
     private function updateToBroken()
     {
-        $this->taskData
-            ->setStatus(Consts::STATUS_BROKEN)
-            ->setExecTime($this->getTotalTime());
-        $this->taskMapper->update($this->taskData);
+        $this->taskData->setStatusBroken();
+        $this->taskData->setExecTime($this->getTotalTime());
+        $this->taskRepository->update($this->taskData);
         return $this;
     }
 

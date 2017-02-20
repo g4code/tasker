@@ -1,36 +1,96 @@
 <?php
 namespace G4\Tasker\Model\Domain;
 
-use G4\DataMapper\Domain\DomainAbstract;
-
-class Task extends DomainAbstract
+class Task
 {
-    protected static $_idKey = 'task_id';
+    /**
+     * @var int
+     */
+    private $taskId;
 
-    protected $_recu_id;
+    /**
+     * @var int
+     */
+    private $recuId;
 
-    protected $_identifier;
+    /**
+     * @var string
+     */
+    private $identifier;
 
-    protected $_task;
+    /**
+     * @var string
+     */
+    private $task;
 
-    protected $_data;
+    /**
+     * @var string
+     */
+    private $data;
 
-    protected $_status;
+    /**
+     * @var int
+     */
+    private $status;
 
-    protected $_priority;
+    /**
+     * @var int
+     */
+    private $priority;
 
-    protected $_ts_created;
+    /**
+     * @var int
+     */
+    private $tsCreated;
 
-    protected $_ts_started;
+    /**
+     * @var int
+     */
+    private $tsStarted;
 
-    protected $_exec_time;
+    /**
+     * @var float
+     */
+    private $execTime;
 
-    protected $_started_count;
+    /**
+     * @var int
+     */
+    private $startedCount;
+
+    /**
+     * Task constructor.
+     * @param int $taskId
+     * @param int $recuId
+     * @param string $identifier
+     * @param string $task
+     * @param string $data
+     * @param int $status
+     * @param int $priority
+     * @param int $tsCreated
+     * @param int $tsStarted
+     * @param float $execTime
+     * @param int $startedCount
+     */
+    public function __construct($taskId, $recuId, $identifier, $task, $data, $status, $priority, $tsCreated, $tsStarted, $execTime, $startedCount)
+    {
+        $this->taskId = $taskId;
+        $this->recuId = $recuId;
+        $this->identifier = $identifier;
+        $this->task = $task;
+        $this->data = $data;
+        $this->status = $status;
+        $this->priority = $priority;
+        $this->tsCreated = $tsCreated;
+        $this->tsStarted = $tsStarted;
+        $this->execTime = $execTime;
+        $this->startedCount = $startedCount;
+    }
 
     public function getRawData()
     {
         return array(
-            self::getIdKey() => $this->getId(),
+            'task_id'        => $this->getTaskId(),
             'recu_id'        => $this->getRecurringId(),
             'identifier'     => $this->getIdentifier(),
             'task'           => $this->getTask(),
@@ -44,12 +104,32 @@ class Task extends DomainAbstract
         );
     }
 
+
+
+    /**
+     * @param $taskId int
+     * @return $this
+     */
+    public function setTaskId($taskId)
+    {
+        $this->taskId = $taskId;
+        return $this;
+    }
+
+    /**
+     * @return int
+     */
+    public function getTaskId()
+    {
+        return $this->taskId;
+    }
+
     /**
      * @return string
      */
     public function getTask()
     {
-        return $this->_task;
+        return $this->task;
     }
 
     /**
@@ -57,7 +137,7 @@ class Task extends DomainAbstract
      */
     public function getIdentifier()
     {
-        return $this->_identifier;
+        return $this->identifier;
     }
 
     /**
@@ -65,7 +145,7 @@ class Task extends DomainAbstract
      */
     public function getRecurringId()
     {
-        return $this->_recu_id;
+        return $this->recuId;
     }
 
     /**
@@ -73,7 +153,7 @@ class Task extends DomainAbstract
      */
     public function getData()
     {
-        return $this->_data;
+        return $this->data;
     }
 
     /**
@@ -81,7 +161,7 @@ class Task extends DomainAbstract
      */
     public function getStatus()
     {
-        return $this->_status;
+        return $this->status;
     }
 
     /**
@@ -89,7 +169,7 @@ class Task extends DomainAbstract
      */
     public function getPriority()
     {
-        return $this->_priority;
+        return $this->priority;
     }
 
     /**
@@ -97,7 +177,7 @@ class Task extends DomainAbstract
      */
     public function getTsCreated()
     {
-        return $this->_ts_created;
+        return $this->tsCreated;
     }
 
     /**
@@ -105,7 +185,7 @@ class Task extends DomainAbstract
      */
     public function getTsStarted()
     {
-        return $this->_ts_started;
+        return $this->tsStarted;
     }
 
     /**
@@ -113,7 +193,7 @@ class Task extends DomainAbstract
      */
     public function getExecTime()
     {
-        return $this->_exec_time;
+        return $this->execTime;
     }
 
     /**
@@ -121,7 +201,7 @@ class Task extends DomainAbstract
      */
     public function getStartedCount()
     {
-        return $this->_started_count;
+        return $this->startedCount;
     }
 
     /**
@@ -129,7 +209,7 @@ class Task extends DomainAbstract
      */
     public function setTask($value)
     {
-        $this->_task = $value;
+        $this->task = $value;
         return $this;
     }
 
@@ -138,7 +218,7 @@ class Task extends DomainAbstract
      */
     public function setIdentifier($value)
     {
-        $this->_identifier = $value;
+        $this->identifier = $value;
         return $this;
     }
 
@@ -147,7 +227,7 @@ class Task extends DomainAbstract
      */
     public function setRecurringId($value)
     {
-        $this->_recu_id = $value;
+        $this->recuId = $value;
         return $this;
     }
 
@@ -156,7 +236,7 @@ class Task extends DomainAbstract
      */
     public function setData($value)
     {
-        $this->_data = $value;
+        $this->data = $value;
         return $this;
     }
 
@@ -165,7 +245,7 @@ class Task extends DomainAbstract
      */
     public function setStatus($value)
     {
-        $this->_status = $value;
+        $this->status = $value;
         return $this;
     }
 
@@ -174,7 +254,7 @@ class Task extends DomainAbstract
      */
     public function setPriority($value)
     {
-        $this->_priority = $value;
+        $this->priority = $value;
         return $this;
     }
 
@@ -183,7 +263,7 @@ class Task extends DomainAbstract
      */
     public function setTsCreated($value)
     {
-        $this->_ts_created = $value;
+        $this->tsCreated = $value;
         return $this;
     }
 
@@ -192,7 +272,7 @@ class Task extends DomainAbstract
      */
     public function setTsStarted($value)
     {
-        $this->_ts_started = $value;
+        $this->tsStarted = $value;
         return $this;
     }
 
@@ -201,7 +281,7 @@ class Task extends DomainAbstract
      */
     public function setExecTime($value)
     {
-        $this->_exec_time = $value;
+        $this->execTime = $value;
         return $this;
     }
 
@@ -210,8 +290,35 @@ class Task extends DomainAbstract
      */
     public function setStartedCount($value)
     {
-        $this->_started_count = $value;
+        $this->startedCount = $value;
         return $this;
+    }
+
+    public function setStatusBroken()
+    {
+        $this->status = \G4\Tasker\Consts::STATUS_BROKEN;
+        return $this;
+    }
+
+    /**
+     * @param $data
+     * @return Task
+     */
+    public static function fromData($data)
+    {
+        return new self(
+            (int) $data['task_id'],
+            (int) $data['recu_id'],
+            $data['identifier'],
+            $data['task'],
+            $data['data'],
+            (int) $data['status'],
+            (int) $data['priority'],
+            (int) $data['ts_created'],
+            (int) $data['ts_started'],
+            (int) $data['exec_time'],
+            (int) $data['started_count']
+        );
     }
 
 }
