@@ -1,6 +1,8 @@
 <?php
 namespace G4\Tasker\Model\Domain;
 
+use G4\Tasker\Consts;
+
 class Task
 {
     /**
@@ -60,31 +62,25 @@ class Task
 
     /**
      * Task constructor.
-     * @param int $taskId
-     * @param int $recuId
      * @param string $identifier
      * @param string $task
      * @param string $data
-     * @param int $status
      * @param int $priority
      * @param int $tsCreated
-     * @param int $tsStarted
-     * @param float $execTime
-     * @param int $startedCount
      */
-    public function __construct($taskId, $recuId, $identifier, $task, $data, $status, $priority, $tsCreated, $tsStarted, $execTime, $startedCount)
+    public function __construct($identifier, $task, $data, $priority, $tsCreated)
     {
-        $this->taskId = $taskId;
-        $this->recuId = $recuId;
+        $this->taskId = 0;
+        $this->recuId = 0;
         $this->identifier = $identifier;
         $this->task = $task;
         $this->data = $data;
-        $this->status = $status;
+        $this->status = Consts::STATUS_PENDING;
         $this->priority = $priority;
         $this->tsCreated = $tsCreated;
-        $this->tsStarted = $tsStarted;
-        $this->execTime = $execTime;
-        $this->startedCount = $startedCount;
+        $this->tsStarted = 0;
+        $this->execTime = 0;
+        $this->startedCount = 0;
     }
 
     public function getRawData()
@@ -306,19 +302,23 @@ class Task
      */
     public static function fromData($data)
     {
-        return new self(
-            (int) $data['task_id'],
-            (int) $data['recu_id'],
+        $task = new self(
             $data['identifier'],
             $data['task'],
             $data['data'],
-            (int) $data['status'],
             (int) $data['priority'],
-            (int) $data['ts_created'],
-            (int) $data['ts_started'],
-            (int) $data['exec_time'],
-            (int) $data['started_count']
+            (int) $data['ts_created']
         );
+
+        $task
+            ->setTaskId((int) $data['task_id'])
+            ->setRecurringId($data['recu_id'])
+            ->setStatus((int) $data['status'])
+            ->setTsStarted((int) $data['ts_started'])
+            ->setExecTime((float) $data['exec_time'])
+            ->setStartedCount((int) $data['started_count']);
+
+        return $task;
     }
 
 }

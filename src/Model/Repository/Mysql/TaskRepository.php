@@ -53,14 +53,13 @@ class TaskRepository implements TaskRepositoryInterface
         $query = 'SELECT * FROM tasks WHERE identifier=:identifier AND status=:status AND ts_created <= :ts_created AND started_count=0 LIMIT :limit';
 
         $stmt = $this->pdo->prepare($query);
-        $stmt->execute(
-            [
-                ':identifier' => $this->getIdentifier(),
-                ':status'     => Consts::STATUS_MULTI_WORKING,
-                ':ts_created' => time() - self::MULTI_WORKING_OLDER_THAN,
-                ':limit'      => $limit,
-            ]
-        );
+
+        $stmt->bindValue(':identifier', $this->getIdentifier());
+        $stmt->bindValue(':status', Consts::STATUS_MULTI_WORKING, \PDO::PARAM_INT);
+        $stmt->bindValue(':ts_created', time() - self::MULTI_WORKING_OLDER_THAN, \PDO::PARAM_INT);
+        $stmt->bindValue(':limit', $limit, \PDO::PARAM_INT);
+
+        $stmt->execute();
 
         return $stmt->fetchAll();
     }
@@ -70,13 +69,11 @@ class TaskRepository implements TaskRepositoryInterface
         $query = 'SELECT * FROM tasks WHERE status=:status AND ts_started<=:ts_started LIMIT :limit';
 
         $stmt = $this->pdo->prepare($query);
-        $stmt->execute(
-            [
-                ':status'     => Consts::STATUS_MULTI_WORKING,
-                ':ts_started' => time() - self::MULTI_WORKING_OLDER_THAN,
-                ':limit'      => self::MULTI_WORKING_LIMIT,
-            ]
-        );
+        $stmt->bindValue(':status', Consts::STATUS_MULTI_WORKING, \PDO::PARAM_INT);
+        $stmt->bindValue(':ts_started', time() - self::MULTI_WORKING_OLDER_THAN, \PDO::PARAM_INT);
+        $stmt->bindValue(':limit', self::MULTI_WORKING_LIMIT, \PDO::PARAM_INT);
+
+        $stmt->execute();
 
         return $stmt->fetchAll();
     }

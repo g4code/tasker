@@ -27,17 +27,13 @@ class Queue
 
     public function add(\G4\Tasker\TaskAbstract $task)
     {
-        $domain = new TaskDomain();
-
-        $domain
-            ->setRecurringId(0)
-            ->setTask($task->getName())
-            ->setData($task->getEncodedData())
-            ->setStatus(Consts::STATUS_PENDING)
-            ->setPriority($task->getPriority())
-            ->setTsCreated($task->getTsCreated())
-            ->setIdentifier($this->identifier->getOne())
-            ->setExecTime(0);
+        $domain = new TaskDomain(
+            $this->identifier->getOne(),
+            $task->getName(),
+            $task->getEncodedData(),
+            $task->getPriority(),
+            $task->getTsCreated()
+        );
 
         $this->tasks[] = $domain;
         return  $this;

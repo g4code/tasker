@@ -25,14 +25,14 @@ class Injector
     private $recurringMapper;
 
     /**
-     * @var TaskMapper
+     * @var \G4\Tasker\Model\Repository\TaskRepositoryInterface
      */
-    private $taskMapper;
+    private $taskRepository;
 
 
-    public function __construct(\G4\Tasker\Model\Mapper\Mysql\Task $taskMapper, \G4\Tasker\Model\Mapper\Mysql\Recurring $recurringMapper)
+    public function __construct(\G4\Tasker\Model\Repository\TaskRepositoryInterface $taskRepository, \G4\Tasker\Model\Mapper\Mysql\Recurring $recurringMapper)
     {
-        $this->taskMapper      = $taskMapper;
+        $this->taskRepository      = $taskRepository;
         $this->recurringMapper = $recurringMapper;
     }
 
@@ -92,7 +92,7 @@ class Injector
             ->setExecTime(0)
             ->setStartedCount(0);
 
-        $this->taskMapper->insert($domain);
+        $this->taskRepository->insert($domain);
     }
 
     private function saveTasks()

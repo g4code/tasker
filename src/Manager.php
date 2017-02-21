@@ -26,15 +26,15 @@ class Manager extends TimerAbstract
 
     /**
      *
-     * @var \G4\Tasker\Model\Mapper\Mysql\Task
+     * @var \G4\Tasker\Model\Repository\TaskRepositoryInterface
      */
-    private $taskMapper;
+    private $taskRepository;
 
-    public function __construct(\G4\Tasker\Model\Mapper\Mysql\Task $mapper)
+    public function __construct(\G4\Tasker\Model\Repository\TaskRepositoryInterface $taskRepository)
     {
         $this->timerStart();
 
-        $this->taskMapper = $mapper;
+        $this->taskRepository = $taskRepository;
 
         $this->limit = Consts::LIMIT_DEFAULT;
     }
@@ -123,11 +123,11 @@ class Manager extends TimerAbstract
     private function updateOldMultiRunnerTasks()
     {
         /** @var \G4\Tasker\Model\Domain\Task[] $oldMultiRunnerTasks */
-        $oldMultiRunnerTasks = $this->taskMapper->getOldMultiWorkingTasks();
+        $oldMultiRunnerTasks = $this->taskRepository->getOldMultiWorkingTasks();
 
         foreach ($oldMultiRunnerTasks as $task) {
             $task->setStatus(Consts::STATUS_PENDING);
-            $this->taskMapper->insertOnDuplicateKeyUpdate($task);
+            $this->taskRepository->insertOnDuplicateKeyUpdate($task);
         }
 
         return $this;
@@ -135,7 +135,7 @@ class Manager extends TimerAbstract
 
     private function getReservedTasks()
     {
-        $this->tasks = $this->taskMapper->getReservedTasks($this->limit);
+        $this->tasks = $this->taskRepository->getReservedTasks($this->limit);
         return $this;
     }
 
@@ -173,12 +173,13 @@ class Manager extends TimerAbstract
 
     private function runTasks()
     {
-        if($this->tasks->count() > 0) {
+        if(count($this->tasks) > 0) {
 
-            $this->taskMapper->closeConnection();
+            // todo call pdo close
+//            $this->taskRepository->closeConnection();
 
             if (!is_null($this->numberOfGroupedTasks) && $this->numberOfGroupedTasks > 1) {
-                $this->tasks = array_chunk($this->tasks->getRawData(), $this->numberOfGroupedTasks);
+                $this->tasks = array_chunk($this->tasks, $this->numberOfGroupedTasks);
             }
 
             $this->forkProcesses();

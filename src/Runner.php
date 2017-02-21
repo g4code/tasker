@@ -3,7 +3,7 @@ namespace G4\Tasker;
 
 declare(ticks = 1);
 
-use G4\Tasker\Model\Mapper\Mysql\Task as TaskMapper;
+use G4\Tasker\Model\Mapper\Mysql\Task as taskRepository;
 use G4\Log\Writer;
 
 class Runner extends TimerAbstract
@@ -122,7 +122,7 @@ class Runner extends TimerAbstract
         $this->taskData
             ->setStatus(Consts::STATUS_DONE)
             ->setExecTime($this->getTotalTime());
-        $this->taskMapper->update($this->taskData);
+        $this->taskRepository->update($this->taskData);
         return $this;
     }
 
@@ -144,7 +144,7 @@ class Runner extends TimerAbstract
         $this->taskData
             ->setStatus(Consts::STATUS_MULTI_WORKING)
             ->setTsStarted(time());
-        $this->taskMapper->update($this->taskData);
+        $this->taskRepository->update($this->taskData);
         return $this;
     }
 
@@ -162,13 +162,13 @@ class Runner extends TimerAbstract
      */
     private function checkIsTaskFinished()
     {
-        $identity = $this->taskMapper->getIdentity();
+        $identity = $this->taskRepository->getIdentity();
 
         $identity
             ->field('task_id')
             ->eq($this->getTaskId());
 
-        $taskData = $this->taskMapper->findOne($identity);
+        $taskData = $this->taskRepository->findOne($identity);
 
         return $taskData->getStatus() == Consts::STATUS_DONE;
     }
