@@ -22,6 +22,9 @@ class Manager extends TimerAbstract
 
     private $runner;
 
+    /**
+     * @var array|\G4\Tasker\Model\Domain\Task[]
+     */
     private $tasks;
 
     /**
@@ -126,8 +129,8 @@ class Manager extends TimerAbstract
         $oldMultiRunnerTasks = $this->taskRepository->getOldMultiWorkingTasks();
 
         foreach ($oldMultiRunnerTasks as $task) {
-            $task->setStatus(Consts::STATUS_PENDING);
-            $this->taskRepository->insertOnDuplicateKeyUpdate($task);
+            $task->setStatusPending();
+            $this->taskRepository->update($task);
         }
 
         return $this;
@@ -153,9 +156,8 @@ class Manager extends TimerAbstract
                 if ($task instanceof \G4\Tasker\Model\Domain\Task) {
                     $this->addOption('id', $task->getId());
                 } else {
-                    $key = 'task_id';
-                    $taskIds = array_map(function($item) use ($key) {
-                        return $item[$key];
+                    $taskIds = array_map(function($task) {
+                        return $task->getTaskId();
                     }, $task);
                     $this->addOption('ids', implode(',', $taskIds));
                 }

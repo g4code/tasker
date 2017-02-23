@@ -119,9 +119,7 @@ class Runner extends TimerAbstract
      */
     private function updateToDone()
     {
-        $this->taskData
-            ->setStatus(Consts::STATUS_DONE)
-            ->setExecTime($this->getTotalTime());
+        $this->taskData->setStatusDone($this->getTotalTime());
         $this->taskRepository->update($this->taskData);
         return $this;
     }
@@ -150,8 +148,7 @@ class Runner extends TimerAbstract
 
     private function updateToBroken()
     {
-        $this->taskData->setStatusBroken();
-        $this->taskData->setExecTime($this->getTotalTime());
+        $this->taskData->setStatusBroken($this->getTotalTime());
         $this->taskRepository->update($this->taskData);
         return $this;
     }
@@ -162,15 +159,8 @@ class Runner extends TimerAbstract
      */
     private function checkIsTaskFinished()
     {
-        $identity = $this->taskRepository->getIdentity();
-
-        $identity
-            ->field('task_id')
-            ->eq($this->getTaskId());
-
-        $taskData = $this->taskRepository->findOne($identity);
-
-        return $taskData->getStatus() == Consts::STATUS_DONE;
+        $taskData = $this->taskRepository->find($this->getTaskId());
+        return $taskData->isDone();
     }
 
     public function handleException(\Exception $e)
@@ -178,7 +168,11 @@ class Runner extends TimerAbstract
         // because register_shutdown_function is registered multiple times inside MultiRunner, it is also called
         // multiple times in case of FATAL error. So this condition will ensure that only currently executing/failed
         // task will be updated to STATUS_BROKEN
-        if ($this->taskData->getStatus() != Consts::STATUS_WORKING) {
+        if (!$this->taskData instanceof \G4\Tasker\Model\Domain\Task) {
+            return $this;
+        }
+
+        if (!$this->taskData->isWorking()) {
             return $this;
         }
     

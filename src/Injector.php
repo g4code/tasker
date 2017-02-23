@@ -32,7 +32,7 @@ class Injector
 
     public function __construct(\G4\Tasker\Model\Repository\TaskRepositoryInterface $taskRepository, \G4\Tasker\Model\Mapper\Mysql\Recurring $recurringMapper)
     {
-        $this->taskRepository      = $taskRepository;
+        $this->taskRepository  = $taskRepository;
         $this->recurringMapper = $recurringMapper;
     }
 
@@ -61,7 +61,7 @@ class Injector
 
     public function isPrimaryHost()
     {
-        return gethostname() == $this->identifier->getPrimary();
+        return gethostname() === $this->identifier->getPrimary();
     }
 
     private function fetchRecurringTasks()
@@ -79,20 +79,17 @@ class Injector
         $expression = CronExpression::factory($item->getFrequency());
         $ts = strtotime($expression->getNextRunDate()->format('Y-m-d H:i:s'));
 
-        $domain = new TaskDomain();
+        $domain = new TaskDomain(
+            $this->identifier->getOne(),
+            $item->getTask(),
+            $item->getData(),
+            $item->getPriority(),
+            $ts
+        );
         $domain
-            ->setRecurringId($item->getId())
-            ->setTask($item->getTask())
-            ->setData($item->getData())
-            ->setIdentifier($this->identifier->getOne())
-            ->setStatus(Consts::STATUS_PENDING)
-            ->setPriority($item->getPriority())
-            ->setTsCreated($ts)
-            ->setTsStarted(0)
-            ->setExecTime(0)
-            ->setStartedCount(0);
+            ->setRecurringId($item->getId());
 
-        $this->taskRepository->insert($domain);
+        $this->taskRepository->add($domain);
     }
 
     private function saveTasks()

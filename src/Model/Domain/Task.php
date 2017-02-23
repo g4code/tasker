@@ -290,10 +290,38 @@ class Task
         return $this;
     }
 
-    public function setStatusBroken()
+    public function setStatusPending()
+    {
+        $this->status = \G4\Tasker\Consts::STATUS_PENDING;
+        return $this;
+    }
+
+    public function setStatusBroken($execTime=null)
     {
         $this->status = \G4\Tasker\Consts::STATUS_BROKEN;
+        if ($execTime) {
+            $this->execTime = $execTime;
+        }
         return $this;
+    }
+
+    public function setStatusDone($execTime=null)
+    {
+        $this->status = \G4\Tasker\Consts::STATUS_DONE;
+        if ($execTime) {
+            $this->execTime = $execTime;
+        }
+        return $this;
+    }
+
+    public function isWorking()
+    {
+        return $this->status === \G4\Tasker\Consts::STATUS_WORKING;
+    }
+
+    public function isDone()
+    {
+        return $this->status === \G4\Tasker\Consts::STATUS_DONE;
     }
 
     /**

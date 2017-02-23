@@ -55,13 +55,15 @@ class TaskRepository implements TaskRepositoryInterface
         $stmt = $this->pdo->prepare($query);
 
         $stmt->bindValue(':identifier', $this->getIdentifier());
-        $stmt->bindValue(':status', Consts::STATUS_MULTI_WORKING, \PDO::PARAM_INT);
+        $stmt->bindValue(':status', Consts::STATUS_PENDING, \PDO::PARAM_INT);
         $stmt->bindValue(':ts_created', time() - self::MULTI_WORKING_OLDER_THAN, \PDO::PARAM_INT);
         $stmt->bindValue(':limit', $limit, \PDO::PARAM_INT);
 
         $stmt->execute();
 
-        return $stmt->fetchAll();
+        return array_map(function($data) {
+            return \G4\Tasker\Model\Domain\Task::fromData($data);
+        }, $stmt->fetchAll());
     }
 
     public function getOldMultiWorkingTasks()
@@ -75,7 +77,9 @@ class TaskRepository implements TaskRepositoryInterface
 
         $stmt->execute();
 
-        return $stmt->fetchAll();
+        return array_map(function($data) {
+            return \G4\Tasker\Model\Domain\Task::fromData($data);
+        }, $stmt->fetchAll());
     }
 
     private function getIdentifier()
@@ -92,6 +96,27 @@ class TaskRepository implements TaskRepositoryInterface
         return $this;
     }
 
+    public function add(Task $task)
+    {
+        $query = 'INSERT INTO tasks (recu_id, identifier, task, `data`, status, priority, ts_created, ts_started, exec_time, started_count)
+VALUES(:recu_id, :identifier, :task, :data, :status, :priority, :ts_created, :ts_started, :exec_time, :started_count)';
+
+        $stmt = $this->pdo->prepare($query);
+        $stmt->bindValue(':recu_id',       $task->getRecurringId(),  \PDO::PARAM_INT);
+        $stmt->bindValue(':identifier',    $task->getIdentifier());
+        $stmt->bindValue(':task',          $task->getTask());
+        $stmt->bindValue(':data',          $task->getData());
+        $stmt->bindValue(':status',        $task->getStatus(),       \PDO::PARAM_INT);
+        $stmt->bindValue(':priority',      $task->getPriority(),     \PDO::PARAM_INT);
+        $stmt->bindValue(':ts_created',    $task->getTsCreated(),    \PDO::PARAM_INT);
+        $stmt->bindValue(':ts_started',    $task->getTsStarted(),    \PDO::PARAM_INT);
+        $stmt->bindValue(':exec_time',     $task->getExecTime());
+        $stmt->bindValue(':started_count', $task->getStartedCount(), \PDO::PARAM_INT);
+
+        $stmt->execute();
+
+    }
+
     public function update(Task $task)
     {
         $update = [];
@@ -99,8 +124,23 @@ class TaskRepository implements TaskRepositoryInterface
             $update[] = sprintf('%s="%s"', $col, $this->pdo->quote($val));
         }
 
-        $query = 'UPDATE tasks SET ' . implode(',', $update) . ' WHERE task_id=:id';
+        $query = 'UPDATE tasks SET recu_id=:recu_id, identifier=:identifier, task=:task, `data`=:data, 
+status=:status, priority=:priority, ts_created=:ts_created, ts_started=:ts_started, exec_time=:exec_time,
+started_count=:started_count WHERE task_id=:task_id';
 
-        $this->pdo->exec($query);
+        $stmt = $this->pdo->prepare($query);
+        $stmt->bindValue(':recu_id',       $task->getRecurringId(),  \PDO::PARAM_INT);
+        $stmt->bindValue(':identifier',    $task->getIdentifier());
+        $stmt->bindValue(':task',          $task->getTask());
+        $stmt->bindValue(':data',          $task->getData());
+        $stmt->bindValue(':status',        $task->getStatus(),       \PDO::PARAM_INT);
+        $stmt->bindValue(':priority',      $task->getPriority(),     \PDO::PARAM_INT);
+        $stmt->bindValue(':ts_created',    $task->getTsCreated(),    \PDO::PARAM_INT);
+        $stmt->bindValue(':ts_started',    $task->getTsStarted(),    \PDO::PARAM_INT);
+        $stmt->bindValue(':exec_time',     $task->getExecTime());
+        $stmt->bindValue(':started_count', $task->getStartedCount(), \PDO::PARAM_INT);
+        $stmt->bindValue(':task_id', $task->getTaskId(), \PDO::PARAM_INT);
+
+        return $stmt->execute();
     }
 }
