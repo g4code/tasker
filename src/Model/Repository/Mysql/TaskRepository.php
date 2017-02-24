@@ -102,16 +102,7 @@ class TaskRepository implements TaskRepositoryInterface
 VALUES(:recu_id, :identifier, :task, :data, :status, :priority, :ts_created, :ts_started, :exec_time, :started_count)';
 
         $stmt = $this->pdo->prepare($query);
-        $stmt->bindValue(':recu_id',       $task->getRecurringId(),  \PDO::PARAM_INT);
-        $stmt->bindValue(':identifier',    $task->getIdentifier());
-        $stmt->bindValue(':task',          $task->getTask());
-        $stmt->bindValue(':data',          $task->getData());
-        $stmt->bindValue(':status',        $task->getStatus(),       \PDO::PARAM_INT);
-        $stmt->bindValue(':priority',      $task->getPriority(),     \PDO::PARAM_INT);
-        $stmt->bindValue(':ts_created',    $task->getTsCreated(),    \PDO::PARAM_INT);
-        $stmt->bindValue(':ts_started',    $task->getTsStarted(),    \PDO::PARAM_INT);
-        $stmt->bindValue(':exec_time',     $task->getExecTime());
-        $stmt->bindValue(':started_count', $task->getStartedCount(), \PDO::PARAM_INT);
+        $stmt = $this->prepareFields($stmt, $task);
 
         $stmt->execute();
 
@@ -129,6 +120,20 @@ status=:status, priority=:priority, ts_created=:ts_created, ts_started=:ts_start
 started_count=:started_count WHERE task_id=:task_id';
 
         $stmt = $this->pdo->prepare($query);
+        $stmt = $this->prepareFields($stmt, $task);
+
+        $stmt->bindValue(':task_id',       $task->getTaskId(),       \PDO::PARAM_INT);
+
+        return $stmt->execute();
+    }
+
+    /**
+     * @param \PDOStatement $stmt
+     * @param Task $task
+     * @return \PDOStatement
+     */
+    private function prepareFields(\PDOStatement $stmt, Task $task)
+    {
         $stmt->bindValue(':recu_id',       $task->getRecurringId(),  \PDO::PARAM_INT);
         $stmt->bindValue(':identifier',    $task->getIdentifier());
         $stmt->bindValue(':task',          $task->getTask());
@@ -139,8 +144,7 @@ started_count=:started_count WHERE task_id=:task_id';
         $stmt->bindValue(':ts_started',    $task->getTsStarted(),    \PDO::PARAM_INT);
         $stmt->bindValue(':exec_time',     $task->getExecTime());
         $stmt->bindValue(':started_count', $task->getStartedCount(), \PDO::PARAM_INT);
-        $stmt->bindValue(':task_id', $task->getTaskId(), \PDO::PARAM_INT);
 
-        return $stmt->execute();
+        return $stmt;
     }
 }

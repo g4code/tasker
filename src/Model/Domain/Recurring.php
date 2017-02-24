@@ -3,24 +3,62 @@ namespace G4\Tasker\Model\Domain;
 
 use G4\DataMapper\Domain\DomainAbstract;
 
-class Recurring extends DomainAbstract
+class Recurring
 {
-    protected static $_idKey = 'recu_id';
+    /**
+     * @var int
+     */
+    private $recuId;
 
-    protected $_frequency;
+    /**
+     * @var string
+     */
+    private $frequency;
 
-    protected $_task;
+    /**
+     * @var string
+     */
+    private $task;
 
-    protected $_data;
+    /**
+     * @var string
+     */
+    private $data;
 
-    protected $_status;
+    /**
+     * @var int
+     */
+    private $status;
 
-    protected $_priority;
+    /**
+     * @var int
+     */
+    private $priority;
+
+    /**
+     * Recurring constructor.
+     * @param int $recuId
+     * @param string $frequency
+     * @param string $task
+     * @param string $data
+     * @param int $status
+     * @param int $priority
+     */
+    public function __construct($recuId, $frequency, $task, $data, $status, $priority)
+    {
+        $this->recuId = $recuId;
+        $this->frequency = $frequency;
+        $this->task = $task;
+        $this->data = $data;
+        $this->status = $status;
+        $this->priority = $priority;
+    }
+
 
     public function getRawData()
     {
         return array(
-            self::getIdKey() => $this->getId(),
+            'recu_id'        => $this->getRecuId(),
             'task'           => $this->getTask(),
             'frequency'      => $this->getFrequency(),
             'data'           => $this->getData(),
@@ -30,11 +68,19 @@ class Recurring extends DomainAbstract
     }
 
     /**
+     * @return int
+     */
+    public function getRecuId()
+    {
+        return $this->recuId;
+    }
+
+    /**
      * @return string
      */
     public function getTask()
     {
-        return $this->_task;
+        return $this->task;
     }
 
     /**
@@ -42,7 +88,7 @@ class Recurring extends DomainAbstract
      */
     public function getFrequency()
     {
-        return $this->_frequency;
+        return $this->frequency;
     }
 
     /**
@@ -50,7 +96,7 @@ class Recurring extends DomainAbstract
      */
     public function getData()
     {
-        return $this->_data;
+        return $this->data;
     }
 
     /**
@@ -58,7 +104,7 @@ class Recurring extends DomainAbstract
      */
     public function getStatus()
     {
-        return $this->_status;
+        return $this->status;
     }
 
     /**
@@ -66,52 +112,76 @@ class Recurring extends DomainAbstract
      */
     public function getPriority()
     {
-        return $this->_priority;
+        return $this->priority;
     }
 
     /**
-     * @return G4\Tasker\Model\Domain\Recurring
+     * @param int $recuId
+     */
+    public function setRecuId($recuId)
+    {
+        $this->recuId = $recuId;
+        return $this;
+    }
+
+    /**
+     * @return \G4\Tasker\Model\Domain\Recurring
      */
     public function setTask($value)
     {
-        $this->_task = $value;
+        $this->task = $value;
         return $this;
     }
 
     /**
-     * @return G4\Tasker\Model\Domain\Recurring
+     * @return \G4\Tasker\Model\Domain\Recurring
      */
     public function setFrequency($value)
     {
-        $this->_frequency = $value;
+        $this->frequency = $value;
         return $this;
     }
 
     /**
-     * @return G4\Tasker\Model\Domain\Recurring
+     * @return \G4\Tasker\Model\Domain\Recurring
      */
     public function setData($value)
     {
-        $this->_data = $value;
+        $this->data = $value;
         return $this;
     }
 
     /**
-     * @return G4\Tasker\Model\Domain\Recurring
+     * @return \G4\Tasker\Model\Domain\Recurring
      */
     public function setStatus($value)
     {
-        $this->_status = $value;
+        $this->status = $value;
         return $this;
     }
 
     /**
-     * @return G4\Tasker\Model\Domain\Recurring
+     * @return \G4\Tasker\Model\Domain\Recurring
      */
     public function setPriority($value)
     {
-        $this->_priority = $value;
+        $this->priority = $value;
         return $this;
     }
 
+    /**
+     * @param array $data
+     * @return Recurring
+     */
+    public static function fromData($data)
+    {
+        return new self(
+            (int) $data['recu_id'],
+            $data['frequency'],
+            $data['task'],
+            $data['data'],
+            (int) $data['status'],
+            (int) $data['priority']
+        );
+    }
 }

@@ -20,9 +20,9 @@ class Injector
     private $identifier;
 
     /**
-     * @var RecurringMapper
+     * @var \G4\Tasker\Model\Repository\RecurringRepositoryInterface
      */
-    private $recurringMapper;
+    private $recurringRepository;
 
     /**
      * @var \G4\Tasker\Model\Repository\TaskRepositoryInterface
@@ -30,10 +30,10 @@ class Injector
     private $taskRepository;
 
 
-    public function __construct(\G4\Tasker\Model\Repository\TaskRepositoryInterface $taskRepository, \G4\Tasker\Model\Mapper\Mysql\Recurring $recurringMapper)
+    public function __construct(\G4\Tasker\Model\Repository\TaskRepositoryInterface $taskRepository, \G4\Tasker\Model\Repository\RecurringRepositoryInterface $recurringRepository)
     {
         $this->taskRepository  = $taskRepository;
-        $this->recurringMapper = $recurringMapper;
+        $this->recurringRepository = $recurringRepository;
     }
 
     public function run()
@@ -66,7 +66,7 @@ class Injector
 
     private function fetchRecurringTasks()
     {
-        $this->data = $this->recurringMapper->getNextTasks();
+        $this->data = $this->recurringRepository->getNextTasks();
     }
 
     private function hasData()
@@ -86,8 +86,9 @@ class Injector
             $item->getPriority(),
             $ts
         );
+
         $domain
-            ->setRecurringId($item->getId());
+            ->setRecurringId($item->getRecuId());
 
         $this->taskRepository->add($domain);
     }
