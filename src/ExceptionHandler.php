@@ -2,6 +2,8 @@
 
 namespace G4\Tasker;
 
+use G4\Tasker\Model\Domain\TaskErrorLog;
+
 class ExceptionHandler
 {
     private $taskId;
@@ -25,9 +27,8 @@ class ExceptionHandler
 
     private $exceptionMapper;
 
-    public function __construct($taskId, \G4\Tasker\Model\Domain\Task $taskData, \Exception $exception, $totalTime, \G4\Tasker\Model\Mapper\Mysql\TaskErrorLog $exceptionMapper)
+    public function __construct(\G4\Tasker\Model\Domain\Task $taskData, \Exception $exception, $totalTime, \G4\Tasker\Model\Mapper\Mysql\TaskErrorLog $exceptionMapper)
     {
-        $this->taskId    = $taskId;
         $this->taskData  = $taskData;
         $this->exception = $exception;
         $this->totalTime = $totalTime;
@@ -43,7 +44,21 @@ class ExceptionHandler
 
     private function prepareLog()
     {
-        $this->taskErrorLog = new \G4\Tasker\Model\Domain\TaskErrorLog();
+        $log = json_encode([
+            'file'    => $this->exception->getFile(),
+            'message' => $this->exception->getMessage(),
+            'line'    => $this->exception->getLine(),
+            'code'    => $this->exception->getCode(),
+        ]);
+
+
+        $this->taskErrorLog = TaskErrorLog::fromTask(
+            $this->taskData,
+            date('c'),
+            $this->totalTime,
+            $log
+        );
+/*
         $this->taskErrorLog
             ->setTaskId($this->taskId)
             ->setIdentifier($this->taskData->getIdentifier())
@@ -58,12 +73,13 @@ class ExceptionHandler
                 'line'    => $this->exception->getLine(),
                 'code'    => $this->exception->getCode(),
             ]));
+*/
         return $this;
     }
 
     private function insert()
     {
-        $this->exceptionMapper->insert($this->taskErrorLog);
+        $this->exceptionMapper->add($this->taskErrorLog);
         return $this;
     }
 }

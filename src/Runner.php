@@ -108,7 +108,7 @@ class Runner extends TimerAbstract
         $task = new $className;
 
         if (!$task instanceof \G4\Tasker\TaskAbstract) {
-            throw new \Exception("Class '{$className}' must extend \G4\Tasker\TaskAbstract class");
+            throw new \Exception("Class '{$className}' must extend \\G4\\Tasker\\TaskAbstract class");
         }
 
         return $task;
@@ -180,7 +180,7 @@ class Runner extends TimerAbstract
             ->timerStop()
             ->updateToBroken();
 
-        $eh = new \G4\Tasker\ExceptionHandler($this->getTaskId(), $this->taskData, $e, $this->getTotalTime(), $this->exceptionMapper);
+        $eh = new \G4\Tasker\ExceptionHandler($this->taskData, $e, $this->getTotalTime(), $this->exceptionMapper);
         $eh->writeLog();
         return $this;
     }

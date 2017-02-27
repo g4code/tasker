@@ -2,33 +2,86 @@
 
 namespace G4\Tasker\Model\Domain;
 
-use G4\DataMapper\Domain\DomainAbstract;
-
-class TaskErrorLog extends DomainAbstract
+class TaskErrorLog
 {
 
-    protected static $_idKey = 'tel_id';
+    /**
+     * @var int
+     */
+    private $telId;
 
-    protected $_task_id;
+    /**
+     * @var int
+     */
+    private $taskId;
 
-    protected $_identifier;
+    /**
+     * @var string
+     */
+    private $identifier;
 
-    protected $_task;
+    /**
+     * @var string
+     */
+    private $task;
 
-    protected $_data;
+    /**
+     * @var string
+     */
+    private $data;
 
-    protected $_ts_started;
+    /**
+     * @var int
+     */
+    private $tsStarted;
 
-    protected $_date_started;
+    /**
+     * @var string
+     */
+    private $dateStarted;
 
-    protected $_exec_time;
+    /**
+     * @var int
+     */
+    private $execTime;
 
-    protected $_log;
+    /**
+     * @var
+     */
+    private $log;
 
+    /**
+     * TaskErrorLog constructor.
+     * @param int $telId
+     * @param int $taskId
+     * @param string $identifier
+     * @param string $task
+     * @param string $data
+     * @param int $tsStarted
+     * @param string $dateStarted
+     * @param int $execTime
+     * @param $log
+     */
+    public function __construct($taskId, $identifier, $task, $data, $tsStarted, $dateStarted, $execTime, $log)
+    {
+        $this->taskId = $taskId;
+        $this->identifier = $identifier;
+        $this->task = $task;
+        $this->data = $data;
+        $this->tsStarted = $tsStarted;
+        $this->dateStarted = $dateStarted;
+        $this->execTime = $execTime;
+        $this->log = $log;
+    }
+
+
+    /**
+     * @return array
+     */
     public function getRawData()
     {
-        return array(
-            self::getIdKey() => $this->getId(),
+        return [
+            'tel_id'         => $this->getTelId(),
             'task_id'        => $this->getTaskId(),
             'identifier'     => $this->getIdentifier(),
             'task'           => $this->getTask(),
@@ -37,96 +90,186 @@ class TaskErrorLog extends DomainAbstract
             'date_started'   => $this->getDateStarted(),
             'exec_time'      => $this->getExecTime(),
             'log'            => $this->getLog(),
-        );
+        ];
     }
 
+    /**
+     * @return int
+     */
+    public function getTelId()
+    {
+        return $this->telId;
+    }
+
+    /**
+     * @return int
+     */
     public function getTaskId()
     {
-        return $this->_task_id;
+        return $this->taskId;
     }
 
+    /**
+     * @return string
+     */
     public function getIdentifier()
     {
-        return $this->_identifier;
+        return $this->identifier;
     }
 
+    /**
+     * @return string
+     */
     public function getTask()
     {
-        return $this->_task;
+        return $this->task;
     }
 
+    /**
+     * @return string
+     */
     public function getData()
     {
-        return $this->_data;
+        return $this->data;
     }
 
+    /**
+     * @return int
+     */
     public function getTsStarted()
     {
-        return $this->_ts_started;
+        return $this->tsStarted;
     }
 
+    /**
+     * @return string
+     */
     public function getDateStarted()
     {
-        return $this->_date_started;
+        return $this->dateStarted;
     }
 
+    /**
+     * @return int
+     */
     public function getExecTime()
     {
-        return $this->_exec_time;
+        return $this->execTime;
     }
 
+    /**
+     * @return mixed
+     */
     public function getLog()
     {
-        return json_decode($this->_log, true);
+        return json_decode($this->log, true);
     }
 
-    public function setTaskId($task_id)
+    /**
+     * @param int $telId
+     * @return $this
+     */
+    public function setTelId($telId)
     {
-        $this->_task_id = $task_id;
+        $this->telId = $telId;
         return $this;
     }
 
+    /**
+     * @param $taskId
+     * @return $this
+     */
+    public function setTaskId($taskId)
+    {
+        $this->taskId = $taskId;
+        return $this;
+    }
+
+    /**
+     * @param $identifier
+     * @return $this
+     */
     public function setIdentifier($identifier)
     {
-        $this->_identifier = $identifier;
+        $this->identifier = $identifier;
         return $this;
     }
 
+    /**
+     * @param $task
+     * @return $this
+     */
     public function setTask($task)
     {
-        $this->_task = $task;
+        $this->task = $task;
         return $this;
     }
 
+    /**
+     * @param $data
+     * @return $this
+     */
     public function setData($data)
     {
-        $this->_data = $data;
+        $this->data = $data;
         return $this;
     }
 
+    /**
+     * @param $ts_started
+     * @return $this
+     */
     public function setTsStarted($ts_started)
     {
-        $this->_ts_started = $ts_started;
+        $this->tsStarted = $ts_started;
         return $this;
     }
 
+    /**
+     * @param $date_started
+     * @return $this
+     */
     public function setDateStarted($date_started)
     {
-        $this->_date_started = $date_started;
+        $this->dateStarted = $date_started;
         return $this;
     }
 
+    /**
+     * @param $exec_time
+     * @return $this
+     */
     public function setExecTime($exec_time)
     {
-        $this->_exec_time = $exec_time;
+        $this->execTime = $exec_time;
         return $this;
     }
 
+    /**
+     * @param $log
+     * @return $this
+     */
     public function setLog($log)
     {
-        $this->_log = json_encode($log);
+        $this->log = json_encode($log);
         return $this;
     }
 
+    /**
+     * @return TaskErrorLog
+     */
+    public static function fromTask(Task $task, $dateStarted, $execTime, $log)
+    {
+        return new self(
+            $task->getTaskId(),
+            $task->getIdentifier(),
+            $task->getTask(),
+            $task->getData(),
+            $task->getTsStarted(),
+            $dateStarted,
+            $execTime,
+            $log
+        );
+    }
 
 }
