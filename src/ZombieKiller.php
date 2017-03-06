@@ -25,7 +25,7 @@ class ZombieKiller
     public function kill()
     {
         if (!$this->maxExecutionTime) {
-            throw new \Exception('Max execution time is not set.');
+            throw new \InvalidArgumentException('Max execution time is not set.');
         }
 
         $this
@@ -44,7 +44,7 @@ class ZombieKiller
         exec('ps -eo pid,etime,args | grep -v grep | grep ' . self::PROCESS_NAME, $response);
 
         // form array of pid and execution time
-        preg_match_all('~(\d+)\s+([^\s]+)\s[^\d]+.*~', join("\n", $response), $response);
+        preg_match_all('~(\d+)\s+([^\s]+)\s[^\d]+.*~', implode("\n", $response), $response);
 
         foreach ($response[2] as $key => $time) {
 

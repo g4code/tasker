@@ -2,12 +2,14 @@
 
 namespace G4\Tasker;
 
+use G4\Tasker\Model\Domain\Task;
 use G4\Tasker\Model\Domain\TaskErrorLog;
+use G4\Tasker\Model\Repository\ErrorRepositoryInterface;
 
 class ExceptionHandler
 {
     /**
-     * @var \G4\Tasker\Model\Domain\Task
+     * @var Task
      */
     private $taskData;
 
@@ -17,18 +19,18 @@ class ExceptionHandler
     private $exception;
 
     /**
-     * @var \G4\Tasker\Model\Domain\TaskErrorLog
+     * @var TaskErrorLog
      */
     private $taskErrorLog;
 
     private $totalTime;
 
     /**
-     * @var Model\Repository\ErrorRepositoryInterface
+     * @var ErrorRepositoryInterface
      */
     private $errorRepository;
 
-    public function __construct(\G4\Tasker\Model\Domain\Task $taskData, \Exception $exception, $totalTime, \G4\Tasker\Model\Repository\ErrorRepositoryInterface $errorRepository)
+    public function __construct(Task $taskData, \Exception $exception, $totalTime, ErrorRepositoryInterface $errorRepository)
     {
         $this->taskData  = $taskData;
         $this->exception = $exception;
@@ -51,7 +53,6 @@ class ExceptionHandler
             'line'    => $this->exception->getLine(),
             'code'    => $this->exception->getCode(),
         ]);
-
 
         $this->taskErrorLog = TaskErrorLog::fromTask(
             $this->taskData,

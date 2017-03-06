@@ -1,19 +1,31 @@
 <?php
 namespace G4\Tasker;
 
+use G4\Tasker\Model\Repository\ErrorRepositoryInterface;
+use G4\Tasker\Model\Repository\TaskRepositoryInterface;
+
 class MultiRunner
 {
+    /**
+     * @var array
+     */
     private $taskIds;
 
-    private $errorRepository;
-
+    /**
+     * @var TaskRepositoryInterface
+     */
     private $taskRepository;
 
     /**
-     * @param Model\Repository\TaskRepositoryInterface $taskRepository
-     * @param Model\Repository\ErrorRepositoryInterface $errorRepository
+     * @var ErrorRepositoryInterface
      */
-    public function __construct(\G4\Tasker\Model\Repository\TaskRepositoryInterface $taskRepository, \G4\Tasker\Model\Repository\ErrorRepositoryInterface $errorRepository)
+    private $errorRepository;
+
+    /**
+     * @param TaskRepositoryInterface $taskRepository
+     * @param ErrorRepositoryInterface $errorRepository
+     */
+    public function __construct(TaskRepositoryInterface $taskRepository, ErrorRepositoryInterface $errorRepository)
     {
         $this->taskRepository = $taskRepository;
         $this->errorRepository = $errorRepository;
@@ -41,6 +53,10 @@ class MultiRunner
         }
     }
 
+    /**
+     * @param array|string $value Array or JSON array
+     * @return $this
+     */
     public function setTaskIds($value)
     {
         $this->taskIds = is_array($value)

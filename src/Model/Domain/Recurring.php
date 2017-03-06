@@ -1,7 +1,6 @@
 <?php
 namespace G4\Tasker\Model\Domain;
 
-use G4\DataMapper\Domain\DomainAbstract;
 
 class Recurring
 {

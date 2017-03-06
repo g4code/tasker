@@ -3,6 +3,9 @@ namespace G4\Tasker;
 
 declare(ticks = 1);
 
+use G4\Tasker\Model\Repository\ErrorRepositoryInterface;
+use G4\Tasker\Model\Repository\TaskRepositoryInterface;
+
 class Runner extends TimerAbstract
 {
 
@@ -17,23 +20,21 @@ class Runner extends TimerAbstract
     private $taskId;
 
     /**
-     * @var \G4\Tasker\Model\Repository\ErrorRepositoryInterface
+     * @var ErrorRepositoryInterface
      */
     private $errorRepository;
 
     /**
-     * @var \G4\Tasker\Model\Repository\TaskRepositoryInterface
+     * @var TaskRepositoryInterface
      */
     private $taskRepository;
 
 
     /**
-     * @param \G4\Tasker\Model\Repository\TaskRepositoryInterface $taskRepository
-     * @param \G4\Tasker\Model\Repository\ErrorRepositoryInterface $errorRepository
+     * @param TaskRepositoryInterface $taskRepository
+     * @param ErrorRepositoryInterface $errorRepository
      */
-    public function __construct(
-        \G4\Tasker\Model\Repository\TaskRepositoryInterface $taskRepository,
-        \G4\Tasker\Model\Repository\ErrorRepositoryInterface $errorRepository)
+    public function __construct(TaskRepositoryInterface $taskRepository, ErrorRepositoryInterface $errorRepository)
     {
         $this->taskRepository = $taskRepository;
         $this->timerStart();
@@ -46,7 +47,7 @@ class Runner extends TimerAbstract
     public function getTaskId()
     {
         if(null === $this->taskId) {
-            throw new \Exception('Task ID is not set');
+            throw new \RuntimeException('Task ID is not set');
         }
         return $this->taskId;
     }
@@ -81,7 +82,7 @@ class Runner extends TimerAbstract
     }
 
     /**
-     * @return \G4\Tasker\Runner
+     * @return Runner
      */
     private function executeTask()
     {
@@ -92,7 +93,7 @@ class Runner extends TimerAbstract
     }
 
     /**
-     * @return \G4\Tasker\Runner
+     * @return Runner
      * @throws \Exception
      */
     private function fetchTaskData()
@@ -104,27 +105,27 @@ class Runner extends TimerAbstract
 
     /**
      * @throws \Exception
-     * @return \G4\Tasker\TaskAbstract
+     * @return TaskAbstract
      */
     private function getTaskInstance()
     {
         $className = $this->taskData->getTask();
 
         if (class_exists($className) === false) {
-            throw new \Exception("Class '{$className}' for task not found");
+            throw new \RuntimeException(sprintf("Class '%s' for task not found", $className));
         }
 
         $task = new $className;
 
-        if (!$task instanceof \G4\Tasker\TaskAbstract) {
-            throw new \Exception("Class '{$className}' must extend \\G4\\Tasker\\TaskAbstract class");
+        if (!$task instanceof TaskAbstract) {
+            throw new \RuntimeException(sprintf("Class '%s' must extend \\G4\\Tasker\\TaskAbstract class", $className));
         }
 
         return $task;
     }
 
     /**
-     * @return \G4\Tasker\Runner
+     * @return Runner
      */
     private function updateToDone()
     {
@@ -134,7 +135,7 @@ class Runner extends TimerAbstract
     }
 
     /**
-     * @return \G4\Tasker\Runner
+     * @return Runner
      */
     private function updateToWorking()
     {

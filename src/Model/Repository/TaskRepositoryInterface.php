@@ -12,13 +12,14 @@ interface TaskRepositoryInterface
      * @return Task
      */
     public function find($taskId);
+
     /**
-     * @param $taskId
+     * @param $limit
      * @return array|Task[]
      */
     public function getReservedTasks($limit);
+
     /**
-     * @param $taskId
      * @return array|Task[]
      */
     public function getOldMultiWorkingTasks();

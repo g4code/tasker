@@ -1,11 +1,13 @@
 <?php
 namespace G4\Tasker;
 
+use G4\Tasker\Model\Domain\Task;
+
 class Manager extends TimerAbstract
 {
     const MAX_RETRY_ATTEMPTS        = 3;
     const TIME_FORMAT               = 'Y-m-d H:i:s';
-    const RESETtasks_AFTER_SECONDS = 60;
+    const RESETtasks_AFTER_SECONDS  = 60;
 
     private $delay;
 
@@ -110,7 +112,7 @@ class Manager extends TimerAbstract
 
     private function checkPhpProcessesCount()
     {
-        if ($this->maxNoOfPhpProcesses == null) {
+        if ($this->maxNoOfPhpProcesses === null) {
             return $this;
         }
 
@@ -151,12 +153,13 @@ class Manager extends TimerAbstract
 
             try {
 
-                usleep($this->delay != null ? $this->_delay : 0);
+                usleep($this->delay?: 0);
 
                 if ($task instanceof \G4\Tasker\Model\Domain\Task) {
                     $this->addOption('id', $task->getId());
                 } else {
                     $taskIds = array_map(function($task) {
+                        /** @var Task $task */
                         return $task->getTaskId();
                     }, $task);
                     $this->addOption('ids', implode(',', $taskIds));
@@ -180,7 +183,7 @@ class Manager extends TimerAbstract
             // todo call pdo close
 //            $this->taskRepository->closeConnection();
 
-            if (!is_null($this->numberOfGroupedTasks) && $this->numberOfGroupedTasks > 1) {
+            if ($this->numberOfGroupedTasks !== null && $this->numberOfGroupedTasks > 1) {
                 $this->tasks = array_chunk($this->tasks, $this->numberOfGroupedTasks);
             }
 
@@ -194,7 +197,7 @@ class Manager extends TimerAbstract
 
     private function writeLog()
     {
-        echo "Started: " . date(self::TIME_FORMAT, $this->getTimerStart()) . "\n";
-        echo "Execution time: " . ($this->getTotalTime()) . "\n";
+        echo 'Started: ' . date(self::TIME_FORMAT, $this->getTimerStart()) . "\n";
+        echo 'Execution time: ' . $this->getTotalTime() . "\n";
     }
 }

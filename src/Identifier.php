@@ -11,7 +11,9 @@ class Identifier
      */
     private $hostnamePool;
 
-
+    /**
+     * @param array|string $hostnamePool
+     */
     public function __construct($hostnamePool)
     {
         $this->hostnamePool = is_array($hostnamePool)

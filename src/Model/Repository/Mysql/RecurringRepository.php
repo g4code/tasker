@@ -13,7 +13,7 @@ class RecurringRepository implements RecurringRepositoryInterface
 
     public function __construct(\PDO $db)
     {
-        $this->db = $db;
+        $this->pdo = $db;
     }
 
     public function getNextTasks()
@@ -22,7 +22,7 @@ class RecurringRepository implements RecurringRepositoryInterface
 WHERE status = :status_recu
 AND recu_id NOT IN (SELECT DISTINCT tasks.recu_id FROM tasks WHERE status = :status)';
 
-        $stmt = $this->db->prepare($query);
+        $stmt = $this->pdo->prepare($query);
         $stmt->bindValue(':status_recu', \G4\Tasker\Consts::RECURRING_TASK_STATUS_ACTIVE, \PDO::PARAM_INT);
         $stmt->bindValue(':status',      \G4\Tasker\Consts::STATUS_PENDING,               \PDO::PARAM_INT);
         $stmt->execute();

@@ -13,9 +13,9 @@ class Forker
     {
         $pid = pcntl_fork();
 
-        if ($pid == -1) {
-            throw new \Exception('could not fork');
-        } else if ($pid) {
+        if ($pid === -1) {
+            throw new \RuntimeException('could not fork');
+        } elseif ($pid) {
             // parent process
         } else {
             $cmd = sprintf('%s %s %s', $this->context, $this->runner, $this->formatOptions());
@@ -33,7 +33,7 @@ class Forker
         }
 
         foreach($options as $key => $value) {
-            $dashes = strlen($key) == 1 ? '-' : '--';
+            $dashes = strlen($key) === 1 ? '-' : '--';
             $segments[] = "{$dashes}{$key} {$value}";
         }
 

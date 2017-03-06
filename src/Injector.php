@@ -1,16 +1,17 @@
 <?php
 namespace G4\Tasker;
 
-use G4\Tasker\Model\Mapper\Mysql\Recurring as RecurringMapper;
-use G4\Tasker\Model\Mapper\Mysql\Task as TaskMapper;
+use G4\Tasker\Model\Domain\Recurring;
 use G4\Tasker\Model\Domain\Task as TaskDomain;
 use G4\Cron\CronExpression;
+use G4\Tasker\Model\Repository\RecurringRepositoryInterface;
+use G4\Tasker\Model\Repository\TaskRepositoryInterface;
 
 class Injector
 {
 
     /**
-     * @var \G4\DataMapper\Collection\Content
+     * @var array|Recurring[]
      */
     private $data;
 
@@ -20,17 +21,20 @@ class Injector
     private $identifier;
 
     /**
-     * @var \G4\Tasker\Model\Repository\RecurringRepositoryInterface
+     * @var RecurringRepositoryInterface
      */
     private $recurringRepository;
 
     /**
-     * @var \G4\Tasker\Model\Repository\TaskRepositoryInterface
+     * @var TaskRepositoryInterface
      */
     private $taskRepository;
 
-
-    public function __construct(\G4\Tasker\Model\Repository\TaskRepositoryInterface $taskRepository, \G4\Tasker\Model\Repository\RecurringRepositoryInterface $recurringRepository)
+    /**
+     * @param TaskRepositoryInterface $taskRepository
+     * @param RecurringRepositoryInterface $recurringRepository
+     */
+    public function __construct(TaskRepositoryInterface $taskRepository, RecurringRepositoryInterface $recurringRepository)
     {
         $this->taskRepository  = $taskRepository;
         $this->recurringRepository = $recurringRepository;
@@ -51,7 +55,7 @@ class Injector
 
     /**
      * @param string|array $hostname
-     * @return \G4\Tasker\Injector
+     * @return Injector
      */
     public function setHostname($hostname)
     {
@@ -71,10 +75,10 @@ class Injector
 
     private function hasData()
     {
-        return !empty($this->data);
+        return count($this->data) > 0;
     }
 
-    private function saveOneTask($item)
+    private function saveOneTask(Recurring $item)
     {
         $expression = CronExpression::factory($item->getFrequency());
         $ts = strtotime($expression->getNextRunDate()->format('Y-m-d H:i:s'));

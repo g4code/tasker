@@ -2,11 +2,14 @@
 namespace G4\Tasker;
 
 use G4\Tasker\Model\Domain\Task as TaskDomain;
+use G4\Tasker\Model\Repository\Mysql\TaskRepository;
 
 class Queue
 {
-
-    private $dbAdapter;
+    /**
+     * @var TaskRepository
+     */
+    private $taskRepository;
 
     /**
      * @var Identifier
@@ -19,9 +22,9 @@ class Queue
     private $tasks;
 
 
-    public function __construct(\G4\DataMapper\Adapter\Mysql\Db $dbAdapter)
+    public function __construct(TaskRepository $taskRepository)
     {
-        $this->dbAdapter = $dbAdapter;
+        $this->taskRepository = $taskRepository;
         $this->tasks = [];
     }
 
@@ -36,12 +39,12 @@ class Queue
         );
 
         $this->tasks[] = $domain;
-        return  $this;
+        return $this;
     }
 
     /**
      * @param string|array $hostname
-     * @return \G4\Tasker\Queue
+     * @return Queue
      */
     public function setHostname($hostname)
     {
@@ -51,15 +54,10 @@ class Queue
 
     public function save()
     {
-        $mapper = $this->getMapperInstance();
-        if (count($this->tasks) > 0) {
-            $mapper->insertBulk($this->tasks);
+        foreach ($this->tasks as $task) {
+            $this->taskRepository->add($task);
         }
         return  $this;
     }
 
-    private function getMapperInstance()
-    {
-        return new \G4\Tasker\Model\Mapper\Mysql\Task($this->dbAdapter);
-    }
 }

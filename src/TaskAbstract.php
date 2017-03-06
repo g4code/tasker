@@ -72,11 +72,11 @@ abstract class TaskAbstract
     protected function addMeta($key, $required = false, $valid = null, $default = null)
     {
         if(!is_string($key) || empty($key)) {
-            throw new \Exception('Meta key must be non empty string');
+            throw new \InvalidArgumentException('Meta key must be non empty string');
         }
 
         if(isset($this->meta[$key])) {
-            throw new \Exception('Meta key already declared');
+            throw new \RuntimeException('Meta key already declared');
         }
 
         $this->meta[$key] = array(
@@ -91,7 +91,7 @@ abstract class TaskAbstract
     protected function verifyData($data)
     {
         if(empty($data)) {
-            throw new \Exception('If data is set, it must be non empty array');
+            throw new \InvalidArgumentException('If data is set, it must be non empty array');
         }
 
         // if meta is not set, or is set to empty array, return true since we don't have anything to verify
@@ -103,7 +103,7 @@ abstract class TaskAbstract
             if($value['required']) {
                 if(!isset($data[$key]) || empty($data[$key])) {
                     $class = get_called_class();
-                    throw new \Exception("Task '{$class}' requires '{$key}' to be set");
+                    throw new \InvalidArgumentException(sprintf("Task '%s' requires '%s' to be set", $class, $key));
                 }
             }
         }
