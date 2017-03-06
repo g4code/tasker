@@ -2,26 +2,33 @@
 
 namespace G4\Tasker;
 
-// id long options is required
+use G4\Tasker\Model\Repository\Mysql\ErrorRepository;
+use G4\Tasker\Model\Repository\Mysql\RecurringRepository;
+use G4\Tasker\Model\Repository\Mysql\TaskRepository;
+
+// id long options are required
 $options = getopt('', array('id:'));
 
-$adapter = new \G4\DataMapper\Adapter\Mysql\Db($config['resources']['db']);
+$dbParams = $config['resources']['db']['params'];
+$dsn = sprintf('mysql:dbname=%s;host=%s', $dbParams['dbname'], $dbParams['host']);
+$pdo = new \PDO($dsn, $dbParams['username'], $dbParams['password']);
+
+$taskRepository = new TaskRepository($pdo);
+$errorRepository = new ErrorRepository($pdo);
+$recurringRepository = new RecurringRepository($pdo);
 
 if(isset($options['id']) && $options['id'] > 0) {
-    $runner = new Runner();
+    $runner = new Runner($taskRepository, $errorRepository);
     $runner
         ->setTaskId($options['id'])
         ->execute();
 } else {
-    $taskMapper = new \G4\Tasker\Model\Mapper\Mysql\Task($adapter);
-    $recuringMapper = new \G4\Tasker\Model\Mapper\Mysql\Task($adapter);
-
     // inject new tasks
-    $injector = new Injector($taskMapper, $recuringMapper);
+    $injector = new Injector($taskRepository, $recurringRepository);
     $injector->run();
 
     // run task
-    $cron = new Manager($taskMapper);
+    $cron = new Manager($taskRepository);
     $cron
         ->setRunner(__FILE__)
         ->run();

@@ -3,9 +3,9 @@ namespace G4\Tasker;
 
 use G4\Tasker\Model\Domain\Recurring;
 use G4\Tasker\Model\Domain\Task as TaskDomain;
-use G4\Cron\CronExpression;
 use G4\Tasker\Model\Repository\RecurringRepositoryInterface;
 use G4\Tasker\Model\Repository\TaskRepositoryInterface;
+use G4\Cron\CronExpression;
 
 class Injector
 {
