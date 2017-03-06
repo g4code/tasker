@@ -6,8 +6,6 @@ use G4\Tasker\Model\Domain\TaskErrorLog;
 
 class ExceptionHandler
 {
-    private $taskId;
-
     /**
      * @var \G4\Tasker\Model\Domain\Task
      */
@@ -25,14 +23,17 @@ class ExceptionHandler
 
     private $totalTime;
 
-    private $exceptionMapper;
+    /**
+     * @var Model\Repository\ErrorRepositoryInterface
+     */
+    private $errorRepository;
 
-    public function __construct(\G4\Tasker\Model\Domain\Task $taskData, \Exception $exception, $totalTime, \G4\Tasker\Model\Mapper\Mysql\TaskErrorLog $exceptionMapper)
+    public function __construct(\G4\Tasker\Model\Domain\Task $taskData, \Exception $exception, $totalTime, \G4\Tasker\Model\Repository\ErrorRepositoryInterface $errorRepository)
     {
         $this->taskData  = $taskData;
         $this->exception = $exception;
         $this->totalTime = $totalTime;
-        $this->exceptionMapper = $exceptionMapper;
+        $this->errorRepository = $errorRepository;
     }
 
     public function writeLog()
@@ -58,28 +59,12 @@ class ExceptionHandler
             $this->totalTime,
             $log
         );
-/*
-        $this->taskErrorLog
-            ->setTaskId($this->taskId)
-            ->setIdentifier($this->taskData->getIdentifier())
-            ->setTask($this->taskData->getTask())
-            ->setData($this->taskData->getData())
-            ->setTsStarted($this->taskData->getTsStarted())
-            ->setDateStarted(date('c'))
-            ->setExecTime($this->totalTime)
-            ->setLog(json_encode([
-                'file'    => $this->exception->getFile(),
-                'message' => $this->exception->getMessage(),
-                'line'    => $this->exception->getLine(),
-                'code'    => $this->exception->getCode(),
-            ]));
-*/
         return $this;
     }
 
     private function insert()
     {
-        $this->exceptionMapper->add($this->taskErrorLog);
+        $this->errorRepository->add($this->taskErrorLog);
         return $this;
     }
 }

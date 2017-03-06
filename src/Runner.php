@@ -3,9 +3,6 @@ namespace G4\Tasker;
 
 declare(ticks = 1);
 
-use G4\Tasker\Model\Mapper\Mysql\Task as taskRepository;
-use G4\Log\Writer;
-
 class Runner extends TimerAbstract
 {
 
@@ -14,9 +11,15 @@ class Runner extends TimerAbstract
      */
     private $taskData;
 
+    /**
+     * @var int
+     */
     private $taskId;
 
-    private $exceptionMapper;
+    /**
+     * @var \G4\Tasker\Model\Repository\ErrorRepositoryInterface
+     */
+    private $errorRepository;
 
     /**
      * @var \G4\Tasker\Model\Repository\TaskRepositoryInterface
@@ -24,11 +27,17 @@ class Runner extends TimerAbstract
     private $taskRepository;
 
 
-    public function __construct(\G4\Tasker\Model\Repository\TaskRepositoryInterface $taskRepository, \G4\Tasker\Model\Mapper\Mysql\TaskErrorLog $exceptionMapper)
+    /**
+     * @param \G4\Tasker\Model\Repository\TaskRepositoryInterface $taskRepository
+     * @param \G4\Tasker\Model\Repository\ErrorRepositoryInterface $errorRepository
+     */
+    public function __construct(
+        \G4\Tasker\Model\Repository\TaskRepositoryInterface $taskRepository,
+        \G4\Tasker\Model\Repository\ErrorRepositoryInterface $errorRepository)
     {
         $this->taskRepository = $taskRepository;
         $this->timerStart();
-        $this->exceptionMapper = $exceptionMapper;
+        $this->errorRepository = $errorRepository;
 
         register_shutdown_function([$this, 'handleShutdownError']);
         set_error_handler([$this, 'handleError']);
@@ -180,7 +189,7 @@ class Runner extends TimerAbstract
             ->timerStop()
             ->updateToBroken();
 
-        $eh = new \G4\Tasker\ExceptionHandler($this->taskData, $e, $this->getTotalTime(), $this->exceptionMapper);
+        $eh = new \G4\Tasker\ExceptionHandler($this->taskData, $e, $this->getTotalTime(), $this->errorRepository);
         $eh->writeLog();
         return $this;
     }

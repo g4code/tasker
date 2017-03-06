@@ -20,8 +20,20 @@ class ErrorRepository implements ErrorRepositoryInterface
 
     public function add(TaskErrorLog $taskError)
     {
-        $query = '';
+        $query = 'INSERT INTO tasks_error_log (task_id, identifier, task, data, ts_started, date_started, exec_time, log) VALUES (:task_id, :identifier, :task, :data, :ts_started, :date_started, :exec_time, :log)';
 
-        $this->pdo->exec();
+        $stmt = $this->pdo->prepare($query);
+
+        $stmt->bindValue(':task_id',      $taskError->getTaskId(), \PDO::PARAM_INT);
+        $stmt->bindValue(':identifier',   $taskError->getIdentifier());
+        $stmt->bindValue(':task',         $taskError->getTask());
+        $stmt->bindValue(':data',         $taskError->getData());
+        $stmt->bindValue(':ts_started',   $taskError->getTsStarted(), \PDO::PARAM_INT);
+        $stmt->bindValue(':date_started', $taskError->getDateStarted());
+        $stmt->bindValue(':exec_time',    $taskError->getExecTime());
+        $stmt->bindValue(':log',          json_encode($taskError->getLog()));
+
+        $stmt->execute();
+
     }
 }

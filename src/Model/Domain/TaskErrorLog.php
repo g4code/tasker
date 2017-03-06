@@ -52,7 +52,6 @@ class TaskErrorLog
 
     /**
      * TaskErrorLog constructor.
-     * @param int $telId
      * @param int $taskId
      * @param string $identifier
      * @param string $task
@@ -60,7 +59,7 @@ class TaskErrorLog
      * @param int $tsStarted
      * @param string $dateStarted
      * @param int $execTime
-     * @param $log
+     * @param array $log
      */
     public function __construct($taskId, $identifier, $task, $data, $tsStarted, $dateStarted, $execTime, $log)
     {
