@@ -56,7 +56,7 @@ class TaskRepository implements TaskRepositoryInterface
 
         $stmt->bindValue(':identifier', $this->getIdentifier());
         $stmt->bindValue(':status', Consts::STATUS_PENDING, \PDO::PARAM_INT);
-        $stmt->bindValue(':ts_created', time() - self::MULTI_WORKING_OLDER_THAN, \PDO::PARAM_INT);
+        $stmt->bindValue(':ts_created', time(), \PDO::PARAM_INT);
         $stmt->bindValue(':limit', $limit, \PDO::PARAM_INT);
 
         $stmt->execute();
