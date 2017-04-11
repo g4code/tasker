@@ -305,6 +305,15 @@ class Task
         return $this;
     }
 
+    public function setStatusCompletedNotDone($execTime=null)
+    {
+        $this->status = \G4\Tasker\Consts::STATUS_COMPLETED_NOT_DONE;
+        if ($execTime) {
+            $this->execTime = $execTime;
+        }
+        return $this;
+    }
+
     public function setStatusDone($execTime=null)
     {
         $this->status = \G4\Tasker\Consts::STATUS_DONE;
