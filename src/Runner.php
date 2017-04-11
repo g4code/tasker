@@ -127,6 +127,16 @@ class Runner extends TimerAbstract
     /**
      * @return Runner
      */
+    private function updateToCompletedNotDone()
+    {
+        $this->taskData->setStatusCompletedNotDone($this->getTotalTime());
+        $this->taskRepository->update($this->taskData);
+        return $this;
+    }
+
+    /**
+     * @return Runner
+     */
     private function updateToDone()
     {
         $this->taskData->setStatusDone($this->getTotalTime());
@@ -185,10 +195,15 @@ class Runner extends TimerAbstract
         if (!$this->taskData->isWorking()) {
             return $this;
         }
-    
+
         $this
-            ->timerStop()
-            ->updateToBroken();
+            ->timerStop();
+
+        if ($e instanceof \G4\Tasker\Model\Exception\CompletedNotDone) {
+            $this->updateToCompletedNotDone();
+        } else {
+            $this->updateToBroken();
+        }
 
         $eh = new \G4\Tasker\ExceptionHandler($this->taskData, $e, $this->getTotalTime(), $this->errorRepository);
         $eh->writeLog();
