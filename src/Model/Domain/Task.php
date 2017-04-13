@@ -323,6 +323,15 @@ class Task
         return $this;
     }
 
+    public function setStatusWaitingForRetry($execTime=null)
+    {
+        $this->status = \G4\Tasker\Consts::STATUS_WAITING_FOR_RETRY;
+        if ($execTime) {
+            $this->execTime = $execTime;
+        }
+        return $this;
+    }
+
     public function isWorking()
     {
         return $this->status === \G4\Tasker\Consts::STATUS_WORKING;
