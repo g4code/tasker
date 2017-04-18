@@ -17,6 +17,11 @@ class TaskRepository implements TaskRepositoryInterface
      */
     private $pdo;
 
+    /**
+     * @var string
+     */
+    private $identifier;
+
     public function __construct(\PDO $pdo)
     {
         $this->pdo = $pdo;
@@ -43,20 +48,22 @@ class TaskRepository implements TaskRepositoryInterface
     }
 
 
-    public function getReservedTasks($limit)
+    public function findReserved($limit)
     {
         $limit = (int) $limit;
         if (!$limit) {
             throw new \RuntimeException('Limit is not valid');
         }
 
-        $query = 'SELECT * FROM tasks WHERE identifier=:identifier AND status=:status AND ts_created <= :ts_created AND started_count=0 LIMIT :limit';
+// todo refactor, move to fetchTasks with TaskFilter ?
+
+        $query = 'SELECT * FROM tasks WHERE identifier=:identifier AND status=:status AND ts_created <= :ts_created LIMIT :limit';
 
         $stmt = $this->pdo->prepare($query);
 
         $stmt->bindValue(':identifier', $this->getIdentifier());
         $stmt->bindValue(':status', Consts::STATUS_PENDING, \PDO::PARAM_INT);
-        $stmt->bindValue(':ts_created', time() - self::MULTI_WORKING_OLDER_THAN, \PDO::PARAM_INT);
+        $stmt->bindValue(':ts_created', time(), \PDO::PARAM_INT);
         $stmt->bindValue(':limit', $limit, \PDO::PARAM_INT);
 
         $stmt->execute();
@@ -66,14 +73,24 @@ class TaskRepository implements TaskRepositoryInterface
         }, $stmt->fetchAll());
     }
 
-    public function getOldMultiWorkingTasks()
+    public function findOldMultiWorking()
+    {
+        return $this->fetchTasks(Consts::STATUS_MULTI_WORKING, self::MULTI_WORKING_OLDER_THAN, self::MULTI_WORKING_LIMIT);
+    }
+
+    public function findWaitingForRetry()
+    {
+        return $this->fetchTasks(Consts::STATUS_WAITING_FOR_RETRY, self::MULTI_WORKING_OLDER_THAN, self::MULTI_WORKING_LIMIT);
+    }
+
+    private function fetchTasks($status, $olderThanSeconds, $limit)
     {
         $query = 'SELECT * FROM tasks WHERE status=:status AND ts_started<=:ts_started LIMIT :limit';
 
         $stmt = $this->pdo->prepare($query);
-        $stmt->bindValue(':status', Consts::STATUS_MULTI_WORKING, \PDO::PARAM_INT);
-        $stmt->bindValue(':ts_started', time() - self::MULTI_WORKING_OLDER_THAN, \PDO::PARAM_INT);
-        $stmt->bindValue(':limit', self::MULTI_WORKING_LIMIT, \PDO::PARAM_INT);
+        $stmt->bindValue(':status', $status, \PDO::PARAM_INT);
+        $stmt->bindValue(':ts_started', time() - $olderThanSeconds, \PDO::PARAM_INT);
+        $stmt->bindValue(':limit', $limit, \PDO::PARAM_INT);
 
         $stmt->execute();
 
@@ -84,15 +101,15 @@ class TaskRepository implements TaskRepositoryInterface
 
     private function getIdentifier()
     {
-        if (!isset($this->_identifier)) {
-            $this->_generateIdentifier();
+        if (!isset($this->identifier)) {
+            $this->generateIdentifier();
         }
-        return $this->_identifier;
+        return $this->identifier;
     }
 
-    private function _generateIdentifier()
+    private function generateIdentifier()
     {
-        $this->_identifier = gethostname();
+        $this->identifier = gethostname();
         return $this;
     }
 

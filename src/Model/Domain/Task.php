@@ -296,6 +296,18 @@ class Task
         return $this;
     }
 
+    public function setStatusMultiWorking()
+    {
+        $this->status = \G4\Tasker\Consts::STATUS_MULTI_WORKING;
+        return $this;
+    }
+
+    public function setStatusWorking()
+    {
+        $this->status = \G4\Tasker\Consts::STATUS_WORKING;
+        return $this;
+    }
+
     public function setStatusBroken($execTime=null)
     {
         $this->status = \G4\Tasker\Consts::STATUS_BROKEN;
@@ -303,6 +315,14 @@ class Task
             $this->execTime = $execTime;
         }
         return $this;
+    }
+
+    public function setStatusRetryFailed($execTime=null)
+    {
+        $this->status = \G4\Tasker\Consts::STATUS_RETRY_FAILED;
+        if ($execTime) {
+            $this->execTime = $execTime;
+        }
     }
 
     public function setStatusCompletedNotDone($execTime=null)
