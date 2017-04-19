@@ -50,7 +50,7 @@ class TaskRepository implements TaskRepositoryInterface
             throw new \RuntimeException('Limit is not valid');
         }
 
-        $query = 'SELECT * FROM tasks WHERE identifier=:identifier AND status=:status AND ts_created <= :ts_created AND started_count=0 LIMIT :limit';
+        $query = 'SELECT * FROM tasks WHERE identifier=:identifier AND status=:status AND ts_created <= :ts_created LIMIT :limit';
 
         $stmt = $this->pdo->prepare($query);
 
