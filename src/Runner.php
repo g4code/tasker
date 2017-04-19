@@ -236,10 +236,10 @@ class Runner extends TimerAbstract
             ->timerStop();
 
         switch($e) {
-            case($e instanceof \G4\Tasker\Model\Exception\CompletedNotDone):
+            case($e instanceof \G4\Tasker\Model\Exception\CompletedNotDoneException):
                 $this->updateToCompletedNotDone();
                 break;
-            case($e instanceof \G4\Tasker\Model\Exception\WaitingForRetry):
+            case($e instanceof \G4\Tasker\Model\Exception\WaitingForRetryException):
                 $this->updateToWaitingForRetry();
                 break;
             case($e instanceof \G4\Tasker\Model\Exception\RetryFailedException):
