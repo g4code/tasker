@@ -12,6 +12,9 @@ class TaskRepository implements TaskRepositoryInterface
     const MULTI_WORKING_OLDER_THAN = 600;   // 10 minutes
     const MULTI_WORKING_LIMIT = 20;         // how many tasks to reset to STATUS_PENDING
 
+    const RESET_TASKS_AFTER_SECONDS  = 60;  // seconds to retry failed tasks
+    const RESET_TASKS_LIMIT = 20;           // how many tasks to reset at once
+
     /**
      * @var \PDO
      */
@@ -80,10 +83,10 @@ class TaskRepository implements TaskRepositoryInterface
 
     public function findWaitingForRetry()
     {
-        return $this->fetchTasks(Consts::STATUS_WAITING_FOR_RETRY, self::MULTI_WORKING_OLDER_THAN, self::MULTI_WORKING_LIMIT);
+        return $this->fetchTasks(Consts::STATUS_WAITING_FOR_RETRY, self::RESET_TASKS_AFTER_SECONDS, self::RESET_TASKS_LIMIT);
     }
 
-    private function fetchTasks($status, $olderThanSeconds, $limit)
+    private function fetchTasks($status, $olderThanSeconds, $limit, $identifier=null)
     {
         $query = 'SELECT * FROM tasks WHERE status=:status AND ts_started<=:ts_started LIMIT :limit';
 

@@ -5,8 +5,7 @@ use G4\Tasker\Model\Domain\Task;
 
 class Manager extends TimerAbstract
 {
-    const TIME_FORMAT               = 'Y-m-d H:i:s';
-    const RESETtasks_AFTER_SECONDS  = 60;
+    const TIME_FORMAT  = 'Y-m-d H:i:s';
 
     private $delay;
 
