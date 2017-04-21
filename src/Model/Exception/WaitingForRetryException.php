@@ -3,12 +3,12 @@
 namespace G4\Tasker\Model\Exception;
 
 
-class CompletedNotDone extends \Exception
+class WaitingForRetryException extends \Exception
 {
     public function __construct($message = '', $code = 0, \Exception $previous = null)
     {
         if (!$message) {
-            $message = 'COMPLETED_NOT_DONE';
+            $message = 'WAITING_FOR_RETRY';
         }
 
         parent::__construct($message, $code, $previous);

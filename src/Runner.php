@@ -3,11 +3,13 @@ namespace G4\Tasker;
 
 declare(ticks = 1);
 
+use G4\Tasker\Model\Exception\RetryFailedException;
 use G4\Tasker\Model\Repository\ErrorRepositoryInterface;
 use G4\Tasker\Model\Repository\TaskRepositoryInterface;
 
 class Runner extends TimerAbstract
 {
+    const MAX_RETRY_ATTEMPTS = 3;
 
     /**
      * @var \G4\Tasker\Model\Domain\Task
@@ -64,11 +66,13 @@ class Runner extends TimerAbstract
             $this
                 ->fetchTaskData()
                 ->updateToWorking()
+                ->checkMaxRetryAttempts()
                 ->executeTask()
                 ->timerStop()
                 ->updateToDone();
 
         } catch (\Exception $e) {
+            print "Exception " . $e->getMessage();
             $this->handleException($e);
             throw $e;
         }
@@ -100,6 +104,20 @@ class Runner extends TimerAbstract
     {
         $this->taskData = $this->taskRepository->find($this->getTaskId());
 
+        return $this;
+    }
+
+    private function checkMaxRetryAttempts()
+    {
+        if ($this->taskData->getStartedCount() > self::MAX_RETRY_ATTEMPTS) {
+            print $this->taskData->getStartedCount();
+            throw new RetryFailedException(
+                sprintf('Task with task_id=%s failed miserably with started_count=%s greater than MAX_RETRY_ATTEMPTS=%s.',
+                $this->taskData->getTaskId(),
+                $this->taskData->getStartedCount(),
+                self::MAX_RETRY_ATTEMPTS)
+            );
+        }
         return $this;
     }
 
@@ -154,13 +172,20 @@ class Runner extends TimerAbstract
         return $this;
     }
 
+    private function updateToRetryFailed()
+    {
+        $this->taskData->setStatusRetryFailed();
+        $this->taskRepository->update($this->taskData);
+        return $this;
+    }
+
     /**
      * @return Runner
      */
     private function updateToWorking()
     {
         $this->taskData
-            ->setStatus(Consts::STATUS_WORKING)
+            ->setStatusWorking()
             ->setTsStarted(time())
             ->setStartedCount($this->taskData->getStartedCount() + 1);
         $this->taskRepository->update($this->taskData);
@@ -170,7 +195,7 @@ class Runner extends TimerAbstract
     private function updateToMultiWorking()
     {
         $this->taskData
-            ->setStatus(Consts::STATUS_MULTI_WORKING)
+            ->setStatusMultiWorking()
             ->setTsStarted(time());
         $this->taskRepository->update($this->taskData);
         return $this;
@@ -198,6 +223,7 @@ class Runner extends TimerAbstract
         // because register_shutdown_function is registered multiple times inside MultiRunner, it is also called
         // multiple times in case of FATAL error. So this condition will ensure that only currently executing/failed
         // task will be updated to STATUS_BROKEN
+
         if (!$this->taskData instanceof \G4\Tasker\Model\Domain\Task) {
             return $this;
         }
@@ -210,11 +236,14 @@ class Runner extends TimerAbstract
             ->timerStop();
 
         switch($e) {
-            case($e instanceof \G4\Tasker\Model\Exception\CompletedNotDone):
+            case($e instanceof \G4\Tasker\Model\Exception\CompletedNotDoneException):
                 $this->updateToCompletedNotDone();
                 break;
-            case($e instanceof \G4\Tasker\Model\Exception\WaitingForRetry):
+            case($e instanceof \G4\Tasker\Model\Exception\WaitingForRetryException):
                 $this->updateToWaitingForRetry();
+                break;
+            case($e instanceof \G4\Tasker\Model\Exception\RetryFailedException):
+                $this->updateToRetryFailed();
                 break;
             default:
                 $this->updateToBroken();
