@@ -58,8 +58,6 @@ class TaskRepository implements TaskRepositoryInterface
             throw new \RuntimeException('Limit is not valid');
         }
 
-// todo refactor, move to fetchTasks with TaskFilter ?
-
         $query = 'SELECT * FROM tasks WHERE identifier=:identifier AND status=:status AND ts_created <= :ts_created LIMIT :limit';
 
         $stmt = $this->pdo->prepare($query);
@@ -86,7 +84,7 @@ class TaskRepository implements TaskRepositoryInterface
         return $this->fetchTasks(Consts::STATUS_WAITING_FOR_RETRY, self::RESET_TASKS_AFTER_SECONDS, self::RESET_TASKS_LIMIT);
     }
 
-    private function fetchTasks($status, $olderThanSeconds, $limit, $identifier=null)
+    private function fetchTasks($status, $olderThanSeconds, $limit)
     {
         $query = 'SELECT * FROM tasks WHERE status=:status AND ts_started<=:ts_started LIMIT :limit';
 
@@ -104,7 +102,7 @@ class TaskRepository implements TaskRepositoryInterface
 
     private function getIdentifier()
     {
-        if (!isset($this->identifier)) {
+        if ($this->identifier === null) {
             $this->generateIdentifier();
         }
         return $this->identifier;
@@ -130,11 +128,6 @@ VALUES(:recu_id, :identifier, :task, :data, :status, :priority, :ts_created, :ts
 
     public function update(Task $task)
     {
-        $update = [];
-        foreach ($task->getRawData() as $col => $val) {
-            $update[] = sprintf('%s="%s"', $col, $this->pdo->quote($val));
-        }
-
         $query = 'UPDATE tasks SET recu_id=:recu_id, identifier=:identifier, task=:task, `data`=:data, 
 status=:status, priority=:priority, ts_created=:ts_created, ts_started=:ts_started, exec_time=:exec_time,
 started_count=:started_count WHERE task_id=:task_id';
