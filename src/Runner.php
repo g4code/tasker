@@ -72,7 +72,6 @@ class Runner extends TimerAbstract
                 ->updateToDone();
 
         } catch (\Exception $e) {
-            print "Exception " . $e->getMessage();
             $this->handleException($e);
             throw $e;
         }
