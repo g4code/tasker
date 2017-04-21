@@ -109,7 +109,6 @@ class Runner extends TimerAbstract
     private function checkMaxRetryAttempts()
     {
         if ($this->taskData->getStartedCount() > self::MAX_RETRY_ATTEMPTS) {
-            print $this->taskData->getStartedCount();
             throw new RetryFailedException(
                 sprintf('Task with task_id=%s failed miserably with started_count=%s greater than MAX_RETRY_ATTEMPTS=%s.',
                 $this->taskData->getTaskId(),
