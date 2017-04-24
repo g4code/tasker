@@ -12,10 +12,18 @@ class TaskRepository implements TaskRepositoryInterface
     const MULTI_WORKING_OLDER_THAN = 600;   // 10 minutes
     const MULTI_WORKING_LIMIT = 20;         // how many tasks to reset to STATUS_PENDING
 
+    const RESET_TASKS_AFTER_SECONDS  = 60;  // seconds to retry failed tasks
+    const RESET_TASKS_LIMIT = 20;           // how many tasks to reset at once
+
     /**
      * @var \PDO
      */
     private $pdo;
+
+    /**
+     * @var string
+     */
+    private $identifier;
 
     public function __construct(\PDO $pdo)
     {
@@ -43,7 +51,7 @@ class TaskRepository implements TaskRepositoryInterface
     }
 
 
-    public function getReservedTasks($limit)
+    public function findReserved($limit)
     {
         $limit = (int) $limit;
         if (!$limit) {
@@ -66,14 +74,24 @@ class TaskRepository implements TaskRepositoryInterface
         }, $stmt->fetchAll());
     }
 
-    public function getOldMultiWorkingTasks()
+    public function findOldMultiWorking()
+    {
+        return $this->fetchTasks(Consts::STATUS_MULTI_WORKING, self::MULTI_WORKING_OLDER_THAN, self::MULTI_WORKING_LIMIT);
+    }
+
+    public function findWaitingForRetry()
+    {
+        return $this->fetchTasks(Consts::STATUS_WAITING_FOR_RETRY, self::RESET_TASKS_AFTER_SECONDS, self::RESET_TASKS_LIMIT);
+    }
+
+    private function fetchTasks($status, $olderThanSeconds, $limit)
     {
         $query = 'SELECT * FROM tasks WHERE status=:status AND ts_started<=:ts_started LIMIT :limit';
 
         $stmt = $this->pdo->prepare($query);
-        $stmt->bindValue(':status', Consts::STATUS_MULTI_WORKING, \PDO::PARAM_INT);
-        $stmt->bindValue(':ts_started', time() - self::MULTI_WORKING_OLDER_THAN, \PDO::PARAM_INT);
-        $stmt->bindValue(':limit', self::MULTI_WORKING_LIMIT, \PDO::PARAM_INT);
+        $stmt->bindValue(':status', $status, \PDO::PARAM_INT);
+        $stmt->bindValue(':ts_started', time() - $olderThanSeconds, \PDO::PARAM_INT);
+        $stmt->bindValue(':limit', $limit, \PDO::PARAM_INT);
 
         $stmt->execute();
 
@@ -84,15 +102,15 @@ class TaskRepository implements TaskRepositoryInterface
 
     private function getIdentifier()
     {
-        if (!isset($this->_identifier)) {
-            $this->_generateIdentifier();
+        if ($this->identifier === null) {
+            $this->generateIdentifier();
         }
-        return $this->_identifier;
+        return $this->identifier;
     }
 
-    private function _generateIdentifier()
+    private function generateIdentifier()
     {
-        $this->_identifier = gethostname();
+        $this->identifier = gethostname();
         return $this;
     }
 
@@ -110,11 +128,6 @@ VALUES(:recu_id, :identifier, :task, :data, :status, :priority, :ts_created, :ts
 
     public function update(Task $task)
     {
-        $update = [];
-        foreach ($task->getRawData() as $col => $val) {
-            $update[] = sprintf('%s="%s"', $col, $this->pdo->quote($val));
-        }
-
         $query = 'UPDATE tasks SET recu_id=:recu_id, identifier=:identifier, task=:task, `data`=:data, 
 status=:status, priority=:priority, ts_created=:ts_created, ts_started=:ts_started, exec_time=:exec_time,
 started_count=:started_count WHERE task_id=:task_id';

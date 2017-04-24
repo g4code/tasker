@@ -5,9 +5,7 @@ use G4\Tasker\Model\Domain\Task;
 
 class Manager extends TimerAbstract
 {
-    const MAX_RETRY_ATTEMPTS        = 3;
-    const TIME_FORMAT               = 'Y-m-d H:i:s';
-    const RESETtasks_AFTER_SECONDS  = 60;
+    const TIME_FORMAT  = 'Y-m-d H:i:s';
 
     private $delay;
 
@@ -44,6 +42,9 @@ class Manager extends TimerAbstract
         $this->limit = Consts::LIMIT_DEFAULT;
     }
 
+    /**
+     * @return $this
+     */
     public function addOption($key, $value)
     {
         $this->options[$key] = $value;
@@ -70,6 +71,7 @@ class Manager extends TimerAbstract
         $this
             ->checkPhpProcessesCount()
             ->updateOldMultiRunnerTasks()
+            ->updateWaitingForRetry()
             ->getReservedTasks()
             ->runTasks();
     }
@@ -80,18 +82,27 @@ class Manager extends TimerAbstract
         return $this;
     }
 
+    /**
+     * @return $this
+     */
     public function setLimit($value)
     {
         $this->limit = $value;
         return $this;
     }
 
+    /**
+     * @return $this
+     */
     public function setMaxNoOfPhpProcesses($value)
     {
         $this->maxNoOfPhpProcesses = $value;
         return $this;
     }
 
+    /**
+     * @return $this
+     */
     public function setNumberOfGroupedTasks($value)
     {
         $this->numberOfGroupedTasks = $value;
@@ -104,6 +115,9 @@ class Manager extends TimerAbstract
         return $this;
     }
 
+    /**
+     * @return $this
+     */
     public function setRunner($value)
     {
         $this->runner = $value;
@@ -125,10 +139,12 @@ class Manager extends TimerAbstract
         return $this;
     }
 
+    /**
+     * @return $this
+     */
     private function updateOldMultiRunnerTasks()
     {
-        /** @var \G4\Tasker\Model\Domain\Task[] $oldMultiRunnerTasks */
-        $oldMultiRunnerTasks = $this->taskRepository->getOldMultiWorkingTasks();
+        $oldMultiRunnerTasks = $this->taskRepository->findOldMultiWorking();
 
         foreach ($oldMultiRunnerTasks as $task) {
             $task->setStatusPending();
@@ -138,9 +154,27 @@ class Manager extends TimerAbstract
         return $this;
     }
 
+    /**
+     * @return $this
+     */
+    private function updateWaitingForRetry()
+    {
+        $waitingForRetryTasks = $this->taskRepository->findWaitingForRetry();
+
+        foreach ($waitingForRetryTasks as $task) {
+            $task->setStatusPending();
+            $this->taskRepository->update($task);
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return $this
+     */
     private function getReservedTasks()
     {
-        $this->tasks = $this->taskRepository->getReservedTasks($this->limit);
+        $this->tasks = $this->taskRepository->findReserved($this->limit);
         return $this;
     }
 

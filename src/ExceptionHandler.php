@@ -47,12 +47,7 @@ class ExceptionHandler
 
     private function prepareLog()
     {
-        $log = json_encode([
-            'file'    => $this->exception->getFile(),
-            'message' => $this->exception->getMessage(),
-            'line'    => $this->exception->getLine(),
-            'code'    => $this->exception->getCode(),
-        ]);
+        $log = json_encode($this->getFirstException()->getTrace());
 
         $this->taskErrorLog = TaskErrorLog::fromTask(
             $this->taskData,
@@ -67,5 +62,14 @@ class ExceptionHandler
     {
         $this->errorRepository->add($this->taskErrorLog);
         return $this;
+    }
+
+    private function getFirstException()
+    {
+        $e = $this->exception;
+        while ($e->getPrevious() !== null) {
+            $e = $e->getPrevious();
+        }
+        return $e;
     }
 }

@@ -17,12 +17,17 @@ interface TaskRepositoryInterface
      * @param $limit
      * @return array|Task[]
      */
-    public function getReservedTasks($limit);
+    public function findReserved($limit);
 
     /**
      * @return array|Task[]
      */
-    public function getOldMultiWorkingTasks();
+    public function findOldMultiWorking();
+
+    /**
+     * @return array|Task[]
+     */
+    public function findWaitingForRetry();
 
     public function add(Task $task);
     public function update(Task $task);
