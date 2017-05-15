@@ -16,6 +16,7 @@ class ErrorRepository implements ErrorRepositoryInterface
     public function __construct(\PDO $pdo)
     {
         $this->pdo = $pdo;
+        $this->pdo->exec('SET NAMES utf8');
     }
 
     public function add(TaskErrorLog $taskError)
