@@ -59,7 +59,7 @@ class TaskRepository implements TaskRepositoryInterface
             throw new \RuntimeException('Limit is not valid');
         }
 
-        $query = 'SELECT * FROM tasks WHERE identifier=:identifier AND status=:status AND ts_created <= :ts_created LIMIT :limit';
+        $query = 'SELECT * FROM tasks WHERE identifier=:identifier AND status=:status AND ts_created <= :ts_created ORDER BY ts_created ASC, priority DESC LIMIT :limit';
 
         $stmt = $this->pdo->prepare($query);
 
@@ -87,7 +87,7 @@ class TaskRepository implements TaskRepositoryInterface
 
     private function fetchTasks($status, $olderThanSeconds, $limit)
     {
-        $query = 'SELECT * FROM tasks WHERE status=:status AND ts_started<=:ts_started LIMIT :limit';
+        $query = 'SELECT * FROM tasks WHERE status=:status AND ts_started<=:ts_started ORDER BY ts_started ASC, priority DESC LIMIT :limit';
 
         $stmt = $this->pdo->prepare($query);
         $stmt->bindValue(':status', $status, \PDO::PARAM_INT);
