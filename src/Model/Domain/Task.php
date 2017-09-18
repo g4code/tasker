@@ -362,6 +362,11 @@ class Task
         return $this->status === \G4\Tasker\Consts::STATUS_DONE;
     }
 
+    public function isBroken()
+    {
+        return $this->status === \G4\Tasker\Consts::STATUS_BROKEN;
+    }
+
     /**
      * @param $data
      * @return Task

@@ -226,7 +226,7 @@ class Runner extends TimerAbstract
             return $this;
         }
 
-        if (!$this->taskData->isWorking()) {
+        if (!$this->taskData->isWorking() && !$this->taskData->isBroken()) {
             return $this;
         }
 
