@@ -31,6 +31,8 @@ class Runner extends TimerAbstract
      */
     private $taskRepository;
 
+    private $resourceContainer;
+
 
     /**
      * @param TaskRepositoryInterface $taskRepository
@@ -57,6 +59,25 @@ class Runner extends TimerAbstract
     public function setTaskId($value)
     {
         $this->taskId = (int) $value;
+        return $this;
+    }
+
+    public function getResourceContainer()
+    {
+        if($this->hasResourceContainer()){
+            return $this->resourceContainer;
+        }
+        throw new \Exception('Resource container is missing');
+    }
+
+    public function hasResourceContainer()
+    {
+        return $this->resourceContainer != null;
+    }
+
+    public function setResourceContainer($resourceContainer)
+    {
+        $this->resourceContainer = $resourceContainer;
         return $this;
     }
 
@@ -89,9 +110,12 @@ class Runner extends TimerAbstract
      */
     private function executeTask()
     {
-        $this->getTaskInstance()
-            ->setEncodedData($this->taskData->getData())
-            ->execute();
+        $aTask = $this->getTaskInstance();
+        $aTask->setEncodedData($this->taskData->getData());
+        if($this->hasResourceContainer()){
+            $aTask->setResourceContainer($this->resourceContainer);
+        }
+        $aTask->execute();
         return $this;
     }
 
