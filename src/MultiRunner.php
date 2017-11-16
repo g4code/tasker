@@ -21,6 +21,8 @@ class MultiRunner
      */
     private $errorRepository;
 
+    private $resourceContainer;
+
     /**
      * @param TaskRepositoryInterface $taskRepository
      * @param ErrorRepositoryInterface $errorRepository
@@ -49,6 +51,9 @@ class MultiRunner
         }
 
         foreach ($tasks as $task) {
+            if ($this->hasResourceContainer()) {
+                $task->setResourceContainer($this->getResourceContainer());
+            }
             $task->execute();
         }
     }
@@ -62,6 +67,25 @@ class MultiRunner
         $this->taskIds = is_array($value)
             ? $value
             : json_decode($value);
+        return $this;
+    }
+
+    public function getResourceContainer()
+    {
+        if($this->hasResourceContainer()){
+            return $this->resourceContainer;
+        }
+        throw new \Exception('Resource container is missing');
+    }
+
+    public function hasResourceContainer()
+    {
+        return $this->resourceContainer != null;
+    }
+
+    public function setResourceContainer($resourceContainer)
+    {
+        $this->resourceContainer = $resourceContainer;
         return $this;
     }
 }
