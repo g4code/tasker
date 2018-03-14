@@ -22,6 +22,11 @@ class MultiRunner
     private $errorRepository;
 
     /**
+     * @var \G4\Profiler\Exception
+     */
+    private $exceptionProfiler;
+
+    /**
      * @param TaskRepositoryInterface $taskRepository
      * @param ErrorRepositoryInterface $errorRepository
      */
@@ -49,7 +54,11 @@ class MultiRunner
         }
 
         foreach ($tasks as $task) {
-            $task->execute();
+            try {
+                $task->execute();
+            }catch (\Exception $e) {
+                $this->logException($e);
+            }
         }
     }
 
@@ -64,4 +73,16 @@ class MultiRunner
             : json_decode($value);
         return $this;
     }
+
+    public function setExceptionProfiler(\G4\Profiler\Exception $profiler)
+    {
+        $this->exceptionProfiler = $profiler;
+        return $this;
+    }
+
+    private function logException(\Exception $e)
+    {
+        $this->exceptionProfiler !== null && $this->exceptionProfiler->handle($e);
+    }
+
 }

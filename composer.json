@@ -27,7 +27,8 @@
     ],
     "require": {
         "php"            : ">=5.5",
-        "g4/cron"        : "*"
+        "g4/cron"        : "*",
+        "g4/profiler"    : "*"
     },
     "minimum-stability": "dev",
     "autoload": {
