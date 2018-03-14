@@ -94,7 +94,6 @@ class Runner extends TimerAbstract
 
         } catch (\Exception $e) {
             $this->handleException($e);
-            throw $e;
         }
     }
 
@@ -257,6 +256,7 @@ class Runner extends TimerAbstract
         $this
             ->timerStop();
 
+        $throwException = false;
         switch($e) {
             case($e instanceof \G4\Tasker\Model\Exception\CompletedNotDoneException):
                 $this->updateToCompletedNotDone();
@@ -266,13 +266,21 @@ class Runner extends TimerAbstract
                 break;
             case($e instanceof \G4\Tasker\Model\Exception\RetryFailedException):
                 $this->updateToRetryFailed();
+                $throwException = true;
                 break;
             default:
                 $this->updateToBroken();
+                $throwException = true;
+                break;
         }
 
         $eh = new \G4\Tasker\ExceptionHandler($this->taskData, $e, $this->getTotalTime(), $this->errorRepository);
         $eh->writeLog();
+
+        if ($throwException) {
+            throw $e;
+        }
+
         return $this;
     }
 
