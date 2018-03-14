@@ -21,6 +21,8 @@ class MultiRunner
      */
     private $errorRepository;
 
+    private $resourceContainer;
+
     /**
      * @var \G4\Profiler\Exception
      */
@@ -54,6 +56,9 @@ class MultiRunner
         }
 
         foreach ($tasks as $task) {
+            if ($this->hasResourceContainer()) {
+                $task->setResourceContainer($this->getResourceContainer());
+            }
             try {
                 $task->execute();
             }catch (\Exception $e) {
@@ -74,6 +79,25 @@ class MultiRunner
         return $this;
     }
 
+    public function getResourceContainer()
+    {
+        if($this->hasResourceContainer()){
+            return $this->resourceContainer;
+        }
+        throw new \Exception('Resource container is missing');
+    }
+
+    public function hasResourceContainer()
+    {
+        return $this->resourceContainer != null;
+    }
+
+    public function setResourceContainer($resourceContainer)
+    {
+        $this->resourceContainer = $resourceContainer;
+        return $this;
+    }
+
     public function setExceptionProfiler(\G4\Profiler\Exception $profiler)
     {
         $this->exceptionProfiler = $profiler;
@@ -84,5 +108,4 @@ class MultiRunner
     {
         $this->exceptionProfiler !== null && $this->exceptionProfiler->handle($e);
     }
-
 }

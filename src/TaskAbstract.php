@@ -11,6 +11,8 @@ abstract class TaskAbstract
 
     private $priority;
 
+    private $resourceContainer;
+
     public function addDelay($value)
     {
         $this->createdTs = $this->getTsCreated() + $value;
@@ -58,6 +60,25 @@ abstract class TaskAbstract
     public function setEncodedData($value)
     {
         $this->data = json_decode(str_replace("\n", "\\n", $value), true);
+        return $this;
+    }
+
+    public function getResourceContainer()
+    {
+        if($this->hasResourceContainer()){
+            return $this->resourceContainer;
+        }
+        throw new \Exception('Resource container is missing');
+    }
+
+    public function hasResourceContainer()
+    {
+        return $this->resourceContainer != null;
+    }
+
+    public function setResourceContainer($resourceContainer)
+    {
+        $this->resourceContainer = $resourceContainer;
         return $this;
     }
 
