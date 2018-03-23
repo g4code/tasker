@@ -9,8 +9,8 @@ use G4\Tasker\Model\Repository\TaskRepositoryInterface;
 
 class TaskRepository implements TaskRepositoryInterface
 {
-    const MULTI_WORKING_OLDER_THAN = 600;   // 10 minutes
-    const MULTI_WORKING_LIMIT = 20;         // how many tasks to reset to STATUS_PENDING
+    const MULTI_WORKING_OLDER_THAN = 300;   // 5 minutes
+    const MULTI_WORKING_LIMIT = 100;        // how many tasks to reset to STATUS_PENDING
 
     const RESET_TASKS_AFTER_SECONDS  = 60;  // seconds to retry failed tasks
     const RESET_TASKS_LIMIT = 20;           // how many tasks to reset at once
