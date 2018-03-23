@@ -34,7 +34,8 @@ class ErrorRepository implements ErrorRepositoryInterface
         $stmt->bindValue(':exec_time',    $taskError->getExecTime());
         $stmt->bindValue(':log',          json_encode($taskError->getLog()));
 
+        $this->pdo->beginTransaction();
         $stmt->execute();
-
+        $this->pdo->commit();
     }
 }
