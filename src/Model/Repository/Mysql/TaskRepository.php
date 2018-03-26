@@ -126,6 +126,39 @@ VALUES(:recu_id, :identifier, :task, :data, :status, :priority, :ts_created, :ts
         $this->execute($stmt);
     }
 
+    /**
+     * @param Task[] $tasks
+     */
+    public function addBulk($tasks)
+    {
+        if (count($tasks) === 0) {
+            return;
+        }
+
+        $insertQuery = [];
+        $insertData = [];
+
+        foreach ($tasks as $task) {
+            $insertQuery[] = '(?,?,?,?,?,?,?,?,?,?)';
+            $insertData[] = $task->getRecurringId();
+            $insertData[] = $task->getIdentifier();
+            $insertData[] = $task->getTask();
+            $insertData[] = $task->getData();
+            $insertData[] = $task->getStatus();
+            $insertData[] = $task->getPriority();
+            $insertData[] = $task->getTsCreated();
+            $insertData[] = $task->getTsStarted();
+            $insertData[] = $task->getExecTime();
+            $insertData[] = $task->getStartedCount();
+        }
+
+        $sql = 'INSERT INTO tasks (recu_id, identifier, task, data, status, priority, ts_created, ts_started, exec_time, started_count) VALUES ';
+        $sql .= implode(', ', $insertQuery);
+
+        $stmt = $this->pdo->prepare($sql);
+        $this->execute($stmt,$insertData);
+    }
+
     public function update(Task $task)
     {
         $query = 'UPDATE tasks SET recu_id=:recu_id, identifier=:identifier, task=:task, `data`=:data, 
@@ -161,13 +194,13 @@ started_count=:started_count WHERE task_id=:task_id';
         return $stmt;
     }
 
-    private function execute(\PDOStatement $stmt)
+    private function execute(\PDOStatement $stmt, $data = [])
     {
         $inTransaction = $this->pdo->inTransaction();
         if (!$inTransaction) {
             $this->pdo->beginTransaction();
         }
-        $res = $stmt->execute();
+        $res = $stmt->execute($data);
         if (!$inTransaction) {
             $this->pdo->commit();
         }
