@@ -123,9 +123,7 @@ VALUES(:recu_id, :identifier, :task, :data, :status, :priority, :ts_created, :ts
         $stmt = $this->pdo->prepare($query);
         $stmt = $this->prepareFields($stmt, $task);
 
-        $this->pdo->beginTransaction();
-        $stmt->execute();
-        $this->pdo->commit();
+        $this->execute($stmt);
     }
 
     public function update(Task $task)
@@ -139,11 +137,7 @@ started_count=:started_count WHERE task_id=:task_id';
 
         $stmt->bindValue(':task_id',       $task->getTaskId(),       \PDO::PARAM_INT);
 
-        $this->pdo->beginTransaction();
-        $res = $stmt->execute();
-        $this->pdo->commit();
-
-        return $res;
+        return $this->execute($stmt);
     }
 
     /**
@@ -165,5 +159,18 @@ started_count=:started_count WHERE task_id=:task_id';
         $stmt->bindValue(':started_count', $task->getStartedCount(), \PDO::PARAM_INT);
 
         return $stmt;
+    }
+
+    private function execute(\PDOStatement $stmt)
+    {
+        $inTransaction = $this->pdo->inTransaction();
+        if (!$inTransaction) {
+            $this->pdo->beginTransaction();
+        }
+        $res = $stmt->execute();
+        if (!$inTransaction) {
+            $this->pdo->commit();
+        }
+        return $res;
     }
 }
