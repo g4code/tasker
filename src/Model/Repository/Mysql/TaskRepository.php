@@ -194,7 +194,7 @@ started_count=:started_count WHERE task_id=:task_id';
         return $stmt;
     }
 
-    private function execute(\PDOStatement $stmt, $data = [])
+    private function execute(\PDOStatement $stmt, $data = null)
     {
         $inTransaction = $this->pdo->inTransaction();
         if (!$inTransaction) {
