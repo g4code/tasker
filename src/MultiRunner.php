@@ -98,9 +98,9 @@ class MultiRunner
         return $this;
     }
 
-    public function setExceptionLogger(\G4\Log\Error\Exception $profiler)
+    public function setExceptionLogger(\G4\Log\Error\Exception $exceptionLogger)
     {
-        $this->exceptionLogger = $profiler;
+        $this->exceptionLogger = $exceptionLogger;
         return $this;
     }
 
