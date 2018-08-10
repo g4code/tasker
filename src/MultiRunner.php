@@ -24,9 +24,9 @@ class MultiRunner
     private $resourceContainer;
 
     /**
-     * @var \G4\Profiler\Exception
+     * @var \G4\Log\Error\Exception
      */
-    private $exceptionProfiler;
+    private $exceptionLogger;
 
     /**
      * @param TaskRepositoryInterface $taskRepository
@@ -98,14 +98,14 @@ class MultiRunner
         return $this;
     }
 
-    public function setExceptionProfiler(\G4\Profiler\Exception $profiler)
+    public function setExceptionLogger(\G4\Log\Error\Exception $profiler)
     {
-        $this->exceptionProfiler = $profiler;
+        $this->exceptionLogger = $profiler;
         return $this;
     }
 
     private function logException(\Exception $e)
     {
-        $this->exceptionProfiler !== null && $this->exceptionProfiler->handle($e);
+        $this->exceptionLogger instanceof \G4\Log\Error\Exception && $this->exceptionLogger->handle($e);
     }
 }
