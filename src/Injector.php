@@ -6,6 +6,7 @@ use G4\Tasker\Model\Domain\Task as TaskDomain;
 use G4\Tasker\Model\Repository\RecurringRepositoryInterface;
 use G4\Tasker\Model\Repository\TaskRepositoryInterface;
 use G4\Cron\CronExpression;
+use G4\ValueObject\Uuid;
 
 class Injector
 {
@@ -92,7 +93,8 @@ class Injector
         );
 
         $domain
-            ->setRecurringId($item->getRecuId());
+            ->setRecurringId($item->getRecuId())
+            ->setRequestUuid(Uuid::generate());
 
         $this->taskRepository->add($domain);
     }

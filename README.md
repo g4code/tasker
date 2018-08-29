@@ -15,6 +15,7 @@ CREATE TABLE tasks (
     identifier    VARCHAR(255)          NOT NULL DEFAULT '',
     task          VARCHAR(255)          NOT NULL DEFAULT '',
     data          TEXT,
+    request_uuid  CHAR(36)              NOT NULL DEFAULT '',
     status        TINYINT(3)   UNSIGNED NOT NULL DEFAULT 0,
     priority      TINYINT(3)   UNSIGNED NOT NULL DEFAULT 0,
     ts_created    INT(10)      UNSIGNED NOT NULL DEFAULT 0,
