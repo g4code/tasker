@@ -2,6 +2,7 @@
 namespace G4\Tasker\Model\Domain;
 
 use G4\Tasker\Consts;
+use G4\ValueObject\Uuid;
 
 class Task
 {
@@ -19,6 +20,11 @@ class Task
      * @var string
      */
     private $identifier;
+
+    /**
+     * @var string
+     */
+    private $requestUuid;
 
     /**
      * @var string
@@ -91,6 +97,7 @@ class Task
             'identifier'     => $this->getIdentifier(),
             'task'           => $this->getTask(),
             'data'           => $this->getData(),
+            'request_uuid'   => $this->getRequestUuid(),
             'status'         => $this->getStatus(),
             'priority'       => $this->getPriority(),
             'ts_created'     => $this->getTsCreated(),
@@ -134,6 +141,14 @@ class Task
     public function getIdentifier()
     {
         return $this->identifier;
+    }
+
+    /**
+     * @return string
+     */
+    public function getRequestUuid()
+    {
+        return $this->requestUuid;
     }
 
     /**
@@ -215,6 +230,15 @@ class Task
     public function setIdentifier($value)
     {
         $this->identifier = $value;
+        return $this;
+    }
+
+    /**
+     * @return \G4\Tasker\Model\Domain\Task
+     */
+    public function setRequestUuid($value)
+    {
+        $this->requestUuid = $value;
         return $this;
     }
 
@@ -381,9 +405,12 @@ class Task
             (int) $data['ts_created']
         );
 
+        $requestUuid = isset($data['request_uuid']) ? $data['request_uuid'] : (string) Uuid::generate();
+
         $task
             ->setTaskId((int) $data['task_id'])
             ->setRecurringId($data['recu_id'])
+            ->setRequestUuid($requestUuid)
             ->setStatus((int) $data['status'])
             ->setTsStarted((int) $data['ts_started'])
             ->setExecTime((float) $data['exec_time'])

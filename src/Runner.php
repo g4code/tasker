@@ -6,10 +6,13 @@ declare(ticks = 1);
 use G4\Tasker\Model\Exception\RetryFailedException;
 use G4\Tasker\Model\Repository\ErrorRepositoryInterface;
 use G4\Tasker\Model\Repository\TaskRepositoryInterface;
+use G4\ValueObject\Uuid;
 
 class Runner extends TimerAbstract
 {
     const MAX_RETRY_ATTEMPTS = 3;
+
+    const HTTP_X_ND_UUID = 'HTTP_X_ND_UUID';
 
     /**
      * @var \G4\Tasker\Model\Domain\Task
@@ -86,6 +89,7 @@ class Runner extends TimerAbstract
         try {
             $this
                 ->fetchTaskData()
+                ->setRequestUuid()
                 ->updateToWorking()
                 ->checkMaxRetryAttempts()
                 ->executeTask()
@@ -302,5 +306,14 @@ class Runner extends TimerAbstract
         $exception = new \ErrorException($errstr, $errno, 0, $errfile, $errline);
         $this->handleException($exception);
         return false;
+    }
+
+    private function setRequestUuId()
+    {
+        $this->taskData->getRequestUuid() !== null
+            ? $_SERVER[self::HTTP_X_ND_UUID] = $this->taskData->getRequestUuid()
+            : Uuid::generate();
+
+        return $this;
     }
 }

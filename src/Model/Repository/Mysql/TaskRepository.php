@@ -117,8 +117,8 @@ class TaskRepository implements TaskRepositoryInterface
 
     public function add(Task $task)
     {
-        $query = 'INSERT INTO tasks (recu_id, identifier, task, `data`, status, priority, ts_created, ts_started, exec_time, started_count)
-VALUES(:recu_id, :identifier, :task, :data, :status, :priority, :ts_created, :ts_started, :exec_time, :started_count)';
+        $query = 'INSERT INTO tasks (recu_id, identifier, task, `data`, request_uuid, status, priority, ts_created, ts_started, exec_time, started_count)
+VALUES(:recu_id, :identifier, :task, :data, :request_uuid, :status, :priority, :ts_created, :ts_started, :exec_time, :started_count)';
 
         $stmt = $this->pdo->prepare($query);
         $stmt = $this->prepareFields($stmt, $task);
@@ -139,11 +139,12 @@ VALUES(:recu_id, :identifier, :task, :data, :status, :priority, :ts_created, :ts
         $insertData = [];
 
         foreach ($tasks as $task) {
-            $insertQuery[] = '(?,?,?,?,?,?,?,?,?,?)';
+            $insertQuery[] = '(?,?,?,?,?,?,?,?,?,?,?)';
             $insertData[] = $task->getRecurringId();
             $insertData[] = $task->getIdentifier();
             $insertData[] = $task->getTask();
             $insertData[] = $task->getData();
+            $insertData[] = $task->getRequestUuid();
             $insertData[] = $task->getStatus();
             $insertData[] = $task->getPriority();
             $insertData[] = $task->getTsCreated();
@@ -152,7 +153,7 @@ VALUES(:recu_id, :identifier, :task, :data, :status, :priority, :ts_created, :ts
             $insertData[] = $task->getStartedCount();
         }
 
-        $sql = 'INSERT INTO tasks (recu_id, identifier, task, data, status, priority, ts_created, ts_started, exec_time, started_count) VALUES ';
+        $sql = 'INSERT INTO tasks (recu_id, identifier, task, data, request_uuid, status, priority, ts_created, ts_started, exec_time, started_count) VALUES ';
         $sql .= implode(', ', $insertQuery);
 
         $stmt = $this->pdo->prepare($sql);
@@ -162,8 +163,8 @@ VALUES(:recu_id, :identifier, :task, :data, :status, :priority, :ts_created, :ts
     public function update(Task $task)
     {
         $query = 'UPDATE tasks SET recu_id=:recu_id, identifier=:identifier, task=:task, `data`=:data, 
-status=:status, priority=:priority, ts_created=:ts_created, ts_started=:ts_started, exec_time=:exec_time,
-started_count=:started_count WHERE task_id=:task_id';
+request_uuid=:request_uuid, status=:status, priority=:priority, ts_created=:ts_created, ts_started=:ts_started, 
+exec_time=:exec_time, started_count=:started_count WHERE task_id=:task_id';
 
         $stmt = $this->pdo->prepare($query);
         $stmt = $this->prepareFields($stmt, $task);
@@ -184,6 +185,7 @@ started_count=:started_count WHERE task_id=:task_id';
         $stmt->bindValue(':identifier',    $task->getIdentifier());
         $stmt->bindValue(':task',          $task->getTask());
         $stmt->bindValue(':data',          $task->getData());
+        $stmt->bindValue(':request_uuid',  $task->getRequestUuid());
         $stmt->bindValue(':status',        $task->getStatus(),       \PDO::PARAM_INT);
         $stmt->bindValue(':priority',      $task->getPriority(),     \PDO::PARAM_INT);
         $stmt->bindValue(':ts_created',    $task->getTsCreated(),    \PDO::PARAM_INT);

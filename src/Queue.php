@@ -17,6 +17,11 @@ class Queue
     private $identifier;
 
     /**
+     * @var string
+     */
+    private $requestUuid;
+
+    /**
      * @var array
      */
     private $tasks;
@@ -37,7 +42,8 @@ class Queue
             $task->getPriority(),
             $task->getTsCreated()
         );
-
+        $domain
+            ->setRequestUuid($this->requestUuid);
         $this->tasks[] = $domain;
         return $this;
     }
@@ -49,6 +55,16 @@ class Queue
     public function setHostname($hostname)
     {
         $this->identifier = new Identifier($hostname);
+        return $this;
+    }
+
+    /**
+     * @param string $requestUuid
+     * @return Queue
+     */
+    public function setRequestUuid($requestUuid)
+    {
+        $this->requestUuid = $requestUuid;
         return $this;
     }
 
