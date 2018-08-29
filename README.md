@@ -76,6 +76,7 @@ VALUES
     ('Dummy\\Task\\Bar', '0 */5 * * * *',               '{\"bar\":234}', '1'); # runs every 5 minutes
 ```
 
+
 ## License
 
 (The MIT License)
