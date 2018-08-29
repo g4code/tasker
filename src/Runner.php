@@ -89,7 +89,6 @@ class Runner extends TimerAbstract
         try {
             $this
                 ->fetchTaskData()
-                ->setRequestUuid()
                 ->updateToWorking()
                 ->checkMaxRetryAttempts()
                 ->executeTask()
@@ -118,6 +117,7 @@ class Runner extends TimerAbstract
         if($this->hasResourceContainer()){
             $aTask->setResourceContainer($this->resourceContainer);
         }
+        $this->setRequestUuid();
         $aTask->execute();
         return $this;
     }
