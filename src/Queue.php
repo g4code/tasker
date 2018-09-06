@@ -3,6 +3,7 @@ namespace G4\Tasker;
 
 use G4\Tasker\Model\Domain\Task as TaskDomain;
 use G4\Tasker\Model\Repository\Mysql\TaskRepository;
+use G4\ValueObject\Uuid;
 
 class Queue
 {
@@ -42,8 +43,11 @@ class Queue
             $task->getPriority(),
             $task->getTsCreated()
         );
+        $requestUuid = isset($this->requestUuid)
+            ? $this->requestUuid
+            : (string) Uuid::generate();
         $domain
-            ->setRequestUuid($this->requestUuid);
+            ->setRequestUuid($requestUuid);
         $this->tasks[] = $domain;
         return $this;
     }
