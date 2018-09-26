@@ -3,6 +3,7 @@ namespace G4\Tasker;
 
 declare(ticks = 1);
 
+use G4\Log\Data\TaskerExecution;
 use G4\Tasker\Model\Exception\RetryFailedException;
 use G4\Tasker\Model\Repository\ErrorRepositoryInterface;
 use G4\Tasker\Model\Repository\TaskRepositoryInterface;
@@ -36,6 +37,16 @@ class Runner extends TimerAbstract
 
     private $resourceContainer;
 
+    /**
+     * @var \G4\Log\Logger
+     */
+    private $logger;
+
+    /**
+     * @var \G4\Log\Data\TaskerExecution
+     */
+    private $taskerExecution;
+
 
     /**
      * @param TaskRepositoryInterface $taskRepository
@@ -46,9 +57,16 @@ class Runner extends TimerAbstract
         $this->taskRepository = $taskRepository;
         $this->timerStart();
         $this->errorRepository = $errorRepository;
+        $this->taskerExecution = new \G4\Log\Data\TaskerExecution();
 
         register_shutdown_function([$this, 'handleShutdownError']);
         set_error_handler([$this, 'handleError']);
+    }
+
+    public function setLogger(\G4\Log\Logger $logger=null)
+    {
+        $this->logger = $logger;
+        return $this;
     }
 
     public function getTaskId()
@@ -89,12 +107,13 @@ class Runner extends TimerAbstract
         try {
             $this
                 ->fetchTaskData()
+                ->logTaskStart()
                 ->updateToWorking()
                 ->checkMaxRetryAttempts()
                 ->executeTask()
                 ->timerStop()
-                ->updateToDone();
-
+                ->updateToDone()
+                ->logTaskExecution();
         } catch (\Exception $e) {
             $this->handleException($e);
         }
@@ -130,6 +149,15 @@ class Runner extends TimerAbstract
     {
         $this->taskData = $this->taskRepository->find($this->getTaskId());
 
+        return $this;
+    }
+
+    private function logTaskStart()
+    {
+        $this->taskerExecution
+            ->setId(md5(uniqid(microtime(), true)))
+            ->setTask($this->taskData);
+        $this->logTaskExecution();
         return $this;
     }
 
@@ -277,6 +305,8 @@ class Runner extends TimerAbstract
                 $throwException = true;
                 break;
         }
+        $this->taskerExecution->setException($e);
+        $this->logTaskExecution();
 
         $eh = new \G4\Tasker\ExceptionHandler($this->taskData, $e, $this->getTotalTime(), $this->errorRepository);
         $eh->writeLog();
@@ -315,5 +345,10 @@ class Runner extends TimerAbstract
             : Uuid::generate();
 
         return $this;
+    }
+
+    private function logTaskExecution()
+    {
+        $this->logger !== null && $this->logger->log($this->taskerExecution);
     }
 }
