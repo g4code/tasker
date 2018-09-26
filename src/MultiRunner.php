@@ -29,6 +29,11 @@ class MultiRunner
     private $exceptionLogger;
 
     /**
+     * @var \G4\Log\Logger
+     */
+    private $logger;
+
+    /**
      * @param TaskRepositoryInterface $taskRepository
      * @param ErrorRepositoryInterface $errorRepository
      */
@@ -36,6 +41,12 @@ class MultiRunner
     {
         $this->taskRepository = $taskRepository;
         $this->errorRepository = $errorRepository;
+    }
+
+    public function setLogger(\G4\Log\Logger $logger)
+    {
+        $this->logger = $logger;
+        return $this;
     }
 
     public function execute()
@@ -46,6 +57,7 @@ class MultiRunner
             try {
                 $runner = new Runner($this->taskRepository, $this->errorRepository);
                 $runner
+                    ->setLogger($this->logger)
                     ->setTaskId($taskId)
                     ->setMultiWorking();
 
