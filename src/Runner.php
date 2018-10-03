@@ -338,10 +338,10 @@ class Runner extends TimerAbstract
         return false;
     }
 
-    private function setRequestUuId()
+    private function setRequestUuid()
     {
-        $this->taskData->getRequestUuid() !== null
-            ? $_SERVER[self::HTTP_X_ND_UUID] = $this->taskData->getRequestUuid()
+        $_SERVER[self::HTTP_X_ND_UUID] = $this->taskData->getRequestUuid() !== null
+            ? $this->taskData->getRequestUuid()
             : Uuid::generate();
 
         return $this;
