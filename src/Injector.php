@@ -94,7 +94,7 @@ class Injector
 
         $domain
             ->setRecurringId($item->getRecuId())
-            ->setRequestUuid(Uuid::generate());
+            ->setRequestUuid((string) Uuid::generate());
 
         $this->taskRepository->add($domain);
     }
