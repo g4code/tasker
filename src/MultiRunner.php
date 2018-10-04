@@ -34,6 +34,11 @@ class MultiRunner
     private $logger;
 
     /**
+     * @var \ND\NewRelic\Transaction
+     */
+    private $newRelic;
+
+    /**
      * @param TaskRepositoryInterface $taskRepository
      * @param ErrorRepositoryInterface $errorRepository
      */
@@ -46,6 +51,12 @@ class MultiRunner
     public function setLogger(\G4\Log\Logger $logger)
     {
         $this->logger = $logger;
+        return $this;
+    }
+
+    public function setNewRelic(\ND\NewRelic\Transaction $newRelic)
+    {
+        $this->newRelic = $newRelic;
         return $this;
     }
 
