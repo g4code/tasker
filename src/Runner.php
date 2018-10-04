@@ -7,7 +7,10 @@ use G4\Log\Data\TaskerExecution;
 use G4\Tasker\Model\Exception\RetryFailedException;
 use G4\Tasker\Model\Repository\ErrorRepositoryInterface;
 use G4\Tasker\Model\Repository\TaskRepositoryInterface;
+use G4\ValueObject\StringLiteral;
 use G4\ValueObject\Uuid;
+use ND\NewRelic\Name;
+use ND\NewRelic\Transaction;
 
 class Runner extends TimerAbstract
 {
@@ -43,6 +46,11 @@ class Runner extends TimerAbstract
     private $logger;
 
     /**
+     * @var \ND\NewRelic\Transaction
+     */
+    private $newRelic;
+
+    /**
      * @var \G4\Log\Data\TaskerExecution
      */
     private $taskerExecution;
@@ -66,6 +74,12 @@ class Runner extends TimerAbstract
     public function setLogger(\G4\Log\Logger $logger=null)
     {
         $this->logger = $logger;
+        return $this;
+    }
+
+    public function setNewRelic(\ND\NewRelic\Transaction $newRelic=null)
+    {
+        $this->newRelic = $newRelic;
         return $this;
     }
 
@@ -108,12 +122,14 @@ class Runner extends TimerAbstract
             $this
                 ->fetchTaskData()
                 ->logTaskStart()
+                ->logNewRelicStart()
                 ->updateToWorking()
                 ->checkMaxRetryAttempts()
                 ->executeTask()
                 ->timerStop()
                 ->updateToDone()
-                ->logTaskExecution();
+                ->logTaskExecution()
+                ->logNewRelicEnd();
         } catch (\Exception $e) {
             $this->handleException($e);
         }
@@ -158,6 +174,30 @@ class Runner extends TimerAbstract
             ->setId(md5(uniqid(microtime(), true)))
             ->setTask($this->taskData);
         $this->logTaskExecution();
+        return $this;
+    }
+
+    private function logNewRelicStart()
+    {
+        if ($this->newRelic !== null) {
+            $this->newRelic->startTransaction(new StringLiteral($this->taskData->getTask()));
+        }
+        return $this;
+    }
+
+    private function logNewRelicEnd()
+    {
+        if ($this->newRelic !== null) {
+            $this->newRelic->endTransaction();
+        }
+        return $this;
+    }
+
+    private function logNewRelicFailed(\Exception $exception)
+    {
+        if ($this->newRelic !== null) {
+            $this->newRelic->failedTransaction($exception);
+        }
         return $this;
     }
 
@@ -307,6 +347,7 @@ class Runner extends TimerAbstract
         }
         $this->taskerExecution->setException($e);
         $this->logTaskExecution();
+        $this->logNewRelicFailed($e);
 
         $eh = new \G4\Tasker\ExceptionHandler($this->taskData, $e, $this->getTotalTime(), $this->errorRepository);
         $eh->writeLog();
@@ -350,5 +391,6 @@ class Runner extends TimerAbstract
     private function logTaskExecution()
     {
         $this->logger !== null && $this->logger->log($this->taskerExecution);
+        return $this;
     }
 }
