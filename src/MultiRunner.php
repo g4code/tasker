@@ -69,6 +69,7 @@ class MultiRunner
                 $runner = new Runner($this->taskRepository, $this->errorRepository);
                 $runner
                     ->setLogger($this->logger)
+                    ->setNewRelic($this->newRelic)
                     ->setTaskId($taskId)
                     ->setMultiWorking();
 
