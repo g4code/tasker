@@ -13,10 +13,24 @@ abstract class TaskAbstract
 
     private $resourceContainer;
 
+    /**
+     * @var int
+     */
+    private $delay;
+
     public function addDelay($value)
     {
+        $this->delay = $value;
         $this->createdTs = $this->getTsCreated() + $value;
         return $this;
+    }
+
+    /**
+     * @return bool
+     */
+    public function delayed()
+    {
+        return $this->delay > 0;
     }
 
     public function getData()
