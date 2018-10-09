@@ -75,6 +75,7 @@ class Queue
     public function save()
     {
         $this->taskRepository->addBulk($this->tasks);
+        $this->tasks = [];
         return  $this;
     }
 
