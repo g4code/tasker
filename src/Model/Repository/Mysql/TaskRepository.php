@@ -180,9 +180,8 @@ exec_time=:exec_time, started_count=:started_count WHERE task_id=:task_id';
             return 0;
         }
 
-        $taskIds = [];
         $taskIds = count($tasks) === 1
-            ? $tasks->getTaskId()
+            ? [$tasks[0]->getTaskId()]
             : array_map(function (Task $task) {
                 return $task->getTaskId();
             }, $tasks);
