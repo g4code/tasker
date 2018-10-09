@@ -174,6 +174,25 @@ exec_time=:exec_time, started_count=:started_count WHERE task_id=:task_id';
         return $this->execute($stmt);
     }
 
+    public function updateStatus($status, Task ...$tasks)
+    {
+        if (count($tasks) === 0) {
+            return 0;
+        }
+
+        $taskIds = [];
+        $taskIds = count($tasks) === 1
+            ? $tasks->getTaskId()
+            : array_map(function (Task $task) {
+                return $task->getTaskId();
+            }, $tasks);
+
+        $query= 'UPDATE tasks SET status=%d WHERE task_id IN (%s)';
+        $this->pdo->query(
+            sprintf($query, $status, implode(',', $taskIds))
+        );
+    }
+
     /**
      * @param \PDOStatement $stmt
      * @param Task $task

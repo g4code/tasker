@@ -31,4 +31,5 @@ interface TaskRepositoryInterface
 
     public function add(Task $task);
     public function update(Task $task);
+    public function updateStatus($status, Task ...$tasks);
 }
