@@ -146,11 +146,11 @@ class Manager extends TimerAbstract
     {
         $oldMultiRunnerTasks = $this->taskRepository->findOldMultiWorking();
 
-        foreach ($oldMultiRunnerTasks as $task) {
-            $task->setStatusPending();
-            $this->taskRepository->update($task);
+        if (count($oldMultiRunnerTasks) === 0) {
+            return $this;
         }
 
+        $this->taskRepository->updateStatus(\G4\Tasker\Consts::STATUS_PENDING,...$oldMultiRunnerTasks);
         return $this;
     }
 
@@ -161,11 +161,11 @@ class Manager extends TimerAbstract
     {
         $waitingForRetryTasks = $this->taskRepository->findWaitingForRetry();
 
-        foreach ($waitingForRetryTasks as $task) {
-            $task->setStatusPending();
-            $this->taskRepository->update($task);
+        if (count($waitingForRetryTasks) === 0) {
+            return $this;
         }
 
+        $this->taskRepository->updateStatus(\G4\Tasker\Consts::STATUS_PENDING,...$waitingForRetryTasks);
         return $this;
     }
 
