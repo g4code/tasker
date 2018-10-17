@@ -30,6 +30,9 @@
         "g4/cron"        : "*",
         "g4/log"         : "1.*"
     },
+    "suggest": {
+        "php-amqplib/php-amqplib": "Use RabbitMQ for task processing"
+    },
     "minimum-stability": "dev",
     "autoload": {
         "psr-4": {"G4\\Tasker\\": "src/"}
