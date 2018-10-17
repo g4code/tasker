@@ -2,7 +2,6 @@
 
 namespace G4\Tasker\Tasker2;
 
-use G4\Tasker\Model\Domain\Task;
 use G4\Tasker\TaskAbstract;
 use Model\Domain\RabbitMq\RabbitMqConsts;
 use PhpAmqpLib\Connection\AMQPStreamConnection;
@@ -38,14 +37,13 @@ class TaskQueue
     {
         $this->queue = $queue;
         $this->AMQPConnection = $AMQPConnection;
-        $this->queueTarget = $messageOptions;
         $this->messageOptions = $messageOptions;
         $this->tasks = [];
     }
 
     public function add(\G4\Tasker\TaskAbstract $task)
     {
-        $this->tasks[] = $task;
+        $this->tasks[] = clone $task;
         return $this;
     }
 
