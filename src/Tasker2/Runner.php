@@ -2,6 +2,7 @@
 
 namespace G4\Tasker\Tasker2;
 
+use G4\Tasker\Model\Repository\TaskRepositoryInterface;
 use G4\Tasker\TaskAbstract;
 use G4\ValueObject\StringLiteral;
 use G4\ValueObject\Uuid;
@@ -10,6 +11,9 @@ use PhpAmqpLib\Message\AMQPMessage;
 class Runner extends \G4\Tasker\TimerAbstract
 {
     const HTTP_X_ND_UUID = 'HTTP_X_ND_UUID';
+    const RETRY_AFTER = 60;
+    const MAX_RETRY_ATTEMPTS = 3;
+
     /**
      * @var \G4\ValueObject\Dictionary
      */
@@ -37,16 +41,21 @@ class Runner extends \G4\Tasker\TimerAbstract
      */
     private $taskerExecution;
 
+    /**
+     * @var TaskRepositoryInterface
+     */
+    private $taskRepository;
+
     const LOG_TYPE = 'rb_worker';
 
-    public function __construct(AMQPMessage $AMQPMessage)
+    public function __construct(AMQPMessage $AMQPMessage, TaskRepositoryInterface $taskRepository)
     {
+        $this->taskRepository = $taskRepository;
         $this->taskData = new \G4\ValueObject\Dictionary(
             json_decode($AMQPMessage->getBody(), true)
         );
         $this->taskDomain = \G4\Tasker\Model\Domain\Task::fromData($this->taskData->getAll());
-        $this->taskerExecution = new \G4\Log\Data\TaskerExecution();
-        $this->taskerExecution->setLogType(self::LOG_TYPE);
+        $this->taskerExecution = (new \G4\Log\Data\TaskerExecution())->setLogType(self::LOG_TYPE);
     }
 
     public function setLogger(\G4\Log\Logger $logger = null)
@@ -63,9 +72,6 @@ class Runner extends \G4\Tasker\TimerAbstract
 
     public function execute()
     {
-        // todo check max retry
-        // todo handle waiting for retry, etc...
-
         $this->timerStart();
 
         $this->taskDomain
@@ -83,14 +89,12 @@ class Runner extends \G4\Tasker\TimerAbstract
             $this->setResourceContainer($this->resourceContainer);
         }
         $this->setRequestUuid();
+
         try {
+            $this->checkMaxRetryAttempts();
             $task->execute();
         } catch (\Exception $e) {
-            $this->timerStop();
-            $this->taskerExecution->setException($e);
-            $this->taskDomain->setStatusBroken($this->getTotalTime());
-            $this->logTaskExecution();
-            $this->logNewRelicFailed($e);
+            $this->handleException($e);
             throw $e;
         }
 
@@ -180,6 +184,71 @@ class Runner extends \G4\Tasker\TimerAbstract
         if ($this->newRelic !== null) {
             $this->newRelic->failedTransaction($exception);
         }
+        return $this;
+    }
+
+    private function checkMaxRetryAttempts()
+    {
+        if ($this->taskDomain->getStartedCount() > self::MAX_RETRY_ATTEMPTS) {
+            throw new \G4\Tasker\Model\Exception\RetryFailedException(
+                sprintf('Task with task_id=%s failed miserably with started_count=%s greater than MAX_RETRY_ATTEMPTS=%s.',
+                    $this->taskDomain->getTaskId(),
+                    $this->taskDomain->getStartedCount(),
+                    self::MAX_RETRY_ATTEMPTS)
+            );
+        }
+        return $this;
+    }
+
+    public function handleException(\Exception $e)
+    {
+        if (!$this->taskDomain instanceof \G4\Tasker\Model\Domain\Task) {
+            return $this;
+        }
+
+        $this->timerStop();
+
+        $throwException = false;
+        switch($e) {
+            case($e instanceof \G4\Tasker\Model\Exception\CompletedNotDoneException):
+                $this->taskDomain->setStatusCompletedNotDone($this->getTotalTime());
+                break;
+            case($e instanceof \G4\Tasker\Model\Exception\WaitingForRetryException):
+                $this->taskDomain->setStatusWaitingForRetry($this->getTotalTime());
+                break;
+            case($e instanceof \G4\Tasker\Model\Exception\RetryFailedException):
+                $this->taskDomain->setStatusRetryFailed($this->getTotalTime());
+                $throwException = true;
+                break;
+            default:
+                $this->taskDomain->setStatusBroken($this->getTotalTime());
+                $throwException = true;
+                break;
+        }
+        $this->taskerExecution->setException($e);
+        $this->logTaskExecution();
+        $this->logNewRelicFailed($e);
+
+        if ($this->taskDomain->getStatus() === \G4\Tasker\Consts::STATUS_WAITING_FOR_RETRY) {
+            $this->requeueTask();
+        }
+
+        if ($throwException) {
+            throw $e;
+        }
+
+        return $this;
+    }
+
+    private function requeueTask()
+    {
+        $this->taskDomain
+            ->setTsStarted(0)
+            ->setExecTime(-1)
+            ->setTsCreated(time() + self::RETRY_AFTER)
+            ->setTaskId(null)
+            ->setStatus(\G4\Tasker\Consts::STATUS_PENDING);
+        $this->taskRepository->add($this->taskDomain);
         return $this;
     }
 
