@@ -29,16 +29,23 @@ class TaskQueue
      */
     private $messageOptions;
 
+    /**
+     * @var string
+     */
+    private $requestUuid;
+
     public function __construct(
         \G4\Tasker\Queue $queue,
         AMQPStreamConnection $AMQPConnection,
-        MessageOptions $messageOptions
+        MessageOptions $messageOptions,
+        $requestUuid = null
     )
     {
         $this->queue = $queue;
         $this->AMQPConnection = $AMQPConnection;
         $this->messageOptions = $messageOptions;
         $this->tasks = [];
+        $this->requestUuid = $requestUuid;
     }
 
     public function add(\G4\Tasker\TaskAbstract $task)
@@ -93,6 +100,7 @@ class TaskQueue
 
         $messages = array_map(function (TaskAbstract $taskAbstract) {
             $task = (new TaskFactory($taskAbstract))->create();
+            $task->setRequestUuid($this->getRequestUuid());
             return (new AmqpMessageFactory($task, $this->messageOptions->getDeliveryMode()))->create();
         }, $tasks);
 
@@ -107,4 +115,10 @@ class TaskQueue
         $channel->close();
     }
 
+    private function getRequestUuid()
+    {
+        return $this->requestUuid !== null
+            ? $this->requestUuid
+            : (string) Uuid::generate();
+    }
 }
