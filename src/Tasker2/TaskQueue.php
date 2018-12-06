@@ -3,9 +3,9 @@
 namespace G4\Tasker\Tasker2;
 
 use G4\Tasker\TaskAbstract;
-use Model\Domain\RabbitMq\RabbitMqConsts;
 use PhpAmqpLib\Connection\AMQPStreamConnection;
 use PhpAmqpLib\Message\AMQPMessage;
+use G4\ValueObject\Uuid;
 
 class TaskQueue
 {
