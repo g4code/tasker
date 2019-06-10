@@ -19,6 +19,11 @@ class MessageOptions
     private $binding;
 
     /**
+     * @var StringLiteral
+     */
+    private $bindingHP;
+
+    /**
      * @var int
      */
     private $deliveryMode;
@@ -52,6 +57,28 @@ class MessageOptions
     public function getDeliveryMode()
     {
         return (int) $this->deliveryMode;
+    }
+
+    /**
+     * @return string
+     */
+    public function getBindingHP()
+    {
+        return (string) $this->bindingHP;
+    }
+
+    /**
+     * @return bool
+     */
+    public function hasBindingHP()
+    {
+        return isset($this->bindingHP) && $this->bindingHP instanceof StringLiteral;
+    }
+
+    public function setBindingHP(StringLiteral $bindingHP)
+    {
+        $this->bindingHP = $bindingHP;
+        return $this;
     }
 
 }

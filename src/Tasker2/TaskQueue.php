@@ -2,6 +2,7 @@
 
 namespace G4\Tasker\Tasker2;
 
+use G4\Tasker\Consts;
 use G4\Tasker\TaskAbstract;
 use PhpAmqpLib\Connection\AMQPStreamConnection;
 use PhpAmqpLib\Message\AMQPMessage;
@@ -105,10 +106,15 @@ class TaskQueue
         }, $tasks);
 
         foreach ($messages as $message) {
+            $decodedMessageBody = json_decode($message->getBody(), 1);
+            $binding = ($this->messageOptions->hasBindingHP() && isset($decodedMessageBody[Consts::PARAM_PRIORITY])
+                && ($decodedMessageBody[Consts::PARAM_PRIORITY] > Consts::PRIORITY_50))
+                ? $this->messageOptions->getBindingHP()
+                : $this->messageOptions->getBinding();
             $channel->batch_basic_publish(
                 $message,
                 $this->messageOptions->getExchange(),
-                $this->messageOptions->getBinding()
+                $binding
             );
         }
         $channel->publish_batch();
