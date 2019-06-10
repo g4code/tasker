@@ -51,6 +51,8 @@ class Consts
     const ORDER_BY_NAME_CREATED_ON = 'CREATED_ON';
     const ORDER_BY_NAME_PRIORITY   = 'PRIORITY';
 
+    const PARAM_PRIORITY           = 'priority';
+
     public static function getMap()
     {
         return array(
