@@ -52,6 +52,15 @@ class Manager
             ->updateStatus();
     }
 
+    /**
+     * Set how many tasks to fetch per run
+     * @param $limit int
+     */
+    public function setFetchLimit($limit)
+    {
+        $this->limit = (int) $limit;
+    }
+
     private function getReservedTasks()
     {
         $this->tasks = $this->taskRepository->findReserved($this->limit);
