@@ -2,10 +2,8 @@
 
 namespace G4\Tasker\Tasker2;
 
-use G4\Tasker\Consts;
-use Model\Domain\RabbitMq\RabbitMqConsts;
+use G4\Tasker\Tasker2\Queue\BatchPublisher;
 use PhpAmqpLib\Connection\AMQPStreamConnection;
-use PhpAmqpLib\Message\AMQPMessage;
 
 class Manager
 {
@@ -17,7 +15,7 @@ class Manager
     private $tasks;
 
     /**
-     * @var AMQPStreamConnection
+     * @var AMQPStreamConnection | null
      */
     private $rabbitMqConnection;
 
@@ -35,7 +33,7 @@ class Manager
 
     public function __construct(
         \G4\Tasker\Model\Repository\TaskRepositoryInterface $taskRepository,
-        AMQPStreamConnection $rabbitMqConnection,
+        AMQPStreamConnection $rabbitMqConnection = null,
         MessageOptions $messageOptions
     ) {
         $this->taskRepository = $taskRepository;
@@ -46,6 +44,11 @@ class Manager
 
     public function run()
     {
+        if ($this->rabbitMqConnection === null) {
+            // no rabbitmq connection is available
+            trigger_error('RabbitMQ connection is not available for Tasker Manager', E_USER_NOTICE);
+            return;
+        }
         $this
             ->getReservedTasks()
             ->addToMessageQueue()
@@ -85,21 +88,8 @@ class Manager
 
         try {
             $messages = $this->getMessages();
-            foreach ($messages as $message) {
-                $decodedMessageBody = json_decode($message->getBody(), 1);
-                $binding = ($this->messageOptions->hasBindingHP() && isset($decodedMessageBody[Consts::PARAM_PRIORITY])
-                    && ($decodedMessageBody[Consts::PARAM_PRIORITY] > Consts::PRIORITY_50))
-                    ? $this->messageOptions->getBindingHP()
-                    : $this->messageOptions->getBinding();
-
-                $channel->batch_basic_publish(
-                    $message,
-                    $this->messageOptions->getExchange(),
-                    $binding
-                );
-
-            }
-            $channel->publish_batch();
+            $queuePublisher = new BatchPublisher($channel, $this->messageOptions);
+            $queuePublisher->publish(...$messages);
         } catch (\Exception $e) {
             // todo throw exception if unable to add messages to queue
         } finally {

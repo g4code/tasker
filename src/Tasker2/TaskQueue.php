@@ -2,10 +2,9 @@
 
 namespace G4\Tasker\Tasker2;
 
-use G4\Tasker\Consts;
 use G4\Tasker\TaskAbstract;
+use G4\Tasker\Tasker2\Queue\BatchPublisher;
 use PhpAmqpLib\Connection\AMQPStreamConnection;
-use PhpAmqpLib\Message\AMQPMessage;
 use G4\ValueObject\Uuid;
 
 class TaskQueue
@@ -16,7 +15,7 @@ class TaskQueue
     private $queue;
 
     /**
-     * @var AMQPStreamConnection
+     * @var AMQPStreamConnection | null
      */
     private $AMQPConnection;
 
@@ -37,7 +36,7 @@ class TaskQueue
 
     public function __construct(
         \G4\Tasker\Queue $queue,
-        AMQPStreamConnection $AMQPConnection,
+        AMQPStreamConnection $AMQPConnection = null,
         MessageOptions $messageOptions,
         $requestUuid = null
     )
@@ -97,6 +96,14 @@ class TaskQueue
         if (count($tasks) === 0) {
             return $this;
         }
+
+        if ($this->AMQPConnection === null) {
+            // in case that rabbitmq is not available save tasks to database
+            $this->saveDelayedTasks($tasks);
+            trigger_error('RabbitMQ connection is not available for Tasker TaskQueue', E_USER_NOTICE);
+            return $this;
+        }
+
         $channel = $this->AMQPConnection->channel();
 
         $messages = array_map(function (TaskAbstract $taskAbstract) {
@@ -105,20 +112,10 @@ class TaskQueue
             return (new AmqpMessageFactory($task, $this->messageOptions->getDeliveryMode()))->create();
         }, $tasks);
 
-        foreach ($messages as $message) {
-            $decodedMessageBody = json_decode($message->getBody(), 1);
-            $binding = ($this->messageOptions->hasBindingHP() && isset($decodedMessageBody[Consts::PARAM_PRIORITY])
-                && ($decodedMessageBody[Consts::PARAM_PRIORITY] > Consts::PRIORITY_50))
-                ? $this->messageOptions->getBindingHP()
-                : $this->messageOptions->getBinding();
-            $channel->batch_basic_publish(
-                $message,
-                $this->messageOptions->getExchange(),
-                $binding
-            );
-        }
-        $channel->publish_batch();
+        $queuePublisher = new BatchPublisher($channel, $this->messageOptions);
+        $queuePublisher->publish(...$messages);
         $channel->close();
+        return $this;
     }
 
     private function getRequestUuid()
