@@ -30,7 +30,7 @@
         "ext-pdo"        : "*",
         "php"            : ">=5.6",
         "g4/cron"        : "*",
-        "g4/log"         : "1.*"
+        "g4/log"         : "1.13.*"
     },
     "suggest": {
         "php-amqplib/php-amqplib": "Use RabbitMQ for task processing"

@@ -2,6 +2,7 @@
 
 namespace G4\Tasker\Tasker2;
 
+use G4\Tasker\Tasker2\Exception\RabbitmqNotAvailableException;
 use G4\Tasker\Tasker2\Queue\BatchPublisher;
 use PhpAmqpLib\Connection\AMQPStreamConnection;
 
@@ -31,6 +32,11 @@ class Manager
      */
     private $messageOptions;
 
+    /**
+     * @var \G4\Log\ErrorLogger
+     */
+    private $errorLogger;
+
     public function __construct(
         \G4\Tasker\Model\Repository\TaskRepositoryInterface $taskRepository,
         AMQPStreamConnection $rabbitMqConnection = null,
@@ -42,11 +48,17 @@ class Manager
         $this->messageOptions = $messageOptions;
     }
 
+    public function setErrorLogger(\G4\Log\ErrorLogger $logger)
+    {
+        $this->errorLogger = $logger;
+        return $this;
+    }
+
     public function run()
     {
         if ($this->rabbitMqConnection === null) {
             // no rabbitmq connection is available
-            trigger_error('RabbitMQ connection is not available for Tasker Manager', E_USER_NOTICE);
+            $this->errorLogger !== null && $this->errorLogger->log(new RabbitmqNotAvailableException());
             return;
         }
         $this
