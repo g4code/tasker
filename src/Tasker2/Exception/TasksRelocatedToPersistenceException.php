@@ -8,7 +8,7 @@ class TasksRelocatedToPersistenceException extends \RuntimeException
     {
         $message = sprintf(
             'RabbitMQ connection is not available for Tasker TaskQueue, relocated %d tasks to persistence',
-            count($countTasks)
+            $countTasks
         );
 
         parent::__construct($message);
