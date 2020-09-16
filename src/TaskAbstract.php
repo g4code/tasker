@@ -3,6 +3,8 @@ namespace G4\Tasker;
 
 abstract class TaskAbstract
 {
+    const RELOCATED = 'RABBITMQ_NOT_AVAILABLE';
+
     private $createdTs;
 
     private $data;
@@ -22,6 +24,12 @@ abstract class TaskAbstract
     {
         $this->delay = $value;
         $this->createdTs = $this->getTsCreated() + $value;
+        return $this;
+    }
+
+    public function relocateToPersistence()
+    {
+        $this->data[self::RELOCATED] = true;
         return $this;
     }
 

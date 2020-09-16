@@ -3,6 +3,7 @@
 namespace G4\Tasker\Tasker2;
 
 use G4\Tasker\TaskAbstract;
+use G4\Tasker\Tasker2\Exception\TasksRelocatedToPersistenceException;
 use G4\Tasker\Tasker2\Queue\BatchPublisher;
 use PhpAmqpLib\Connection\AMQPStreamConnection;
 use G4\ValueObject\Uuid;
@@ -34,6 +35,11 @@ class TaskQueue
      */
     private $requestUuid;
 
+    /**
+     * @var \G4\Log\ErrorLogger
+     */
+    private $errorLogger;
+
     public function __construct(
         \G4\Tasker\Queue $queue,
         AMQPStreamConnection $AMQPConnection = null,
@@ -46,6 +52,12 @@ class TaskQueue
         $this->messageOptions = $messageOptions;
         $this->tasks = [];
         $this->requestUuid = $requestUuid;
+    }
+
+    public function setErrorLogger(\G4\Log\ErrorLogger $logger)
+    {
+        $this->errorLogger = $logger;
+        return $this;
     }
 
     public function add(\G4\Tasker\TaskAbstract $task)
@@ -99,8 +111,7 @@ class TaskQueue
 
         if ($this->AMQPConnection === null) {
             // in case that rabbitmq is not available save tasks to database
-            $this->saveDelayedTasks($tasks);
-            trigger_error('RabbitMQ connection is not available for Tasker TaskQueue', E_USER_NOTICE);
+            $this->delayCurrentTasks($tasks);
             return $this;
         }
 
@@ -116,6 +127,18 @@ class TaskQueue
         $queuePublisher->publish(...$messages);
         $channel->close();
         return $this;
+    }
+
+    private function delayCurrentTasks($tasks)
+    {
+        $tasksModified = array_map(function(TaskAbstract $task) {
+            return $task->relocateToPersistence();
+        }, $tasks);
+
+        $this->saveDelayedTasks($tasksModified);
+        $this->errorLogger !== null
+            && $this->errorLogger->log(new TasksRelocatedToPersistenceException(count($tasksModified))
+        );
     }
 
     private function getRequestUuid()
