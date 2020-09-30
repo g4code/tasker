@@ -93,6 +93,7 @@ class Runner extends \G4\Tasker\TimerAbstract
         try {
             $this->checkMaxRetryAttempts();
             $task->execute();
+            $this->logNewRelicEnd();
         } catch (\Exception $e) {
             $this->handleException($e);
             throw $e;
