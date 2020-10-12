@@ -229,6 +229,7 @@ class Runner extends \G4\Tasker\TimerAbstract
         $this->taskerExecution->setException($e);
         $this->logTaskExecution();
         $this->logNewRelicFailed($e);
+        $this->logNewRelicEnd();
 
         if ($this->taskDomain->getStatus() === \G4\Tasker\Consts::STATUS_WAITING_FOR_RETRY) {
             $this->requeueTask();
