@@ -17,13 +17,13 @@ self-update:
 	@ /bin/echo -e "${TITLE} running composer self update" \
 	&& php composer.phar self-update"
 
-test:
-	@/bin/echo -e "${TITLE} testing suite started..." \
-	&& vendor/phpunit/phpunit/composer/bin/phpunit -c test/phpunit.xml
+unit-tests:
+	@/bin/echo -e "${TITLE} unit test suite started..." \
+	&& ./vendor/bin/phpunit -c tests/unit/phpunit.xml --coverage-html tests/unit/coverage
 
 test-group:
 	@/bin/echo -e "${TITLE} testing suite started..." \
-	&& vendor/phpunit/phpunit/composer/bin/phpunit -c tests/phpunit.xml --group $(g) \
+	&& ./vendor/phpunit/phpunit/composer/bin/phpunit -c tests/unit/phpunit.xml --group $(g) \
 
 update:
 	@/bin/echo -e "${TITLE} update dependencies..." \
@@ -33,4 +33,4 @@ update:
 .PHONY: all
 .PHONY: clean-composer-lock
 .PHONY: install update self-update
-.PHONY: test test-group
+.PHONY: unit-tests test-group

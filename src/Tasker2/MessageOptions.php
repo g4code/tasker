@@ -2,6 +2,7 @@
 
 namespace G4\Tasker\Tasker2;
 
+use G4\ValueObject\Dictionary;
 use G4\ValueObject\StringLiteral;
 
 class MessageOptions
@@ -27,6 +28,11 @@ class MessageOptions
      * @var int
      */
     private $deliveryMode;
+
+    /**
+     * @var Dictionary
+     */
+    private $additionalBindings;
 
     public function __construct(StringLiteral $exchange, StringLiteral $binding, $deliveryMode = 2)
     {
@@ -81,4 +87,35 @@ class MessageOptions
         return $this;
     }
 
+    /**
+     * Add additional bindings
+     *
+     * @param Dictionary $bindings
+     * @return MessageOptions
+     */
+    public function setAdditionalBindings(Dictionary $bindings)
+    {
+        $this->additionalBindings = $bindings;
+        return $this;
+    }
+
+    /**
+     * Get additional bindings
+     *
+     * @return Dictionary
+     */
+    public function getAdditionalBindings()
+    {
+        return $this->additionalBindings;
+    }
+
+    /**
+     * Check for additional bindings
+     *
+     * @return bool
+     */
+    public function hasAdditionalBindings()
+    {
+        return $this->additionalBindings->count() > 0;
+    }
 }

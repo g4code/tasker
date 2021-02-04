@@ -2,8 +2,9 @@
 
 namespace G4\Tasker\Tasker2\Queue;
 
-use G4\Tasker\Consts;
 use G4\Tasker\Tasker2\MessageOptions;
+use G4\ValueObject\Dictionary;
+use G4\ValueObject\StringLiteral;
 use PhpAmqpLib\Channel\AMQPChannel;
 use PhpAmqpLib\Message\AMQPMessage;
 
@@ -28,10 +29,11 @@ class BatchPublisher
     {
         foreach ($messages as $message) {
             $decodedMessageBody = json_decode($message->getBody(), true);
-            $binding = ($this->messageOptions->hasBindingHP() && isset($decodedMessageBody[Consts::PARAM_PRIORITY])
-                && ($decodedMessageBody[Consts::PARAM_PRIORITY] > Consts::PRIORITY_50))
-                ? $this->messageOptions->getBindingHP()
-                : $this->messageOptions->getBinding();
+
+            $task = isset($decodedMessageBody['task']) ? new StringLiteral($decodedMessageBody['task']) : null;
+
+            $binding = (new BindingResolver($this->messageOptions))->resolve(new Dictionary($decodedMessageBody), $task);
+
             $this->channel->batch_basic_publish(
                 $message,
                 $this->messageOptions->getExchange(),
