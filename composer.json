@@ -32,6 +32,24 @@
         "g4/cron"        : "*",
         "g4/log"         : "1.13.*"
     },
+    "require-dev": {
+        "phpunit/phpunit"           : "5.*",
+        "g4/code-coverage"          : "1.*"
+    },
+    "scripts": {
+        "unit-test": [
+            "vendor/bin/phpunit -c tests/unit/phpunit.xml --colors=always --coverage-html tests/unit/coverage"
+        ],
+        "test-coverage": [
+            "./vendor/bin/phpunit --colors=always -c tests/unit/phpunit.xml --coverage-text"
+        ],
+        "test-report": [
+            "./vendor/bin/phpunit --colors=always -c tests/unit/phpunit.xml --coverage-clover=tests/unit/coverage/code-coverage.xml"
+        ],
+        "code-coverage": [
+            "./vendor/bin/code-coverage -p 90 -f tests/unit/coverage/code-coverage.xml"
+        ]
+    },
     "suggest": {
         "php-amqplib/php-amqplib": "Use RabbitMQ for task processing"
     },

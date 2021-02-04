@@ -1,0 +1,20 @@
+language: php
+
+sudo: false
+
+php:
+  - 5.6
+  - 7.0
+  - 7.1
+  - 7.2
+  - 7.3
+
+before_install:
+  - echo "extension = intl.so" >> ~/.phpenv/versions/$(phpenv version-name)/etc/php.ini
+
+before_script:
+  - composer install --prefer-source
+
+script:
+  - composer test-report
+  - composer code-coverage

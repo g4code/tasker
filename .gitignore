@@ -56,3 +56,7 @@ vendor
 ehthumbs.db
 Icon?
 Thumbs.db
+
+# Unit tests #
+######################
+tests/unit/coverage/*
