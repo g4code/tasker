@@ -31,7 +31,10 @@ class BindingResolver
     public function resolve(Dictionary $messageBody, StringLiteral $task = null)
     {
         $additionalBindings = $this->messageOptions->getAdditionalBindings();
-        if ($task instanceof StringLiteral && $additionalBindings->has((string) $task)) {
+        if ($task instanceof StringLiteral
+            && $additionalBindings instanceof Dictionary
+            && $additionalBindings->has((string) $task)
+        ) {
             return $additionalBindings->get((string) $task);
         }
 
