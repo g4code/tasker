@@ -15,11 +15,11 @@ class RetryAfterResolver
 
     /**
      * RetryAfterResolver constructor.
-     * @param $startedCount
+     * @param int $startedCount
      */
     public function __construct($startedCount)
     {
-        $this->startedCount = $startedCount;
+        $this->startedCount = (int) $startedCount;
     }
 
     /**
