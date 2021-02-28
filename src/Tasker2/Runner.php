@@ -77,8 +77,7 @@ class Runner extends \G4\Tasker\TimerAbstract
         $this->taskDomain
             ->setStatusWorking()
             ->setIdentifier(gethostname())
-            ->setTsStarted(time())
-            ->setStartedCount($this->taskDomain->getStartedCount() + 1);
+            ->setTsStarted(time());
 
         $this->logTaskStart();
         $this->logNewRelicStart();
@@ -92,6 +91,9 @@ class Runner extends \G4\Tasker\TimerAbstract
 
         try {
             $this->checkMaxRetryAttempts();
+
+            $this->taskDomain->setStartedCount($this->taskDomain->getStartedCount() + 1);
+
             $task->execute();
             $this->logNewRelicEnd();
         } catch (\Exception $e) {
@@ -247,7 +249,7 @@ class Runner extends \G4\Tasker\TimerAbstract
         $this->taskDomain
             ->setTsStarted(0)
             ->setExecTime(-1)
-            ->setTsCreated(time() + self::RETRY_AFTER)
+            ->setTsCreated(time() + (new RetryAfterResolver($this->taskDomain->getStartedCount()))->resolve())
             ->setTaskId(null)
             ->setStatus(\G4\Tasker\Consts::STATUS_PENDING);
         $this->taskRepository->add($this->taskDomain);
