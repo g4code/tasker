@@ -37,7 +37,7 @@ class TaskRepository implements TaskRepositoryInterface
             throw new \RuntimeException(sprintf('Task id=%s is not integer', $id));
         }
 
-        $query = 'SELECT * FROM tasks WHERE task_id=:id';
+        $query = 'SELECT * FROM '. Consts::TASKS_TABLE_NAME .' WHERE task_id=:id';
         $stmt = $this->pdo->prepare($query);
         $stmt->execute([
             'id' => $id
@@ -59,7 +59,7 @@ class TaskRepository implements TaskRepositoryInterface
             throw new \RuntimeException('Limit is not valid');
         }
 
-        $query = 'SELECT * FROM tasks WHERE identifier=:identifier AND status=:status AND ts_created <= :ts_created ORDER BY ts_created ASC, priority DESC LIMIT :limit';
+        $query = 'SELECT * FROM '. Consts::TASKS_TABLE_NAME .' WHERE identifier=:identifier AND status=:status AND ts_created <= :ts_created ORDER BY ts_created ASC, priority DESC LIMIT :limit';
 
         $stmt = $this->pdo->prepare($query);
 
@@ -87,7 +87,7 @@ class TaskRepository implements TaskRepositoryInterface
 
     private function fetchTasks($status, $olderThanSeconds, $limit)
     {
-        $query = 'SELECT * FROM tasks WHERE status=:status AND ts_started<=:ts_started ORDER BY ts_started ASC, priority DESC LIMIT :limit';
+        $query = 'SELECT * FROM '. Consts::TASKS_TABLE_NAME .' WHERE status=:status AND ts_started<=:ts_started ORDER BY ts_started ASC, priority DESC LIMIT :limit';
 
         $stmt = $this->pdo->prepare($query);
         $stmt->bindValue(':status', $status, \PDO::PARAM_INT);
@@ -117,8 +117,9 @@ class TaskRepository implements TaskRepositoryInterface
 
     public function add(Task $task)
     {
-        $query = 'INSERT INTO tasks (recu_id, identifier, task, `data`, request_uuid, status, priority, ts_created, ts_started, exec_time, started_count)
+        $query = 'INSERT INTO ' . Consts::TASKS_TABLE_NAME . ' (recu_id, identifier, task, `data`, request_uuid, status, priority, ts_created, ts_started, exec_time, started_count)
 VALUES(:recu_id, :identifier, :task, :data, :request_uuid, :status, :priority, :ts_created, :ts_started, :exec_time, :started_count)';
+
 
         $stmt = $this->pdo->prepare($query);
         $stmt = $this->prepareFields($stmt, $task);
@@ -153,16 +154,17 @@ VALUES(:recu_id, :identifier, :task, :data, :request_uuid, :status, :priority, :
             $insertData[] = $task->getStartedCount();
         }
 
-        $sql = 'INSERT INTO tasks (recu_id, identifier, task, data, request_uuid, status, priority, ts_created, ts_started, exec_time, started_count) VALUES ';
+        $sql = 'INSERT INTO ' . Consts::TASKS_TABLE_NAME . ' (recu_id, identifier, task, data, request_uuid, status, priority, ts_created, ts_started, exec_time, started_count) VALUES ';
         $sql .= implode(', ', $insertQuery);
 
         $stmt = $this->pdo->prepare($sql);
+        $stmt->bindValue(':mudo', Consts::TASKS_TABLE_NAME);
         $this->execute($stmt,$insertData);
     }
 
     public function update(Task $task)
     {
-        $query = 'UPDATE tasks SET recu_id=:recu_id, identifier=:identifier, task=:task, `data`=:data, 
+        $query = 'UPDATE '. Consts::TASKS_TABLE_NAME .' SET recu_id=:recu_id, identifier=:identifier, task=:task, `data`=:data, 
 request_uuid=:request_uuid, status=:status, priority=:priority, ts_created=:ts_created, ts_started=:ts_started, 
 exec_time=:exec_time, started_count=:started_count WHERE task_id=:task_id';
 
@@ -186,7 +188,7 @@ exec_time=:exec_time, started_count=:started_count WHERE task_id=:task_id';
                 return $task->getTaskId();
             }, $tasks);
 
-        $query= 'UPDATE tasks SET status=%d WHERE task_id IN (%s)';
+        $query= 'UPDATE '. Consts::TASKS_TABLE_NAME .' SET status=%d WHERE task_id IN (%s)';
         $this->pdo->query(
             sprintf($query, $status, implode(',', $taskIds))
         );
@@ -199,6 +201,7 @@ exec_time=:exec_time, started_count=:started_count WHERE task_id=:task_id';
      */
     private function prepareFields(\PDOStatement $stmt, Task $task)
     {
+
         $stmt->bindValue(':recu_id',       $task->getRecurringId(),  \PDO::PARAM_INT);
         $stmt->bindValue(':identifier',    $task->getIdentifier());
         $stmt->bindValue(':task',          $task->getTask());

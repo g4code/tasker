@@ -53,6 +53,9 @@ class Consts
 
     const PARAM_PRIORITY           = 'priority';
 
+    const TASKS_TABLE_NAME            = 'tasks';
+    const RECURRING_TASKS_TABLE_NAME     = 'tasks_recurrings';
+
     public static function getMap()
     {
         return array(

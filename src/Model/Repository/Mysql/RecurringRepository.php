@@ -3,6 +3,7 @@
 namespace G4\Tasker\Model\Repository\Mysql;
 
 use G4\Tasker\Model\Repository\RecurringRepositoryInterface;
+use G4\Tasker\Consts;
 
 class RecurringRepository implements RecurringRepositoryInterface
 {
@@ -19,9 +20,8 @@ class RecurringRepository implements RecurringRepositoryInterface
 
     public function getNextTasks()
     {
-        $query = 'SELECT * FROM tasks_recurrings
-WHERE status = :status_recu
-AND recu_id NOT IN (SELECT DISTINCT tasks.recu_id FROM tasks WHERE status = :status)';
+        $query = 'SELECT * FROM ' . Consts::RECURRING_TASKS_TABLE_NAME . ' WHERE status = :status_recu
+        AND recu_id NOT IN (SELECT DISTINCT tasks.recu_id FROM tasks WHERE status = :status)';
 
         $stmt = $this->pdo->prepare($query);
         $stmt->bindValue(':status_recu', \G4\Tasker\Consts::RECURRING_TASK_STATUS_ACTIVE, \PDO::PARAM_INT);
