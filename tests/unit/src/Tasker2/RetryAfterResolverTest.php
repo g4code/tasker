@@ -21,4 +21,38 @@ class RetryAfterResolverTest extends \PHPUnit_Framework_TestCase
             [3, 1000]
         ];
     }
+
+    /**
+     * @dataProvider resolverDelayForRetriesDataProvider
+     */
+    public function testResolveDelayForRetries($startedCount, $retryAfter)
+    {
+        $delayForRetries = [
+            1 => 10,
+            2 => 10,
+            3 => 20,
+            4 => 60,
+            5 => 120,
+            6 => 600,
+            7 => 1800,
+            8 => 86400
+        ];
+        $resolverDelay = new \G4\Tasker\Tasker2\RetryAfterResolver($startedCount, $delayForRetries);
+
+        $this->assertSame($retryAfter, $resolverDelay->resolve());
+    }
+
+    public function resolverDelayForRetriesDataProvider()
+    {
+        return [
+            [1, 10],
+            [2, 10],
+            [3, 20],
+            [4, 60],
+            [5, 120],
+            [6, 600],
+            [7, 1800],
+            [8, 86400]
+        ];
+    }
 }

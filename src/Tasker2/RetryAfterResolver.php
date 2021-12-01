@@ -14,12 +14,19 @@ class RetryAfterResolver
     private $startedCount;
 
     /**
+     * @var array
+     */
+    private $delayForRetries;
+
+    /**
      * RetryAfterResolver constructor.
      * @param int $startedCount
+     * @param array $delayForRetries
      */
-    public function __construct($startedCount)
+    public function __construct($startedCount, array $delayForRetries = [])
     {
-        $this->startedCount = (int) $startedCount;
+        $this->startedCount = (int)$startedCount;
+        $this->delayForRetries = $delayForRetries;
     }
 
     /**
@@ -29,6 +36,12 @@ class RetryAfterResolver
      */
     public function resolve()
     {
+        if (!empty($this->delayForRetries)) {
+            return isset($this->delayForRetries[$this->startedCount])
+                ? $this->delayForRetries[$this->startedCount]
+                : self::RETRY_AFTER_60;
+        }
+
         if ($this->startedCount === 2) {
             return self::RETRY_AFTER_300;
         }
