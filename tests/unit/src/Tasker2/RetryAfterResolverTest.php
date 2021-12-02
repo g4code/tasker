@@ -4,13 +4,51 @@
 class RetryAfterResolverTest extends \PHPUnit_Framework_TestCase
 {
     /**
+     * @var array
+     */
+    private $delayForRetries;
+
+    /**
+     * @var \G4\Tasker\Tasker2\RetryAfterResolver
+     */
+    private $resolverDelay;
+
+    /**
+     * Set up method
+     */
+    protected function setUp()
+    {
+        $this->delayForRetries = [
+            1 => 10,
+            2 => 10,
+            3 => 20,
+            4 => 60,
+            5 => 120,
+            6 => 600,
+            7 => 1800,
+            8 => 86400
+        ];
+
+        $this->resolverDelay = new \G4\Tasker\Tasker2\RetryAfterResolver($this->delayForRetries);
+    }
+
+    /**
+     * Tear down method
+     */
+    protected function tearDown()
+    {
+        $this->delayForRetries = null;
+        $this->resolverDelay = null;
+    }
+
+    /**
      * @dataProvider resolverDataProvider
      */
     public function testResolve($startedCount, $retryAfter)
     {
-        $resolver = new \G4\Tasker\Tasker2\RetryAfterResolver($startedCount);
+        $resolver = new \G4\Tasker\Tasker2\RetryAfterResolver();
 
-        $this->assertSame($retryAfter, $resolver->resolve());
+        $this->assertSame($retryAfter, $resolver->resolve($startedCount));
     }
 
     public function resolverDataProvider()
@@ -27,19 +65,17 @@ class RetryAfterResolverTest extends \PHPUnit_Framework_TestCase
      */
     public function testResolveDelayForRetries($startedCount, $retryAfter)
     {
-        $delayForRetries = [
-            1 => 10,
-            2 => 10,
-            3 => 20,
-            4 => 60,
-            5 => 120,
-            6 => 600,
-            7 => 1800,
-            8 => 86400
-        ];
-        $resolverDelay = new \G4\Tasker\Tasker2\RetryAfterResolver($startedCount, $delayForRetries);
+        $this->assertSame($retryAfter, $this->resolverDelay->resolve($startedCount));
+    }
 
-        $this->assertSame($retryAfter, $resolverDelay->resolve());
+    public function testGetMaxRetryAttempts()
+    {
+        $this->assertSame(count($this->delayForRetries), $this->resolverDelay->getMaxRetryAttempts());
+    }
+
+    public function testGetDelayForRetries()
+    {
+        $this->assertSame($this->delayForRetries, $this->resolverDelay->getDelayForRetries());
     }
 
     public function resolverDelayForRetriesDataProvider()

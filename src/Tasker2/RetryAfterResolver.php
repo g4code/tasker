@@ -4,14 +4,11 @@ namespace G4\Tasker\Tasker2;
 
 class RetryAfterResolver
 {
-    const RETRY_AFTER_60 = 60;
-    const RETRY_AFTER_300 = 300;
-    const RETRY_AFTER_1000 = 1000;
-
-    /**
-     * @var int
-     */
-    private $startedCount;
+    const DEFAULT_DELAY = [
+        60,
+        300,
+        1000
+    ];
 
     /**
      * @var array
@@ -20,13 +17,11 @@ class RetryAfterResolver
 
     /**
      * RetryAfterResolver constructor.
-     * @param int $startedCount
      * @param array $delayForRetries
      */
-    public function __construct($startedCount, array $delayForRetries = [])
+    public function __construct(array $delayForRetries = [])
     {
-        $this->startedCount = (int)$startedCount;
-        $this->delayForRetries = $delayForRetries;
+        $this->setDelayForRetries($delayForRetries);
     }
 
     /**
@@ -34,22 +29,33 @@ class RetryAfterResolver
      *
      * @return int
      */
-    public function resolve()
+    public function resolve($startedCount)
     {
-        if (!empty($this->delayForRetries)) {
-            return isset($this->delayForRetries[$this->startedCount])
-                ? $this->delayForRetries[$this->startedCount]
-                : self::RETRY_AFTER_60;
-        }
+        return isset($this->delayForRetries[$startedCount])
+            ? $this->delayForRetries[$startedCount]
+            : self::DEFAULT_DELAY[0];
+    }
 
-        if ($this->startedCount === 2) {
-            return self::RETRY_AFTER_300;
-        }
+    /**
+     * @return array
+     */
+    public function getDelayForRetries()
+    {
+        return $this->delayForRetries;
+    }
 
-        if ($this->startedCount === 3) {
-            return self::RETRY_AFTER_1000;
-        }
+    /**
+     * @return int
+     */
+    public function getMaxRetryAttempts()
+    {
+        return count($this->delayForRetries);
+    }
 
-        return self::RETRY_AFTER_60;
+    public function setDelayForRetries($delayForRetries)
+    {
+        $this->delayForRetries = count($delayForRetries)
+            ? array_combine(range(1, count($delayForRetries)), $delayForRetries)
+            : array_combine(range(1, count(self::DEFAULT_DELAY)), self::DEFAULT_DELAY);
     }
 }

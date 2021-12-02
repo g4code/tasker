@@ -11,7 +11,6 @@ use PhpAmqpLib\Message\AMQPMessage;
 class Runner extends \G4\Tasker\TimerAbstract
 {
     const HTTP_X_ND_UUID = 'HTTP_X_ND_UUID';
-    const MAX_RETRY_ATTEMPTS = 3;
 
     /**
      * @var \G4\ValueObject\Dictionary
@@ -46,9 +45,9 @@ class Runner extends \G4\Tasker\TimerAbstract
     private $taskRepository;
 
     /**
-     * @var array
+     * @var RetryAfterResolver
      */
-    private $delayForRetries;
+    private $resolver;
 
     const LOG_TYPE = 'rb_worker';
 
@@ -60,7 +59,7 @@ class Runner extends \G4\Tasker\TimerAbstract
         );
         $this->taskDomain = \G4\Tasker\Model\Domain\Task::fromData($this->taskData->getAll());
         $this->taskerExecution = (new \G4\Log\Data\TaskerExecution())->setLogType(self::LOG_TYPE);
-        $this->delayForRetries = $delayForRetries;
+        $this->resolver = new RetryAfterResolver($delayForRetries);
     }
 
     public function setLogger(\G4\Log\Logger $logger = null)
@@ -195,21 +194,9 @@ class Runner extends \G4\Tasker\TimerAbstract
         return $this;
     }
 
-    /**
-     * @return array
-     */
-    public function getDelayForRetries()
-    {
-        return !empty($this->delayForRetries)
-            ? array_combine(range(1, count($this->delayForRetries)), $this->delayForRetries)
-            : [];
-    }
-
     private function checkMaxRetryAttempts()
     {
-        $maxRetryAttempts = !empty($this->delayForRetries)
-            ? count($this->delayForRetries)
-            : self::MAX_RETRY_ATTEMPTS;
+        $maxRetryAttempts = $this->resolver->getMaxRetryAttempts();
 
         if ($this->taskDomain->getStartedCount() > $maxRetryAttempts) {
             throw new \G4\Tasker\Model\Exception\RetryFailedException(
@@ -268,10 +255,8 @@ class Runner extends \G4\Tasker\TimerAbstract
         $this->taskDomain
             ->setTsStarted(0)
             ->setExecTime(-1)
-            ->setTsCreated(time() + (new RetryAfterResolver(
-                    $this->taskDomain->getStartedCount(),
-                    $this->getDelayForRetries())
-                )->resolve())
+            ->setTsCreated(time() + $this->resolver
+                    ->resolve($this->taskDomain->getStartedCount()))
             ->setTaskId(null)
             ->setStatus(\G4\Tasker\Consts::STATUS_PENDING);
         $this->taskRepository->add($this->taskDomain);
