@@ -10,17 +10,17 @@ class RetryAfterResolverTest extends \PHPUnit_Framework_TestCase
     private $delayForRetries;
 
     /**
-     * @var \G4\Tasker\Tasker2\RetryAfterResolver
+     * @var RetryAfterResolver
      */
     private $resolverDelay;
 
     /**
-     * @var \G4\Tasker\Tasker2\RetryAfterResolver
+     * @var RetryAfterResolver
      */
     private $resolverDelayEmptyArray;
 
     /**
-     * @var \G4\Tasker\Tasker2\RetryAfterResolver
+     * @var RetryAfterResolver
      */
     private $resolverDelayNotSet;
 
