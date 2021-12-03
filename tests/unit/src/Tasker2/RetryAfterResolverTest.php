@@ -1,5 +1,6 @@
 <?php
 
+use G4\Tasker\Tasker2\RetryAfterResolver;
 
 class RetryAfterResolverTest extends \PHPUnit_Framework_TestCase
 {
@@ -39,9 +40,9 @@ class RetryAfterResolverTest extends \PHPUnit_Framework_TestCase
             86400
         ];
 
-        $this->resolverDelay = new \G4\Tasker\Tasker2\RetryAfterResolver($this->delayForRetries);
-        $this->resolverDelayEmptyArray = new \G4\Tasker\Tasker2\RetryAfterResolver([]);
-        $this->resolverDelayNotSet = new \G4\Tasker\Tasker2\RetryAfterResolver();
+        $this->resolverDelay = new RetryAfterResolver($this->delayForRetries);
+        $this->resolverDelayEmptyArray = new RetryAfterResolver([]);
+        $this->resolverDelayNotSet = new RetryAfterResolver();
     }
 
     /**
@@ -60,7 +61,7 @@ class RetryAfterResolverTest extends \PHPUnit_Framework_TestCase
      */
     public function testResolve($startedCount, $retryAfter)
     {
-        $resolver = new \G4\Tasker\Tasker2\RetryAfterResolver();
+        $resolver = new RetryAfterResolver();
 
         $this->assertSame($retryAfter, $resolver->resolve($startedCount));
     }
@@ -84,7 +85,7 @@ class RetryAfterResolverTest extends \PHPUnit_Framework_TestCase
 
     public function testGetMaxRetryAttempts()
     {
-        $this->assertSame(count($this->delayForRetries), $this->resolverDelay->getMaxRetryAttempts());
+        $this->assertEquals(count($this->delayForRetries), $this->resolverDelay->getMaxRetryAttempts());
     }
 
     public function testGetDelayForRetries()
@@ -115,13 +116,7 @@ class RetryAfterResolverTest extends \PHPUnit_Framework_TestCase
 
     public function testMaxCountDelayForRetriesNotSet()
     {
-        $defaultDelay = [
-            60,
-            300,
-            1000
-        ];
-
-        $this->assertSame(count($defaultDelay), $this->resolverDelayNotSet->getMaxRetryAttempts());
+        $this->assertEquals(count(RetryAfterResolver::DEFAULT_DELAY), $this->resolverDelayNotSet->getMaxRetryAttempts());
     }
 
     public function testDelayForRetriesEmptyArray()
@@ -137,13 +132,7 @@ class RetryAfterResolverTest extends \PHPUnit_Framework_TestCase
 
     public function testMaxCountDelayForRetriesEmptyArray()
     {
-        $defaultDelay = [
-            60,
-            300,
-            1000
-        ];
-
-        $this->assertSame(count($defaultDelay), $this->resolverDelayEmptyArray->getMaxRetryAttempts());
+        $this->assertEquals(count(RetryAfterResolver::DEFAULT_DELAY), $this->resolverDelayEmptyArray->getMaxRetryAttempts());
     }
 
     public function resolverDelayForRetriesDataProvider()
