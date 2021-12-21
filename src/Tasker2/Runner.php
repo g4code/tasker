@@ -98,7 +98,10 @@ class Runner extends \G4\Tasker\TimerAbstract
 
             $this->taskDomain->setStartedCount($this->taskDomain->getStartedCount() + 1);
 
+            ob_start();
             $task->execute();
+            $content = ob_get_flush();
+            $this->taskerExecution->setOutput($content);
             $this->logNewRelicEnd();
         } catch (\Exception $e) {
             $this->handleException($e);
