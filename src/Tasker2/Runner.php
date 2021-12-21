@@ -100,10 +100,10 @@ class Runner extends \G4\Tasker\TimerAbstract
 
             ob_start();
             $task->execute();
-            $content = ob_get_flush();
-            $this->taskerExecution->setOutput($content);
+            $this->taskerExecution->setOutput(ob_get_flush());
             $this->logNewRelicEnd();
         } catch (\Exception $e) {
+            $this->taskerExecution->setOutput(ob_get_flush());
             $this->handleException($e);
             throw $e;
         }
