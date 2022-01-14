@@ -94,11 +94,12 @@ class Runner extends \G4\Tasker\TimerAbstract
         $this->setRequestUuid();
 
         try {
+            ob_start();
+
             $this->checkMaxRetryAttempts();
 
             $this->taskDomain->setStartedCount($this->taskDomain->getStartedCount() + 1);
 
-            ob_start();
             $task->execute();
             $this->taskerExecution->setOutput(ob_get_flush());
             $this->logNewRelicEnd();
