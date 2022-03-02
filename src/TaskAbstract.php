@@ -81,7 +81,7 @@ abstract class TaskAbstract
 
     public function setEncodedData($value)
     {
-        $this->data = json_decode(str_replace("\n", "\\n", $value), true);
+        $this->data = json_decode(str_replace("\n", "\\n", trim($value)), true);
         return $this;
     }
 
