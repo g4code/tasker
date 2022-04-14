@@ -4,8 +4,11 @@ namespace G4\Tasker\Tasker2;
 
 use G4\Tasker\Model\Repository\TaskRepositoryInterface;
 use G4\Tasker\TaskAbstract;
+use G4\ValueObject\IntegerNumber;
 use G4\ValueObject\StringLiteral;
 use G4\ValueObject\Uuid;
+use ND\NewRelic\NewRelicCacheInterface;
+use ND\NewRelic\Transaction;
 use PhpAmqpLib\Message\AMQPMessage;
 
 class Runner extends \G4\Tasker\TimerAbstract
@@ -30,9 +33,14 @@ class Runner extends \G4\Tasker\TimerAbstract
     private $logger;
 
     /**
-     * @var \ND\NewRelic\Transaction
+     * @var Transaction
      */
     private $newRelic;
+
+    /**
+     * @var NewRelicCacheInterface
+     */
+    private $newRelicCache;
 
     /**
      * @var \G4\Log\Data\TaskerExecution
@@ -68,9 +76,15 @@ class Runner extends \G4\Tasker\TimerAbstract
         return $this;
     }
 
-    public function setNewRelic(\ND\NewRelic\Transaction $newRelic = null)
+    public function setNewRelic(Transaction $newRelic = null)
     {
         $this->newRelic = $newRelic;
+        return $this;
+    }
+
+    public function setNewRelicCache(NewRelicCacheInterface $newRelicCache)
+    {
+        $this->newRelicCache = $newRelicCache;
         return $this;
     }
 
@@ -178,8 +192,27 @@ class Runner extends \G4\Tasker\TimerAbstract
     {
         if ($this->newRelic !== null) {
             $this->newRelic->startTransaction(new StringLiteral($this->taskDomain->getTask()));
+            $this->addCustomNewRelicParams();
         }
         return $this;
+    }
+
+    private function addCustomNewRelicParams()
+    {
+        if ($this->newRelicCache instanceof NewRelicCacheInterface) {
+            $userId = $this->getUserIdFromData($this->taskDomain->getData());
+
+            if ($userId && $this->newRelicCache->exists(new IntegerNumber((int) $userId))) {
+                $cacheData = $this->newRelicCache->find(new IntegerNumber((int) $userId));
+                $this->newRelic->addCustomParams($cacheData);
+            }
+        }
+    }
+
+    public function getUserIdFromData($taskData)
+    {
+        $data = json_decode(str_replace("\n", "\\n", trim($taskData)), true);
+        return isset($data['user_id']) ? $data['user_id'] : null;
     }
 
     private function logNewRelicEnd()
