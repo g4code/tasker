@@ -12,6 +12,9 @@ $options = getopt('', array('id:'));
 $dbParams = $config['resources']['db']['params'];
 $dsn = sprintf('mysql:dbname=%s;host=%s', $dbParams['dbname'], $dbParams['host']);
 $pdo = new \PDO($dsn, $dbParams['username'], $dbParams['password']);
+if (isset($config['resources']['db']['params']['charset'])) {
+    $this->pdo->exec('SET NAMES ' . $config['resources']['db']['params']['charset']);
+}
 
 $taskRepository = new TaskRepository($pdo);
 $errorRepository = new ErrorRepository($pdo);
