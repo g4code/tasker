@@ -15,7 +15,6 @@ class RecurringRepository implements RecurringRepositoryInterface
     public function __construct(\PDO $db)
     {
         $this->pdo = $db;
-        $this->pdo->exec('SET NAMES utf8');
     }
 
     public function getNextTasks()
