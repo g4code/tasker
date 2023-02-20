@@ -2,6 +2,7 @@
 
 namespace G4\Tasker\Tasker2;
 
+use G4\Runner\Profiler;
 use G4\Tasker\Model\Repository\TaskRepositoryInterface;
 use G4\Tasker\TaskAbstract;
 use G4\ValueObject\IntegerNumber;
@@ -57,6 +58,11 @@ class Runner extends \G4\Tasker\TimerAbstract
      */
     private $resolver;
 
+    /**
+     * @var Profiler
+     */
+    private $profiler;
+
     const LOG_TYPE = 'rb_worker';
 
     public function __construct(AMQPMessage $AMQPMessage, TaskRepositoryInterface $taskRepository, array $delayForRetries = [])
@@ -85,6 +91,23 @@ class Runner extends \G4\Tasker\TimerAbstract
     public function setNewRelicCache(NewRelicCacheInterface $newRelicCache)
     {
         $this->newRelicCache = $newRelicCache;
+        return $this;
+    }
+
+    public function setProfiler(Profiler $profiler)
+    {
+        $this->profiler = $profiler;
+        return $this;
+    }
+
+    public function clearProfilerData()
+    {
+        $this->profiler->clearProfilers();
+    }
+
+    public function registerProfilerTicker(\G4\Profiler\Ticker\TickerAbstract $profiler)
+    {
+        $this->profiler->addProfiler($profiler);
         return $this;
     }
 
@@ -120,6 +143,7 @@ class Runner extends \G4\Tasker\TimerAbstract
         } catch (\Exception $e) {
             $this->taskerExecution->setOutput(ob_get_flush());
             $this->handleException($e);
+            $this->logTaskExecution();
             throw $e;
         }
 
@@ -184,7 +208,13 @@ class Runner extends \G4\Tasker\TimerAbstract
 
     private function logTaskExecution()
     {
-        $this->logger !== null && $this->logger->log($this->taskerExecution);
+        if ($this->logger !== null) {
+            $this->taskerExecution->setProfiler($this->profiler);
+            $this->logger->log($this->taskerExecution);
+        }
+        if ($this->profiler) {
+            $this->profiler->clearProfilers();
+        }
         return $this;
     }
 
