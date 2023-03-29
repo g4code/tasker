@@ -143,7 +143,6 @@ class Runner extends \G4\Tasker\TimerAbstract
         } catch (\Exception $e) {
             $this->taskerExecution->setOutput(ob_get_flush());
             $this->handleException($e);
-            $this->logTaskExecution();
             throw $e;
         }
 
