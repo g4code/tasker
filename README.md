@@ -67,10 +67,10 @@ CREATE TABLE tasks_error_log (
 ```
 ```sql
 CREATE TABLE `tasker_pool` (
-                               `hostname` varchar(255) NOT NULL DEFAULT '',
-                               `status` tinyint(3) unsigned NOT NULL DEFAULT '0',
-                               `ts_available` int(10) NOT NULL DEFAULT '0',
-                               PRIMARY KEY (`hostname`)
+   `hostname` varchar(255) NOT NULL DEFAULT '',
+   `status` tinyint(3) unsigned NOT NULL DEFAULT '0',
+   `ts_available` int(10) NOT NULL DEFAULT '0',
+    PRIMARY KEY (`hostname`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 ```
 

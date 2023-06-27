@@ -2,6 +2,8 @@
 
 namespace G4\Tasker\Model\Domain\TaskerPool;
 
+use G4\Tasker\Identifier;
+
 class DiscoveryService
 {
     /**
@@ -17,7 +19,7 @@ class DiscoveryService
     /**
      * @return void
      */
-    public function add()
+    public function notify()
     {
         $hostname = gethostname();
         if ($hostname) {
@@ -25,8 +27,11 @@ class DiscoveryService
         }
     }
 
+    /**
+     * @return string
+     */
     public function getAvailableHostnames()
     {
-        return  implode('|', $this->repo->getAvailableHostnames());
+        return  implode(Identifier::DELIMITER, $this->repo->getAvailableHostnames());
     }
 }
