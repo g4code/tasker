@@ -42,7 +42,7 @@ class TaskerPoolRepository
      */
     public function getAvailableHostnames()
     {
-        $query = "SELECT (hostname) FROM tasker_pool WHERE status = 1 AND ts_available >= UNIX_TIMESTAMP() - 30;";
+        $query = "SELECT (hostname) FROM " . self::TABLE_NAME . " WHERE status = 1 AND ts_available >= UNIX_TIMESTAMP() - 30;";
         $stmt = $this->pdo->prepare($query);
         $stmt->execute();
 
