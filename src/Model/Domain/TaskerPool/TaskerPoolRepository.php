@@ -19,13 +19,14 @@ class TaskerPoolRepository
         $this->pdo = $pdo;
     }
 
-    public function upsert(string $taskerPoolEntity)
+    public function upsert(string $hostname)
     {
         $query = sprintf(
-            "INSERT INTO %s (`hostname`,`status`,`ts_available`) VALUES ('%s',%s,%s) ON DUPLICATE KEY UPDATE ts_available=UNIX_TIMESTAMP();",
+            "INSERT INTO %s (`hostname`,`status`,`ts_available`) VALUES ('%s',%s,%s) ON DUPLICATE KEY UPDATE ts_available=%s;",
             self::TABLE_NAME,
-            $taskerPoolEntity,
+            $hostname,
             self::ACTIVE,
+            time(),
             time()
         );
 
@@ -46,7 +47,13 @@ class TaskerPoolRepository
      */
     public function getAvailableHostnames()
     {
-        $query = "SELECT (hostname) FROM " . self::TABLE_NAME . " WHERE status = 1 AND ts_available >= UNIX_TIMESTAMP() - ". self::HOST_ALIVE_SECONDS .";";
+        $query = sprintf(
+            "SELECT (hostname) FROM %s WHERE status = %s AND ts_available >= %s;",
+            self::TABLE_NAME,
+            self::ACTIVE,
+            time() - self::HOST_ALIVE_SECONDS
+        );
+
         $stmt = $this->pdo->prepare($query);
         $stmt->execute();
 
