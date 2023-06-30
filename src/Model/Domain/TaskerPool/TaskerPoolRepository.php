@@ -7,16 +7,21 @@ class TaskerPoolRepository
     const TABLE_NAME = 'tasker_pool';
     const INACTIVE = 0;
     const ACTIVE = 1;
-    const HOST_ALIVE_SECONDS = 30;
+    const HOST_ALIVE_SECONDS = 90;
 
     /**
      * @var \PDO
      */
     private $pdo;
+    /**
+     * @var int
+     */
+    private $hostAvailabilityTime;
 
-    public function __construct(\PDO $pdo)
+    public function __construct(\PDO $pdo, $hostAvailabilityTime = self::HOST_ALIVE_SECONDS)
     {
         $this->pdo = $pdo;
+        $this->hostAvailabilityTime = $hostAvailabilityTime;
     }
 
     public function upsert(string $hostname)
@@ -51,7 +56,7 @@ class TaskerPoolRepository
             "SELECT (hostname) FROM %s WHERE status = %s AND ts_available >= %s;",
             self::TABLE_NAME,
             self::ACTIVE,
-            time() - self::HOST_ALIVE_SECONDS
+            time() - $this->hostAvailabilityTime
         );
 
         $stmt = $this->pdo->prepare($query);
