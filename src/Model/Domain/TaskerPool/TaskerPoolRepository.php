@@ -76,7 +76,7 @@ class TaskerPoolRepository
         }
 
         $query = sprintf(
-            "SELECT (hostname) FROM %s WHERE status = %s AND ts_available >= %s;",
+            "SELECT (hostname) FROM %s WHERE status = %s AND ts_available >= %s ORDER BY hostname ASC",
             self::TABLE_NAME,
             self::ACTIVE,
             time() - $this->hostAvailabilityTime
