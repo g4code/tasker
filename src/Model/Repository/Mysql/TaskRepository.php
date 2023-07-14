@@ -111,13 +111,13 @@ class TaskRepository implements TaskRepositoryInterface
     {
         $query = sprintf('SELECT task_id FROM %s
                WHERE
-                   identifier NOT IN (:availableHostnames) AND status=:status AND ts_created <= :ts_created
+                   identifier NOT IN ("%s") AND status=:status AND ts_created <= :ts_created
                ORDER BY ts_created ASC LIMIT :limit',
-            Consts::TASKS_TABLE_NAME
+            Consts::TASKS_TABLE_NAME,
+            implode('","', $availableHostnames)
         );
 
         $stmt = $this->pdo->prepare($query);
-        $stmt->bindValue(':availableHostnames', implode(',', $availableHostnames));
         $stmt->bindValue(':status', Consts::STATUS_PENDING, \PDO::PARAM_INT);
         $stmt->bindValue(':limit', self::REBALANCE_LIMIT, \PDO::PARAM_INT);
         $stmt->bindValue(':ts_created', time() + self::REBALANCE_TIME_IN_FUTURE, \PDO::PARAM_INT);
