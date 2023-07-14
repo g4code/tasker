@@ -32,6 +32,14 @@ class DiscoveryService
      */
     public function getAvailableHostnames()
     {
-        return  implode(Identifier::DELIMITER, $this->repo->getAvailableHostnames());
+        return  implode(Identifier::DELIMITER, $this->getAvailableHostnamesAsArray());
+    }
+
+    /**
+     * @return array
+     */
+    public function getAvailableHostnamesAsArray()
+    {
+        return $this->repo->getAvailableHostnames();
     }
 }
