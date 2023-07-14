@@ -15,6 +15,9 @@ class TaskRepository implements TaskRepositoryInterface
     const RESET_TASKS_AFTER_SECONDS  = 60;  // seconds to retry failed tasks
     const RESET_TASKS_LIMIT = 20;           // how many tasks to reset at once
 
+    const REBALANCE_LIMIT = 1000;           // how many tasks to rebalance at once
+    const REBALANCE_TIME_IN_FUTURE = 3600;  // seconds in future tasks to rebalance
+
     /**
      * @var \PDO
      */
@@ -100,6 +103,30 @@ class TaskRepository implements TaskRepositoryInterface
         }, $stmt->fetchAll());
     }
 
+    /**
+     * @param array $availableHostnames
+     * @return array|int[]
+     */
+    public function findTasksForRebalance(array $availableHostnames)
+    {
+        $query = sprintf('SELECT task_id FROM %s
+               WHERE
+                   identifier NOT IN (:availableHostnames) AND status=:status AND ts_created <= :ts_created
+               ORDER BY ts_created ASC LIMIT :limit',
+            Consts::TASKS_TABLE_NAME
+        );
+
+        $stmt = $this->pdo->prepare($query);
+        $stmt->bindValue(':availableHostnames', implode(',', $availableHostnames));
+        $stmt->bindValue(':status', Consts::STATUS_PENDING, \PDO::PARAM_INT);
+        $stmt->bindValue(':limit', self::REBALANCE_LIMIT, \PDO::PARAM_INT);
+        $stmt->bindValue(':ts_created', time() + self::REBALANCE_TIME_IN_FUTURE, \PDO::PARAM_INT);
+
+        $stmt->execute();
+
+        return $stmt->fetchAll(\PDO::FETCH_COLUMN);
+    }
+
     private function getIdentifier()
     {
         if ($this->identifier === null) {
@@ -157,7 +184,6 @@ VALUES(:recu_id, :identifier, :task, :data, :request_uuid, :status, :priority, :
         $sql .= implode(', ', $insertQuery);
 
         $stmt = $this->pdo->prepare($sql);
-        $stmt->bindValue(':mudo', Consts::TASKS_TABLE_NAME);
         $this->execute($stmt,$insertData);
     }
 
@@ -191,6 +217,27 @@ exec_time=:exec_time, started_count=:started_count WHERE task_id=:task_id';
         $this->pdo->query(
             sprintf($query, $status, implode(',', $taskIds))
         );
+    }
+
+    /**
+     * @param string$identifier
+     * @param array $taskIds
+     * @return void
+     */
+    public function updateIdentifier($identifier, array $taskIds)
+    {
+        if (count($taskIds) === 0) {
+            return;
+        }
+
+        $query= sprintf(
+            'UPDATE %s SET identifier="%s" WHERE task_id IN (%s)',
+            Consts::TASKS_TABLE_NAME,
+            $identifier,
+            implode(',', $taskIds)
+        );
+
+        $this->pdo->exec($query);
     }
 
     /**
