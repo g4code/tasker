@@ -19,13 +19,17 @@ class RecurringRepository implements RecurringRepositoryInterface
 
     public function getNextTasks()
     {
-        $query = 'SELECT * FROM ' . Consts::RECURRING_TASKS_TABLE_NAME . ' WHERE status = :status_recu
-        AND recu_id NOT IN (SELECT DISTINCT tasks.recu_id FROM tasks WHERE status = :status)';
+        $query = sprintf(
+            'SELECT * FROM %s 
+            WHERE status=%d 
+            AND recu_id NOT IN (SELECT DISTINCT recu_id FROM %s WHERE status=%d AND recu_id > 0)',
+            Consts::RECURRING_TASKS_TABLE_NAME,
+            Consts::RECURRING_TASK_STATUS_ACTIVE,
+            Consts::TASKS_TABLE_NAME,
+            Consts::STATUS_PENDING
+        );
 
-        $stmt = $this->pdo->prepare($query);
-        $stmt->bindValue(':status_recu', \G4\Tasker\Consts::RECURRING_TASK_STATUS_ACTIVE, \PDO::PARAM_INT);
-        $stmt->bindValue(':status',      \G4\Tasker\Consts::STATUS_PENDING,               \PDO::PARAM_INT);
-        $stmt->execute();
+        $stmt = $this->pdo->query($query);
 
         return array_map(function($data) {
             return \G4\Tasker\Model\Domain\Recurring::fromData($data);
