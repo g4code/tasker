@@ -107,6 +107,9 @@ class Runner extends \G4\Tasker\TimerAbstract
 
     public function registerProfilerTicker(\G4\Profiler\Ticker\TickerAbstract $profiler)
     {
+        if (!$this->profiler instanceof Profiler) {
+            return $this;
+        }
         $this->profiler->addProfiler($profiler);
         return $this;
     }
@@ -207,8 +210,10 @@ class Runner extends \G4\Tasker\TimerAbstract
 
     private function logTaskExecution()
     {
-        if ($this->logger !== null) {
+        if ($this->profiler) {
             $this->taskerExecution->setProfiler($this->profiler);
+        }
+        if ($this->logger !== null) {
             $this->logger->log($this->taskerExecution);
         }
         if ($this->profiler) {
