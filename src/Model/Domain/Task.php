@@ -65,6 +65,10 @@ class Task
      * @var int
      */
     private $startedCount;
+    /**
+     * @var mixed
+     */
+    private $queueSource;
 
     /**
      * Task constructor.
@@ -104,6 +108,7 @@ class Task
             'ts_started'     => $this->getTsStarted(),
             'exec_time'      => $this->getExecTime(),
             'started_count'  => $this->getStartedCount(),
+            'queue_source'   => $this->getQueueSource(),
         );
     }
 
@@ -365,6 +370,16 @@ class Task
             $this->execTime = $execTime;
         }
         return $this;
+    }
+
+    public function setQueueSource($queueSource)
+    {
+        $this->queueSource = $queueSource;
+    }
+
+    public function getQueueSource()
+    {
+        return $this->queueSource ?: 'no_queue_source_set';
     }
 
     public function setStatusWaitingForRetry($execTime=null)
