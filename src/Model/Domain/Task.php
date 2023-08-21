@@ -379,7 +379,7 @@ class Task
 
     public function getQueueSource()
     {
-        return $this->queueSource ?: 'no_queue_source_set';
+        return $this->queueSource ?: null;
     }
 
     public function setStatusWaitingForRetry($execTime=null)
@@ -429,7 +429,8 @@ class Task
             ->setStatus((int) $data['status'])
             ->setTsStarted((int) $data['ts_started'])
             ->setExecTime((float) $data['exec_time'])
-            ->setStartedCount((int) $data['started_count']);
+            ->setStartedCount((int) $data['started_count'])
+            ->setQueueSource(isset($data['queue_source']) ? (string) $data['queue_source'] : null );
 
         return $task;
     }
