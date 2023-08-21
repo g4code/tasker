@@ -65,12 +65,17 @@ class Runner extends \G4\Tasker\TimerAbstract
 
     const LOG_TYPE = 'rb_worker';
 
-    public function __construct(AMQPMessage $AMQPMessage, TaskRepositoryInterface $taskRepository, array $delayForRetries = [])
-    {
+    public function __construct(
+        AMQPMessage $AMQPMessage,
+        TaskRepositoryInterface $taskRepository,
+        array $delayForRetries = [],
+        string $queue = null
+    ){
         $this->taskRepository = $taskRepository;
         $this->taskData = new \G4\ValueObject\Dictionary(
             json_decode($AMQPMessage->getBody(), true)
         );
+        $this->taskData->add('queue_source', $queue);
         $this->taskDomain = \G4\Tasker\Model\Domain\Task::fromData($this->taskData->getAll());
         $this->taskerExecution = (new \G4\Log\Data\TaskerExecution())->setLogType(self::LOG_TYPE);
         $this->resolver = new RetryAfterResolver($delayForRetries);

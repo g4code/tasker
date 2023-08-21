@@ -65,6 +65,10 @@ class Task
      * @var int
      */
     private $startedCount;
+    /**
+     * @var mixed
+     */
+    private $queueSource;
 
     /**
      * Task constructor.
@@ -104,6 +108,7 @@ class Task
             'ts_started'     => $this->getTsStarted(),
             'exec_time'      => $this->getExecTime(),
             'started_count'  => $this->getStartedCount(),
+            'queue_source'   => $this->getQueueSource(),
         );
     }
 
@@ -367,6 +372,16 @@ class Task
         return $this;
     }
 
+    public function setQueueSource($queueSource)
+    {
+        $this->queueSource = $queueSource;
+    }
+
+    public function getQueueSource()
+    {
+        return $this->queueSource ?: null;
+    }
+
     public function setStatusWaitingForRetry($execTime=null)
     {
         $this->status = \G4\Tasker\Consts::STATUS_WAITING_FOR_RETRY;
@@ -414,7 +429,8 @@ class Task
             ->setStatus((int) $data['status'])
             ->setTsStarted((int) $data['ts_started'])
             ->setExecTime((float) $data['exec_time'])
-            ->setStartedCount((int) $data['started_count']);
+            ->setStartedCount((int) $data['started_count'])
+            ->setQueueSource(isset($data['queue_source']) ? (string) $data['queue_source'] : null );
 
         return $task;
     }
