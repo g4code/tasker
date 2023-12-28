@@ -2,6 +2,7 @@
 
 namespace G4\Tasker\Tasker2;
 
+use G4\Tasker\Consts;
 use G4\Tasker\Tasker2\Exception\RabbitmqNotAvailableException;
 use G4\Tasker\Tasker2\Queue\BatchPublisher;
 use PhpAmqpLib\Connection\AMQPStreamConnection;
@@ -116,8 +117,7 @@ class Manager
         if (count($this->tasks) === 0) {
             return $this;
         }
-        // update status sent to queue for execution
-        $this->taskRepository->updateStatus(10, ...$this->tasks);
+        $this->taskRepository->updateStatus(Consts::STATUS_SENT_TO_QUEUE_FOR_EXECUTION, ...$this->tasks);
         return $this;
     }
 }
