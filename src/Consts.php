@@ -12,6 +12,7 @@ class Consts
     const STATUS_DONE               = 2;
     const STATUS_COMPLETED_NOT_DONE = 6;
     const STATUS_WAITING_FOR_RETRY  = 7;
+    const STATUS_SENT_TO_QUEUE_FOR_EXECUTION  = 10;
 
     const PRIORITY_LOW             = 11;
     const PRIORITY_MEDIUM          = 41;
