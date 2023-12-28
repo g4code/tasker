@@ -45,6 +45,8 @@ class Consts
     const STATUS_NAME_COMPLETED_NOT_DONE = 'STATUS_COMPLETED_NOT_DONE';
     const STATUS_NAME_WAITING_FOR_RETRY  = 'STATUS_WAITING_FOR_RETRY';
 
+    const STATUS_NAME_SENT_TO_QUEUE_FOR_EXECUTION  = 'STATUS_SENT_TO_QUEUE_FOR_EXECUTION';
+
     const ORDER_BY_CREATED_ON      = 'ts_created';
     const ORDER_BY_PRIORITY        = 'priority';
 
@@ -60,16 +62,17 @@ class Consts
     public static function getMap()
     {
         return array(
-            self::STATUS_NAME_PENDING            => self::STATUS_PENDING,
-            self::STATUS_NAME_MULTI_WORKING      => self::STATUS_MULTI_WORKING,
-            self::STATUS_NAME_WORKING            => self::STATUS_WORKING,
-            self::STATUS_NAME_BROKEN             => self::STATUS_BROKEN,
-            self::STATUS_NAME_RETRY_FAILED       => self::STATUS_RETRY_FAILED,
-            self::STATUS_NAME_DONE               => self::STATUS_DONE,
-            self::STATUS_NAME_COMPLETED_NOT_DONE => self::STATUS_COMPLETED_NOT_DONE,
-            self::STATUS_NAME_WAITING_FOR_RETRY  => self::STATUS_WAITING_FOR_RETRY,
-            self::ORDER_BY_NAME_CREATED_ON       => self::ORDER_BY_CREATED_ON,
-            self::ORDER_BY_NAME_PRIORITY         => self::ORDER_BY_PRIORITY,
+            self::STATUS_NAME_PENDING                               => self::STATUS_PENDING,
+            self::STATUS_NAME_MULTI_WORKING                         => self::STATUS_MULTI_WORKING,
+            self::STATUS_NAME_WORKING                               => self::STATUS_WORKING,
+            self::STATUS_NAME_BROKEN                                => self::STATUS_BROKEN,
+            self::STATUS_NAME_RETRY_FAILED                          => self::STATUS_RETRY_FAILED,
+            self::STATUS_NAME_DONE                                  => self::STATUS_DONE,
+            self::STATUS_NAME_COMPLETED_NOT_DONE                    => self::STATUS_COMPLETED_NOT_DONE,
+            self::STATUS_NAME_WAITING_FOR_RETRY                     => self::STATUS_WAITING_FOR_RETRY,
+            self::STATUS_NAME_SENT_TO_QUEUE_FOR_EXECUTION           => self::STATUS_SENT_TO_QUEUE_FOR_EXECUTION,
+            self::ORDER_BY_NAME_CREATED_ON                          => self::ORDER_BY_CREATED_ON,
+            self::ORDER_BY_NAME_PRIORITY                            => self::ORDER_BY_PRIORITY,
         );
     }
 
