@@ -32,4 +32,11 @@ interface TaskRepositoryInterface
     public function add(Task $task);
     public function update(Task $task);
     public function updateStatus($status, Task ...$tasks);
+
+    /**
+     * @param int $olderThan
+     * @param int $limit
+     * @return void
+     */
+    public function deleteProcessedTasks($olderThan, $limit);
 }
