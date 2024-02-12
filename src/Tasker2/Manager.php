@@ -120,4 +120,14 @@ class Manager
         $this->taskRepository->updateStatus(Consts::STATUS_SENT_TO_QUEUE_FOR_EXECUTION, ...$this->tasks);
         return $this;
     }
+
+    /**
+     * @param int $olderThan
+     * @param int $limit
+     * @return void
+     */
+    public function deleteProcessedTasks($olderThan, $limit)
+    {
+        $this->taskRepository->deleteProcessedTasks($olderThan, $limit);
+    }
 }
