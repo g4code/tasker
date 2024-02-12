@@ -229,6 +229,16 @@ class Manager extends TimerAbstract
             ->writeLog();
     }
 
+    /**
+     * @param int $olderThan
+     * @param int $limit
+     * @return void
+     */
+    public function deleteProcessedTasks($olderThan, $limit)
+    {
+        $this->taskRepository->deleteProcessedTasks($olderThan, $limit);
+    }
+
     private function writeLog()
     {
         echo 'Started: ' . date(self::TIME_FORMAT, $this->getTimerStart()) . "\n";
