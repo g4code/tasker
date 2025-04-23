@@ -68,7 +68,8 @@ class Injector
         $this->startTime = microtime(true);
         $taskerStart = new \G4\Log\Data\TaskerStart();
         $taskerStart
-            ->setId($this->uniqueId);
+            ->setId($this->uniqueId)
+            ->setType(self::LOG_TYPE);
         $this->logger->log($taskerStart);
     }
 

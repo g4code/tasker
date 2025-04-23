@@ -57,6 +57,11 @@ class Task
     private $tsStarted;
 
     /**
+     * @var int
+     */
+    private $tsFinished;
+
+    /**
      * @var float
      */
     private $execTime;
@@ -207,6 +212,14 @@ class Task
     /**
      * @return int
      */
+    public function getTsFinished()
+    {
+        return $this->tsFinished;
+    }
+
+    /**
+     * @return int
+     */
     public function getExecTime()
     {
         return $this->execTime;
@@ -304,6 +317,15 @@ class Task
     /**
      * @return \G4\Tasker\Model\Domain\Task
      */
+    public function setTsFinished($value)
+    {
+        $this->tsFinished = $value;
+        return $this;
+    }
+
+    /**
+     * @return \G4\Tasker\Model\Domain\Task
+     */
     public function setExecTime($value)
     {
         $this->execTime = $value;
@@ -340,6 +362,7 @@ class Task
     public function setStatusBroken($execTime=null)
     {
         $this->status = \G4\Tasker\Consts::STATUS_BROKEN;
+        $this->tsFinished = microtime(true);
         if ($execTime) {
             $this->execTime = $execTime;
         }
@@ -349,6 +372,7 @@ class Task
     public function setStatusRetryFailed($execTime=null)
     {
         $this->status = \G4\Tasker\Consts::STATUS_RETRY_FAILED;
+        $this->tsFinished = microtime(true);
         if ($execTime) {
             $this->execTime = $execTime;
         }
@@ -357,6 +381,7 @@ class Task
     public function setStatusCompletedNotDone($execTime=null)
     {
         $this->status = \G4\Tasker\Consts::STATUS_COMPLETED_NOT_DONE;
+        $this->tsFinished = microtime(true);
         if ($execTime) {
             $this->execTime = $execTime;
         }
@@ -366,6 +391,7 @@ class Task
     public function setStatusDone($execTime=null)
     {
         $this->status = \G4\Tasker\Consts::STATUS_DONE;
+        $this->tsFinished = microtime(true);
         if ($execTime) {
             $this->execTime = $execTime;
         }
@@ -385,6 +411,7 @@ class Task
     public function setStatusWaitingForRetry($execTime=null)
     {
         $this->status = \G4\Tasker\Consts::STATUS_WAITING_FOR_RETRY;
+        $this->tsFinished = microtime(true);
         if ($execTime) {
             $this->execTime = $execTime;
         }
