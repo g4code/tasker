@@ -107,7 +107,7 @@ class Runner extends \G4\Tasker\TimerAbstract
 
     public function clearProfilerData()
     {
-        $this->profiler->clearProfilers();
+        $this->profiler && $this->profiler->clearProfilers();
     }
 
     public function registerProfilerTicker(\G4\Profiler\Ticker\TickerAbstract $profiler)
@@ -126,9 +126,10 @@ class Runner extends \G4\Tasker\TimerAbstract
         $this->taskDomain
             ->setStatusWorking()
             ->setIdentifier(gethostname())
-            ->setTsStarted(time());
+            ->setTsStarted(microtime(true));
 
         $this->logTaskStart();
+        $this->logTaskExecution(true);
         $this->logNewRelicStart();
 
         $task = $this->getTaskInstance();
@@ -151,12 +152,14 @@ class Runner extends \G4\Tasker\TimerAbstract
         } catch (\Exception $e) {
             $this->taskerExecution->setOutput(ob_get_flush());
             $this->handleException($e);
+            $this->clearProfilerData();
             throw $e;
         }
 
         $this->timerStop();
         $this->taskDomain->setStatusDone($this->getTotalTime());
         $this->logTaskExecution();
+        $this->clearProfilerData();
     }
 
     /**
@@ -209,21 +212,24 @@ class Runner extends \G4\Tasker\TimerAbstract
         $this->taskerExecution
             ->setId(md5(uniqid(microtime(), true)))
             ->setTask($this->taskDomain);
-        $this->logTaskExecution();
         return $this;
     }
 
-    private function logTaskExecution()
+    private function logTaskExecution($start = false)
     {
-        if ($this->profiler) {
+        $start
+            ? $this->taskerExecution->taskStarted()
+            : $this->taskerExecution->taskFinished();
+
+        if ($start && $this->profiler) {
             $this->taskerExecution->setProfiler($this->profiler);
         }
+
         if ($this->logger !== null) {
             $this->logger->log($this->taskerExecution);
+            $start === false && $this->logger->clearData();
         }
-        if ($this->profiler) {
-            $this->profiler->clearProfilers();
-        }
+
         return $this;
     }
 
