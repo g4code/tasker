@@ -149,7 +149,7 @@ class Runner extends \G4\Tasker\TimerAbstract
             $task->execute();
             $this->taskerExecution->setOutput(ob_get_flush());
             $this->logNewRelicEnd();
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             $this->taskerExecution->setOutput(ob_get_flush());
             $this->handleException($e);
             $this->clearProfilerData();
@@ -268,7 +268,7 @@ class Runner extends \G4\Tasker\TimerAbstract
         return $this;
     }
 
-    private function logNewRelicFailed(\Exception $exception)
+    private function logNewRelicFailed(\Throwable $exception)
     {
         if ($this->newRelic !== null) {
             $this->newRelic->failedTransaction($exception);
@@ -291,7 +291,7 @@ class Runner extends \G4\Tasker\TimerAbstract
         return $this;
     }
 
-    public function handleException(\Exception $e)
+    public function handleException(\Throwable $e)
     {
         if (!$this->taskDomain instanceof \G4\Tasker\Model\Domain\Task) {
             return $this;
