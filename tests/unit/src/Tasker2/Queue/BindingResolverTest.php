@@ -4,7 +4,7 @@ use G4\Tasker\Tasker2\MessageOptions;
 use G4\Tasker\Tasker2\Queue\BindingResolver;
 use G4\ValueObject\StringLiteral;
 
-class BindingResolverTest extends \PHPUnit_Framework_TestCase
+class BindingResolverTest extends \PHPUnit\Framework\TestCase
 {
     /**
      * @var MessageOptions
@@ -19,7 +19,7 @@ class BindingResolverTest extends \PHPUnit_Framework_TestCase
     /**
      * Set up method
      */
-    protected function setUp()
+    protected function setUp(): void
     {
         $this->messageOptions = $this->createMock(MessageOptions::class);
 
@@ -29,7 +29,7 @@ class BindingResolverTest extends \PHPUnit_Framework_TestCase
     /**
      * Tear down method
      */
-    protected function tearDown()
+    protected function tearDown(): void
     {
         $this->messageOptions = null;
 

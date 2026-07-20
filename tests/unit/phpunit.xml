@@ -1,13 +1,19 @@
-<phpunit bootstrap="bootstrap.php" colors="true">
+<?xml version="1.0" encoding="UTF-8"?>
+<phpunit bootstrap="bootstrap.php"
+         colors="true"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:noNamespaceSchemaLocation="https://schema.phpunit.de/9.6/phpunit.xsd">
 
-    <testsuite name="Test Suite">
-        <directory>./src</directory>
-    </testsuite>
+    <testsuites>
+        <testsuite name="Test Suite">
+            <directory>./src</directory>
+        </testsuite>
+    </testsuites>
 
-    <filter>
-        <whitelist>
+    <coverage>
+        <include>
             <directory suffix=".php">../../src</directory>
-        </whitelist>
-    </filter>
+        </include>
+    </coverage>
 
 </phpunit>

@@ -4,6 +4,7 @@ namespace G4\Tasker\Tasker2;
 
 use G4\Tasker\TaskAbstract;
 use G4\Tasker\Tasker2\Exception\TasksRelocatedToPersistenceException;
+use G4\Tasker\Tasker2\Profiler\RabbitMq\Ticker as RabbitMqTicker;
 use G4\Tasker\Tasker2\Queue\BatchPublisher;
 use PhpAmqpLib\Connection\AMQPStreamConnection;
 use G4\ValueObject\Uuid;
@@ -99,7 +100,9 @@ class TaskQueue
         foreach ($tasks as $task) {
             $this->queue->add($task);
         }
-        $this->queue->save();
+        $this->profile('tasker_delayed_tasks_persistence', function () {
+            $this->queue->save();
+        }, $tasks);
         return $this;
     }
 
@@ -115,7 +118,9 @@ class TaskQueue
             return $this;
         }
 
-        $channel = $this->AMQPConnection->channel();
+        $channel = $this->profile('tasker_channel_open', function () {
+            return $this->AMQPConnection->channel();
+        });
 
         $messages = array_map(function (TaskAbstract $taskAbstract) {
             $task = (new TaskFactory($taskAbstract))->create();
@@ -124,8 +129,12 @@ class TaskQueue
         }, $tasks);
 
         $queuePublisher = new BatchPublisher($channel, $this->messageOptions);
-        $queuePublisher->publish(...$messages);
-        $channel->close();
+        $this->profile('tasker_publish_batch', function () use ($queuePublisher, $messages) {
+            $queuePublisher->publish(...$messages);
+        }, $tasks);
+        $this->profile('tasker_channel_close', function () use ($channel) {
+            $channel->close();
+        });
         return $this;
     }
 
@@ -135,16 +144,56 @@ class TaskQueue
             return $task->relocateToPersistence();
         }, $tasks);
 
-        $this->saveDelayedTasks($tasksModified);
+        foreach ($tasksModified as $task) {
+            $this->queue->add($task);
+        }
+        $this->profile('tasker_fallback_db_persistence', function () {
+            $this->queue->save();
+        }, $tasksModified);
         $this->errorLogger !== null
             && $this->errorLogger->log(new TasksRelocatedToPersistenceException(count($tasksModified))
         );
     }
 
+    /**
+     * @param string $operation
+     * @param callable $callback
+     * @param TaskAbstract[] $tasks
+     * @return mixed
+     */
+    private function profile($operation, callable $callback, array $tasks = [])
+    {
+        $ticker = RabbitMqTicker::getInstance();
+        $tickerId = $ticker->start();
+        $ticker->setOperation($tickerId, $operation);
+
+        if (count($tasks) > 0) {
+            $ticker->setTasks($tickerId, $this->getTaskDetails($tasks));
+        }
+
+        try {
+            return $callback();
+        } finally {
+            $ticker->end($tickerId);
+        }
+    }
+
+    /**
+     * @param TaskAbstract[] $tasks
+     * @return array
+     */
+    private function getTaskDetails(array $tasks)
+    {
+        return array_map(function (TaskAbstract $task) {
+            return [
+                'task_name'  => $task->getName(),
+                'parameters' => $task->getData(),
+            ];
+        }, $tasks);
+    }
+
     private function getRequestUuid()
     {
-        return $this->requestUuid !== null
-            ? $this->requestUuid
-            : (string) Uuid::generate();
+        return $this->requestUuid ?? (string)Uuid::generate();
     }
 }
