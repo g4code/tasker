@@ -2,7 +2,7 @@
 
 use G4\Tasker\Tasker2\RetryAfterResolver;
 
-class RetryAfterResolverTest extends \PHPUnit_Framework_TestCase
+class RetryAfterResolverTest extends \PHPUnit\Framework\TestCase
 {
     /**
      * @var array
@@ -27,7 +27,7 @@ class RetryAfterResolverTest extends \PHPUnit_Framework_TestCase
     /**
      * Set up method
      */
-    protected function setUp()
+    protected function setUp(): void
     {
         $this->delayForRetries = [
             10,
@@ -48,7 +48,7 @@ class RetryAfterResolverTest extends \PHPUnit_Framework_TestCase
     /**
      * Tear down method
      */
-    protected function tearDown()
+    protected function tearDown(): void
     {
         $this->delayForRetries = null;
         $this->resolverDelay = null;

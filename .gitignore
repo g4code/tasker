@@ -1,6 +1,9 @@
 # Add your rules here #
 #######################
 composer.lock
+tests/unit/.phpunit.result.cache
+.cursor/
+
 
 # Default GIT ignore rules #
 ############################
@@ -14,7 +17,7 @@ composer.lock
 *~
 dummy.php
 composer.phar
-vendor
+vendor/
 
 # Compiled source #
 ###################
