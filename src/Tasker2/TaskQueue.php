@@ -46,8 +46,7 @@ class TaskQueue
         AMQPStreamConnection $AMQPConnection = null,
         MessageOptions $messageOptions,
         $requestUuid = null
-    )
-    {
+    ) {
         $this->queue = $queue;
         $this->AMQPConnection = $AMQPConnection;
         $this->messageOptions = $messageOptions;
@@ -118,29 +117,41 @@ class TaskQueue
             return $this;
         }
 
-        $channel = $this->profile('tasker_channel_open', function () {
-            return $this->AMQPConnection->channel();
-        });
+        try {
+            $channel = $this->profile('tasker_channel_open', function () {
+                return $this->AMQPConnection->channel();
+            });
 
-        $messages = array_map(function (TaskAbstract $taskAbstract) {
-            $task = (new TaskFactory($taskAbstract))->create();
-            $task->setRequestUuid($this->getRequestUuid());
-            return (new AmqpMessageFactory($task, $this->messageOptions->getDeliveryMode()))->create();
-        }, $tasks);
+            $messages = array_map(function (TaskAbstract $taskAbstract) {
+                $task = (new TaskFactory($taskAbstract))->create();
+                $task->setRequestUuid($this->getRequestUuid());
+                return (new AmqpMessageFactory($task, $this->messageOptions->getDeliveryMode()))->create();
+            }, $tasks);
 
-        $queuePublisher = new BatchPublisher($channel, $this->messageOptions);
-        $this->profile('tasker_publish_batch', function () use ($queuePublisher, $messages) {
-            $queuePublisher->publish(...$messages);
-        }, $tasks);
-        $this->profile('tasker_channel_close', function () use ($channel) {
-            $channel->close();
-        });
+            $queuePublisher = new BatchPublisher($channel, $this->messageOptions);
+            $this->profile('tasker_publish_batch', function () use ($queuePublisher, $messages) {
+                $queuePublisher->publish(...$messages);
+            }, $tasks);
+        } catch (\Exception $e) {
+            $this->errorLogger !== null && $this->errorLogger->log($e);
+            $this->delayCurrentTasks($tasks);
+            return $this;
+        }
+
+        // moved from above try catch block to avoid duplicating tasks in case of RabbitMQ connection close exception
+        try {
+            $this->profile('tasker_channel_close', function () use ($channel) {
+                $channel->close();
+            });
+        } catch (\Exception $e) {
+            $this->errorLogger !== null && $this->errorLogger->log($e);
+        }
         return $this;
     }
 
     private function delayCurrentTasks($tasks)
     {
-        $tasksModified = array_map(function(TaskAbstract $task) {
+        $tasksModified = array_map(function (TaskAbstract $task) {
             return $task->relocateToPersistence();
         }, $tasks);
 
